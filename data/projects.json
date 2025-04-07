@@ -1,10 +1,10 @@
 [
   {
-    "slug": "cdc",
-    "title": "CDC - Site Corporate",
-    "date": "2024-02-15",
+    "slug": "ellipse-groupe",
+    "title": "Ellipse Group",
+    "date": "2023-02-02",
     "featuredImage": {
-      "sourceUrl": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-12%2019.34.33%20-%20A%20luxurious%20and%20modern%20brand%20identity%20visualization%20for%20%27Ellipse%20Group%27.%20The%20design%20should%20convey%20elegance%2C%20prestige%2C%20and%20Greek%20sophistication.%20A%20rich-26iRaC5DHMXgW0xn1l5EBAlWm4ejb5.webp",
+      "sourceUrl": "/public/projects/ELLIPSE-GROUP/ellipse-group-main.png",
       "altText": "Page d'accueil du site CDC"
     },
     "services": [
@@ -14,7 +14,7 @@
     "detailsprojet": {
       "galerie": [
         {
-          "sourceUrl": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-12%2019.34.33%20-%20A%20luxurious%20and%20modern%20brand%20identity%20visualization%20for%20%27Ellipse%20Group%27.%20The%20design%20should%20convey%20elegance%2C%20prestige%2C%20and%20Greek%20sophistication.%20A%20rich-26iRaC5DHMXgW0xn1l5EBAlWm4ejb5.webp",
+          "sourceUrl": "/public/projects/ELLIPSE-GROUP/ellipse-group-gallery-4.png",
           "altText": "Page des services CDC"
         }
       ],
