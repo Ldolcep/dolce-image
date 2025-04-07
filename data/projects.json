@@ -4,7 +4,7 @@
     "title": "Ellipse Group",
     "date": "2023-02-02",
     "featuredImage": {
-      "sourceUrl": "/public/projects/ELLIPSE-GROUP/ellipse-group-main.png",
+      "sourceUrl": "/projects/ELLIPSE-GROUP/ellipse-group-main.png",
       "altText": "Page d'accueil du site CDC"
     },
     "services": [
@@ -14,7 +14,7 @@
     "detailsprojet": {
       "galerie": [
         {
-          "sourceUrl": "/public/projects/ELLIPSE-GROUP/ellipse-group-gallery-4.png",
+          "sourceUrl": "/projects/ELLIPSE-GROUP/ellipse-group-gallery-4.png",
           "altText": "Page des services CDC"
         }
       ],
