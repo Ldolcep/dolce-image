@@ -1,0 +1,76 @@
+{
+  "projects": [
+    {
+      "id": "1",
+      "title": "Brand Identity",
+      "mainVisual": "/images/projects/brand-identity-main.jpg",
+      "additionalVisuals": [
+        "/images/projects/brand-identity-1.jpg",
+        "/images/projects/brand-identity-2.jpg",
+        "/images/projects/brand-identity-3.jpg"
+      ],
+      "description": "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
+      "link": "https://example.com/brand-identity"
+    },
+    {
+      "id": "2",
+      "title": "Web Design",
+      "mainVisual": "/images/projects/web-design-main.jpg",
+      "additionalVisuals": [
+        "/images/projects/web-design-1.jpg",
+        "/images/projects/web-design-2.jpg",
+        "/images/projects/web-design-3.jpg"
+      ],
+      "description": "A responsive e-commerce website with a focus on user experience and conversion optimization, resulting in a 40% increase in sales.",
+      "link": "https://example.com/web-design"
+    },
+    {
+      "id": "3",
+      "title": "Digital Marketing",
+      "mainVisual": "/images/projects/digital-marketing-main.jpg",
+      "additionalVisuals": [
+        "/images/projects/digital-marketing-1.jpg",
+        "/images/projects/digital-marketing-2.jpg",
+        "/images/projects/digital-marketing-3.jpg"
+      ],
+      "description": "A comprehensive digital marketing campaign that increased brand awareness by 65% and generated a 3x return on ad spend.",
+      "link": "https://example.com/digital-marketing"
+    },
+    {
+      "id": "4",
+      "title": "Social Media",
+      "mainVisual": "/images/projects/social-media-main.jpg",
+      "additionalVisuals": [
+        "/images/projects/social-media-1.jpg",
+        "/images/projects/social-media-2.jpg",
+        "/images/projects/social-media-3.jpg"
+      ],
+      "description": "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
+      "link": "https://example.com/social-media"
+    },
+    {
+      "id": "5",
+      "title": "UI/UX Design",
+      "mainVisual": "/images/projects/ui-ux-main.jpg",
+      "additionalVisuals": [
+        "/images/projects/ui-ux-1.jpg",
+        "/images/projects/ui-ux-2.jpg",
+        "/images/projects/ui-ux-3.jpg"
+      ],
+      "description": "A complete user interface and experience redesign for a mobile app, resulting in a 60% increase in user retention.",
+      "link": "https://example.com/ui-ux"
+    },
+    {
+      "id": "6",
+      "title": "Content Creation",
+      "mainVisual": "/images/projects/content-main.jpg",
+      "additionalVisuals": [
+        "/images/projects/content-1.jpg",
+        "/images/projects/content-2.jpg",
+        "/images/projects/content-3.jpg"
+      ],
+      "description": "A content strategy and creation service that increased organic traffic by 85% and conversions by 35% within 6 months.",
+      "link": "https://example.com/content"
+    }
+  ]
+}
