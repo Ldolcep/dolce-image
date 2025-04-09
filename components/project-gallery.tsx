@@ -9,8 +9,8 @@ const projectsData = {
   projects: [
     {
       id: "1",
-      title: "Brand Identity",
-      mainVisual: "/images/projects/project-1-main.jpg",
+      title: "Le Boudoir Miadana",
+      mainVisual: "/images/projects/le-boudoir-miadana-main.jpg",
       additionalVisuals: [
         "/images/projects/brand-identity-1.jpg",
         "/images/projects/brand-identity-2.jpg",
@@ -22,8 +22,8 @@ const projectsData = {
     },
     {
       id: "2",
-      title: "Web Design",
-      mainVisual: "/images/projects/project-2-main.jpg",
+      title: "Ellipse Real Estate",
+      mainVisual: "/images/projects/ellipse-real-estate-main.jpg",
       additionalVisuals: [
         "/images/projects/web-design-1.jpg",
         "/images/projects/web-design-2.jpg",
@@ -31,12 +31,12 @@ const projectsData = {
       ],
       description:
         "A responsive e-commerce website with a focus on user experience and conversion optimization, resulting in a 40% increase in sales.",
-      link: "https://example.com/web-design",
+      link: "https://ellipse-real-estate.com/",
     },
     {
       id: "3",
-      title: "Digital Marketing",
-      mainVisual: "/images/projects/project-3-main.jpg",
+      title: "Ellipse Groupe",
+      mainVisual: "/images/projects/ellipse-groupe-main.png",
       additionalVisuals: [
         "/images/projects/digital-marketing-1.jpg",
         "/images/projects/digital-marketing-2.jpg",
@@ -48,8 +48,8 @@ const projectsData = {
     },
     {
       id: "4",
-      title: "Social Media",
-      mainVisual: "/images/projects/project-4-main.jpg",
+      title: "DOLCE",
+      mainVisual: "/images/projects/dolce-main.jpg",
       additionalVisuals: [
         "/images/projects/social-media-1.jpg",
         "/images/projects/social-media-2.jpg",
@@ -61,8 +61,8 @@ const projectsData = {
     },
     {
       id: "5",
-      title: "UI/UX Design",
-      mainVisual: "/images/projects/project-5-main.jpg",
+      title: "Ilios Immobilier",
+      mainVisual: "/images/projects/ilios-immobilier-main.jpg",
       additionalVisuals: [
         "/images/projects/ui-ux-1.jpg",
         "/images/projects/ui-ux-2.jpg",
@@ -74,12 +74,12 @@ const projectsData = {
     },
     {
       id: "6",
-      title: "Content Creation",
-      mainVisual: "/images/projects/content-main.jpg",
+      title: "PickUp",
+      mainVisual: "/images/projects/pickup-main.jpg",
       additionalVisuals: [
-        "/images/projects/content-1.jpg",
-        "/images/projects/content-2.jpg",
-        "/images/projects/content-3.jpg",
+        "/images/projects/pickup-gallery-1.jpg",
+        "/images/projects/pickup-gallery-2.jpg",
+        "/images/projects/pickup-gallery-3.jpg",
       ],
       description:
         "A content strategy and creation service that increased organic traffic by 85% and conversions by 35% within 6 months.",
