@@ -157,10 +157,11 @@ export default function ProjectGallery() {
                     className="project-img"
                     priority={project.id === "1"}
                   />
-                  <div className="overlay">
-                    <h3 className="font-great-vibes text-xl md:text-2xl">{project.title}</h3>
-                    <p className="desc">{project.description.substring(0, 100)}...</p>
-                  </div>
+                </div>
+                {/* Nouveau contenu pour les titres sous l'image */}
+                <div className="project-content">
+                  <h3 className="project-title font-great-vibes">{project.title}</h3>
+                  <p className="project-description font-poppins">{project.description.substring(0, 100)}...</p>
                 </div>
               </div>
             </div>
