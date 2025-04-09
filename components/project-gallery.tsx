@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectModal from "./project-modal"
+import styles from "./project-gallery.module.css"
 
 // Define the project data directly in the component to avoid fetch issues
 const projectsData = {
@@ -19,6 +20,7 @@ const projectsData = {
       description:
         "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
       link: "https://example.com/brand-identity",
+      height: 320, // Varying heights to create masonry effect
     },
     {
       id: "2",
@@ -32,6 +34,7 @@ const projectsData = {
       description:
         "A responsive e-commerce website with a focus on user experience and conversion optimization, resulting in a 40% increase in sales.",
       link: "https://example.com/web-design",
+      height: 420,
     },
     {
       id: "3",
@@ -45,6 +48,7 @@ const projectsData = {
       description:
         "A comprehensive digital marketing campaign that increased brand awareness by 65% and generated a 3x return on ad spend.",
       link: "https://example.com/digital-marketing",
+      height: 380,
     },
     {
       id: "4",
@@ -58,6 +62,7 @@ const projectsData = {
       description:
         "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
       link: "https://example.com/social-media",
+      height: 280,
     },
     {
       id: "5",
@@ -71,6 +76,7 @@ const projectsData = {
       description:
         "A complete user interface and experience redesign for a mobile app, resulting in a 60% increase in user retention.",
       link: "https://example.com/ui-ux",
+      height: 360,
     },
     {
       id: "6",
@@ -84,6 +90,7 @@ const projectsData = {
       description:
         "A content strategy and creation service that increased organic traffic by 85% and conversions by 35% within 6 months.",
       link: "https://example.com/content",
+      height: 400,
     },
   ],
 }
@@ -95,6 +102,7 @@ interface Project {
   additionalVisuals: string[]
   description: string
   link: string
+  height?: number
 }
 
 export default function ProjectGallery() {
@@ -135,38 +143,51 @@ export default function ProjectGallery() {
       <div className="container mx-auto px-4">
         <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
 
-        {/* Masonry Grid Layout */}
-        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="break-inside-avoid mb-6"
-              onClick={() => openModal(project)}
-              onKeyDown={(e) => e.key === "Enter" && openModal(project)}
-              tabIndex={0}
-              role="button"
-              aria-label={`View ${project.title} project details`}
-            >
-              <div className="project-card group cursor-pointer transition duration-300 ease-in-out">
-                <div className="relative project-card-image rounded-md overflow-hidden">
-                  <div className="w-full aspect-[4/3] md:aspect-auto md:h-auto relative">
+        {/* Masonry Grid Layout - avec CSS Module */}
+        <div className={styles.projectGrid}>
+          {projects.map((project) => {
+            // Calculate how many rows this item should span based on its height
+            // Each row is 10px tall as set in grid-auto-rows in CSS 
+            const rowSpan = project.height ? Math.ceil(project.height / 10) : 30;
+            
+            return (
+              <div
+                key={project.id}
+                className={`${styles.projectCard} ${styles.shine}`}
+                style={{ gridRowEnd: `span ${rowSpan}` }}
+                onClick={() => openModal(project)}
+                onKeyDown={(e) => e.key === "Enter" && openModal(project)}
+                tabIndex={0}
+                role="button"
+                aria-label={`View ${project.title} project details`}
+              >
+                {/* Card container with image */}
+                <div className={styles.cardInner}>
+                  {/* Image container with variable height */}
+                  <div className={styles.imageContainer}>
+                    <div className={styles.overlay} aria-hidden="true" />
                     <Image
                       src={project.mainVisual || "/placeholder.svg"}
                       alt={project.title}
-                      fill
-                      className="object-cover transition duration-300 ease-in-out group-hover:scale-105"
+                      layout="fill"
+                      objectFit="cover"
+                      className={styles.cardImage}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      priority={project.id === "1"}
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition duration-300"></div>
+                    
+                    {/* Project title overlay */}
+                    <div className={styles.cardContent}>
+                      <h3 className={styles.cardTitle}>{project.title}</h3>
+                      <p className={styles.cardDescription}>
+                        {project.description.substring(0, 60)}...
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <h3 className="project-card-title font-medium text-lg mt-3 mb-1">{project.title}</h3>
-                <p className="font-poppins text-sm text-gray-600 line-clamp-2">
-                  {project.description}
-                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
