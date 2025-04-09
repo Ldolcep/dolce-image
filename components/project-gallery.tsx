@@ -10,7 +10,7 @@ const projectsData = {
     {
       id: "1",
       title: "Brand Identity",
-      mainVisual: "/images/projects/brand-identity-main.jpg",
+      mainVisual: "/images/projects/project-1-main.jpg",
       additionalVisuals: [
         "/images/projects/brand-identity-1.jpg",
         "/images/projects/brand-identity-2.jpg",
@@ -23,7 +23,7 @@ const projectsData = {
     {
       id: "2",
       title: "Web Design",
-      mainVisual: "/images/projects/web-design-main.jpg",
+      mainVisual: "/images/projects/project-2-main.jpg",
       additionalVisuals: [
         "/images/projects/web-design-1.jpg",
         "/images/projects/web-design-2.jpg",
@@ -36,7 +36,7 @@ const projectsData = {
     {
       id: "3",
       title: "Digital Marketing",
-      mainVisual: "/images/projects/digital-marketing-main.jpg",
+      mainVisual: "/images/projects/project-3-main.jpg",
       additionalVisuals: [
         "/images/projects/digital-marketing-1.jpg",
         "/images/projects/digital-marketing-2.jpg",
@@ -49,7 +49,7 @@ const projectsData = {
     {
       id: "4",
       title: "Social Media",
-      mainVisual: "/images/projects/social-media-main.jpg",
+      mainVisual: "/images/projects/project-4-main.jpg",
       additionalVisuals: [
         "/images/projects/social-media-1.jpg",
         "/images/projects/social-media-2.jpg",
@@ -62,7 +62,7 @@ const projectsData = {
     {
       id: "5",
       title: "UI/UX Design",
-      mainVisual: "/images/projects/ui-ux-main.jpg",
+      mainVisual: "/images/projects/project-5-main.jpg",
       additionalVisuals: [
         "/images/projects/ui-ux-1.jpg",
         "/images/projects/ui-ux-2.jpg",
