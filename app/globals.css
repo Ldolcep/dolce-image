@@ -129,3 +129,16 @@ html {
   outline: 2px solid var(--color-primary-orange);
   outline-offset: 2px;
 }
+
+/* Styles spécifiques pour le masonry grid si nécessaire */
+@layer utilities {
+  /* Assurer que le break-inside fonctionne correctement */ 
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+}
+
+/* Permettre que la hauteur des images varie naturellement */
+.aspect-random {
+  aspect-ratio: var(--aspect-ratio, 1);
+}
