@@ -1,21 +1,26 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Great_Vibes, Poppins } from "next/font/google"
 import "./globals.css"
-import localFont from "next/font/local"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-
-const koolegant = localFont({
-  src: "../public/fonts/Koolegant.woff2",
-  variable: "--font-koolegant",
+// Import Google Fonts
+const greatVibes = Great_Vibes({
+  weight: "400",
+  subsets: ["latin"],
   display: "swap",
+  variable: "--font-great-vibes",
 })
 
-const cocogoose = localFont({
-  src: "../public/fonts/Cocogoose.woff2",
-  variable: "--font-cocogoose",
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600"],
+  subsets: ["latin"],
   display: "swap",
+  variable: "--font-poppins",
+})
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 })
 
 export const metadata: Metadata = {
@@ -31,7 +36,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} ${koolegant.variable} ${cocogoose.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${greatVibes.variable} ${poppins.variable} antialiased`}>{children}</body>
     </html>
   )
 }
+
+
+import './globals.css'

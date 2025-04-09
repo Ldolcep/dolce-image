@@ -82,7 +82,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-6 text-center md:text-right">
-          <p className="text-sm text-gray-600">© {new Date().getFullYear()} Dolce. All rights reserved.</p>
+          <p className="text-sm text-gray-600 font-poppins">© {new Date().getFullYear()} Dolce. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -8,9 +8,12 @@ export default function Hero() {
           <div className="relative h-24 w-56 md:h-32 md:w-72 mb-8">
             <Image src="/images/DOLCE_LOGO_PRIMAIRE.png" alt="Dolce" fill className="object-contain" priority />
           </div>
-          <h2 className="font-koolegant text-2xl md:text-3xl lg:text-4xl max-w-2xl">
+          <h2 className="font-great-vibes text-4xl md:text-5xl lg:text-6xl max-w-2xl">
             Crafting digital experiences that elevate your brand
           </h2>
+          <p className="font-poppins text-base md:text-lg mt-4 max-w-xl text-gray-600">
+            We create elegant, functional designs that help businesses stand out in the digital landscape
+          </p>
         </div>
       </div>
     </section>

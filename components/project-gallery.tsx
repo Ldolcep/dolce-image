@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectModal from "./project-modal"
 
@@ -101,8 +101,6 @@ export default function ProjectGallery() {
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
-  const galleryRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Use the hardcoded data instead of fetching
@@ -132,65 +130,41 @@ export default function ProjectGallery() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isModalOpen])
 
-  // Handle horizontal scrolling with mouse wheel
-  useEffect(() => {
-    const gallery = galleryRef.current
-
-    const handleWheel = (e: WheelEvent) => {
-      if (gallery) {
-        e.preventDefault()
-        gallery.scrollLeft += e.deltaY
-      }
-    }
-
-    if (gallery) {
-      gallery.addEventListener("wheel", handleWheel)
-
-      return () => {
-        gallery.removeEventListener("wheel", handleWheel)
-      }
-    }
-  }, [])
-
   return (
     <section id="projects" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
-        <h2 className="font-koolegant text-3xl md:text-4xl mb-12 text-center">Our Projects</h2>
+        <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
 
-        {/* Horizontal scrolling gallery with overlapping cards */}
-        <div
-          ref={galleryRef}
-          className="horizontal-scroll flex overflow-x-auto pb-8 -mx-4 px-4 snap-x snap-mandatory"
-          tabIndex={0}
-          aria-label="Project gallery, scroll horizontally to view more projects"
-        >
-          {projects.map((project, index) => (
+        {/* Masonry Grid Layout */}
+        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+          {projects.map((project) => (
             <div
               key={project.id}
-              className="project-card snap-center"
-              style={{
-                marginLeft: index === 0 ? "0" : "-40px",
-                zIndex: hoveredId === project.id ? 10 : projects.length - index,
-                opacity: hoveredId && hoveredId !== project.id ? 0.7 : 1,
-                transform: hoveredId === project.id ? "scale(1.05)" : "scale(1)",
-              }}
+              className="break-inside-avoid mb-6"
               onClick={() => openModal(project)}
               onKeyDown={(e) => e.key === "Enter" && openModal(project)}
-              onMouseEnter={() => setHoveredId(project.id)}
-              onMouseLeave={() => setHoveredId(null)}
               tabIndex={0}
               role="button"
               aria-label={`View ${project.title} project details`}
             >
-              <div className="relative project-card-image">
-                <Image
-                  src={project.mainVisual || "/placeholder.svg"}
-                  alt={project.title}
-                  fill
-                  className="object-cover"
-                />
+              <div className="project-card group cursor-pointer transition duration-300 ease-in-out">
+                <div className="relative project-card-image rounded-md overflow-hidden">
+                  <div className="w-full aspect-[4/3] md:aspect-auto md:h-auto relative">
+                    <Image
+                      src={project.mainVisual || "/placeholder.svg"}
+                      alt={project.title}
+                      fill
+                      className="object-cover transition duration-300 ease-in-out group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition duration-300"></div>
+                  </div>
+                </div>
+                <h3 className="project-card-title font-medium text-lg mt-3 mb-1">{project.title}</h3>
+                <p className="font-poppins text-sm text-gray-600 line-clamp-2">
+                  {project.description}
+                </p>
               </div>
-              <h3 className="project-card-title">{project.title}</h3>
             </div>
           ))}
         </div>

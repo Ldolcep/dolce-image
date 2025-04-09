@@ -95,7 +95,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         </button>
 
         {/* Main image with smooth transition */}
-        <div className="relative w-full h-[300px] md:h-[400px] mb-6 overflow-hidden">
+        <div className="relative w-full h-[300px] md:h-[400px] mb-6 overflow-hidden rounded-md">
           <Image
             src={currentImage || "/placeholder.svg"}
             alt={project.title}
@@ -109,7 +109,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         {/* Thumbnails with improved interaction */}
         <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
           <button
-            className={`relative w-20 h-20 flex-shrink-0 transition-all duration-300 ${
+            className={`relative w-20 h-20 flex-shrink-0 transition-all duration-300 rounded-sm ${
               currentImage === project.mainVisual
                 ? "ring-2 ring-primary-orange scale-105"
                 : "opacity-70 hover:opacity-100"
@@ -131,7 +131,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           {project.additionalVisuals.map((image, index) => (
             <button
               key={index}
-              className={`relative w-20 h-20 flex-shrink-0 transition-all duration-300 ${
+              className={`relative w-20 h-20 flex-shrink-0 transition-all duration-300 rounded-sm ${
                 currentImage === image ? "ring-2 ring-primary-orange scale-105" : "opacity-70 hover:opacity-100"
               }`}
               onClick={() => setCurrentImage(image)}
@@ -152,16 +152,16 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         </div>
 
         {/* Project details with improved typography */}
-        <h2 id={`modal-title-${project.id}`} className="font-koolegant text-2xl md:text-3xl mb-4">
+        <h2 id={`modal-title-${project.id}`} className="font-great-vibes text-3xl md:text-4xl mb-4">
           {project.title}
         </h2>
-        <p className="font-cocogoose text-base mb-8 leading-relaxed">{project.description}</p>
+        <p className="font-poppins text-base mb-8 leading-relaxed">{project.description}</p>
 
         <Link
           href={project.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center bg-primary-orange text-white px-6 py-3 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2"
+          className="inline-flex items-center bg-primary-orange text-white px-6 py-3 font-poppins transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2"
         >
           View Project
           <svg

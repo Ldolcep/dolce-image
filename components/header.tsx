@@ -24,13 +24,13 @@ export default function Header() {
         <nav className="hidden md:flex space-x-8">
           <button
             onClick={() => scrollToSection("projects")}
-            className="font-cocogoose text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
+            className="font-poppins text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
           >
             PROJECTS
           </button>
           <button
             onClick={() => scrollToSection("contact")}
-            className="font-cocogoose text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
+            className="font-poppins text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
           >
             CONTACT
           </button>
