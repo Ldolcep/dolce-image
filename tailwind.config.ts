@@ -10,6 +10,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+          koolegant: ['koolegant', 'cursive'],
+          cocogoose: ['cocogoose', 'sans-serif'],
+      };
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
