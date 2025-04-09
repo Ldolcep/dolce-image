@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectModal from "./project-modal"
-import styles from "./project-gallery.module.css"
+import styles from "./project-gallery-module.css"
 
 // Define the project data directly in the component to avoid fetch issues
 const projectsData = {
