@@ -16,20 +16,16 @@
   font-style: normal;
 }
 
-
 :root {
-  /* Primary Colors */
   --color-primary-orange: #f7a520;
   --color-primary-blue: #09478e;
   --color-primary-black: #000000;
 
-  /* Secondary Colors */
   --color-secondary-orange: #f9af3f;
   --color-secondary-cream-1: #efe4e4;
   --color-secondary-cream-2: #f0e9e6;
   --color-secondary-cream-3: #faf7f7;
 
-  /* Background */
   --background: #faf7f7;
   --foreground: #000000;
 }
@@ -68,7 +64,6 @@
   }
 }
 
-/* Project card styles */
 .project-card {
   flex-shrink: 0;
   width: 300px;
@@ -102,10 +97,9 @@
   margin-top: 0.75rem;
 }
 
-/* Custom scrollbar for horizontal gallery */
 .horizontal-scroll {
-  -ms-overflow-style: none; /* for Internet Explorer, Edge */
-  scrollbar-width: none; /* for Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   cursor: grab;
 }
 
@@ -114,10 +108,9 @@
 }
 
 .horizontal-scroll::-webkit-scrollbar {
-  display: none; /* for Chrome, Safari, and Opera */
+  display: none;
 }
 
-/* Modal animations */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -154,12 +147,10 @@
   opacity: 1;
 }
 
-/* Smooth scrolling for anchor links */
 html {
   scroll-behavior: smooth;
 }
 
-/* Focus styles for accessibility */
 :focus-visible {
   outline: 2px solid var(--color-primary-orange);
   outline-offset: 2px;
