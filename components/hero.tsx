@@ -47,7 +47,7 @@ export default function Hero() {
   }, [isMuted, volume])
 
   return (
-    <section className="w-full relative">
+    <section className="w-full relative pt-[64px] md:pt-[72px] lg:pt-0"">
       {/* Video Full Screen */}
       <div className="w-full h-full">
         <video
