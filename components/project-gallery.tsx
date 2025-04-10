@@ -48,7 +48,7 @@ const projectsData = {
     },
     {
       id: "4",
-      title: "DOLCE",
+      title: "Dolce",
       mainVisual: "/images/projects/dolce-main.jpg",
       additionalVisuals: [
         "/images/projects/social-media-1.jpg",
@@ -161,7 +161,6 @@ export default function ProjectGallery() {
                 {/* Nouveau contenu pour les titres sous l'image */}
                 <div className="project-content">
                   <h3 className="project-title font-great-vibes">{project.title}</h3>
-                  <p className="project-description font-poppins">{project.description.substring(0, 100)}...</p>
                 </div>
               </div>
             </div>
