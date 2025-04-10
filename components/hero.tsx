@@ -47,7 +47,7 @@ export default function Hero() {
   }, [isMuted, volume])
 
   return (
-    <section className="w-full relative pt-[64px] md:pt-[72px] lg:pt-0">
+    <section className="w-full relative pt-[64px] md:pt-[72px] lg:pt-[-80px]">
       {/* Video Full Screen */}
       <div className="w-full h-full">
         <video
@@ -70,7 +70,7 @@ export default function Hero() {
         {showVolumeControl && (
           <div 
             className="bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full transition-all duration-300"
-            style={{ width: '120px', opacity: showVolumeControl ? 1 : 0 }}
+            style={{ width: '100px', opacity: showVolumeControl ? 1 : 0 }}
           >
             <input
               type="range"
