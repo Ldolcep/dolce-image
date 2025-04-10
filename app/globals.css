@@ -236,3 +236,66 @@ html {
   opacity: 1;
   height: auto;
 }
+
+/* Styles spécifiques pour les filler cards avec effet 3D */
+.filler-card-container {
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.filler-card-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(45deg, rgba(247, 165, 32, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.filler-card-container:hover::before {
+  opacity: 1;
+}
+
+.filler-card-container:hover .project-img {
+  transform: scale(1.05);
+}
+
+.filler-card-container .img-container {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.filler-card-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateZ(-20px);
+  background: rgba(9, 71, 142, 0.1);
+  z-index: -1;
+}
+
+/* Animation pour l'effet brillant au survol */
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.filler-card-container:hover::before {
+  animation: shine 1.5s infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  background-size: 200% 100%;
+}
