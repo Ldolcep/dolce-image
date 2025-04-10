@@ -93,7 +93,7 @@ export default function Hero() {
                 style={{ 
                   height: '4px',
                   transform: isMobile ? 'none':'rotate(-90deg)',
-                  transformOrigin: 'center'
+                  transformOrigin: 'center',
                   marginTop: isMobile ? 0 : '4px'
                 }}
               />
