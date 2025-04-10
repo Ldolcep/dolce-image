@@ -75,9 +75,9 @@ export default function Hero() {
             <div 
               className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-600 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
               style={{ 
-                padding: '8px 12px',
-                width: isMobile ? '100px' : '48px',
-                height: isMobile ? 'auto' : '120px',
+                padding: '8px 12px' : '8px',
+                width: isMobile ? '100px' : '40px',
+                height: isMobile ? 'auto' : '160px',
                 opacity: showVolumeControl ? 1 : 0,
                 bixSizing: 'border-box'
               }}
@@ -94,6 +94,7 @@ export default function Hero() {
                   height: '4px',
                   transform: isMobile ? 'none' : 'rotate(-90deg)',
                   transformOrigin: 'center'
+                  marginTop: isMobile ? 0 : '4px'
                 }}
               />
             </div>
