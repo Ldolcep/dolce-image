@@ -47,12 +47,12 @@ export default function Hero() {
   }, [isMuted, volume])
 
   return (
-    <section className="w-full h-screen overflow-hidden relative">
+    <section className="w-full relative">
       {/* Video Full Screen */}
       <div className="w-full h-full video-container">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover sm:object-cover object-contain"
+          className="w-full max-h-[100vh] object-contain"
           autoPlay
           muted
           loop
