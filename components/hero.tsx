@@ -67,7 +67,7 @@ export default function Hero() {
       </div>
       
       {/* Contrôles audio */}
-      <div className="absolute bottom-8 right-4">
+      <div className="absolute bottom-8 right-8">
         {/* Disposition du contrôleur différente selon la taille d'écran */}
         <div className={`flex ${isMobile ? 'flex-row items-center gap-3' : 'flex-col items-end gap-3'}`}>
           {/* Contrôle de volume - visible uniquement quand le son est activé */}
@@ -76,8 +76,8 @@ export default function Hero() {
               className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-300 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
               style={{ 
                 padding: '8px 12px',
-                width: isMobile ? 'auto' : '100px',
-                height: isMobile ? 'auto' : '120px',
+                width: isMobile ? '100px' : '40px',
+                height: isMobile ? 'auto' : '150px',
                 opacity: showVolumeControl ? 1 : 0
               }}
             >
