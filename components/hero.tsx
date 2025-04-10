@@ -41,11 +41,11 @@ export default function Hero() {
   }, [isMuted, volume])
 
   return (
-    <section className="w-full relative pt-[64px] md:pt-[72px]">
+    <section className="w-full relative pt-[64px] md:pt-[72px] lg:pt-0">
       <div className="w-full h-auto flex justify-center items-center bg-black">
         <video
           ref={videoRef}
-          className="w-full max-h-[100svh] object-contain"
+          className="w-full max-h-[100svh lg:h-screen object-contain"
           autoPlay
           muted
           loop
