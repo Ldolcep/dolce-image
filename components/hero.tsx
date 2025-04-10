@@ -51,7 +51,7 @@ export default function Hero() {
   return (
     <section className="w-full relative video-container">
       {/* Video Full Screen avec hauteur ajustée */}
-      <div className="w-full h-[100vh] md:h-[80vh] lg:h-[70vh] xl:h-[85vh] overflow-hidden">
+      <div className="w-full relative pt-[64px] md:pt-[72px] lg:pt-0">
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
