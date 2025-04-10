@@ -49,7 +49,7 @@ export default function Hero() {
   }, [isMuted, volume])
 
   return (
-    <section className="w-full h-screen overflow-hidden relative">
+    <section className="w-full relative pt-[64px] md:pt-[72px]">
       {/* Video Full Screen */}
       <div className="w-full h-full">
         <video
@@ -66,17 +66,18 @@ export default function Hero() {
         </video>
       </div>
       
-      {/* Contrôles audio avec disposition spécifique selon le format */}
-      <div className="absolute bottom-8 right-8 flex items-center">
-        {/* Disposition et style spécifiques selon la taille d'écran */}
-        <div className={`flex ${!isMobile && showVolumeControl ? 'lg:flex-col lg:items-center' : 'flex-row items-center'} gap-3`}>
+      {/* Contrôles audio */}
+      <div className="absolute bottom-8 right-8">
+        {/* Disposition du contrôleur différente selon la taille d'écran */}
+        <div className={`flex ${isMobile ? 'flex-row items-center gap-3' : 'flex-col items-end gap-3'}`}>
           {/* Contrôle de volume - visible uniquement quand le son est activé */}
           {showVolumeControl && (
             <div 
-              className="bg-black/30 backdrop-blur-sm rounded-full transition-all duration-300 flex items-center justify-center"
+              className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-300 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
               style={{ 
                 padding: '8px 12px',
-                width: '100px',
+                width: isMobile ? '100px' : '40px',
+                height: isMobile ? 'auto' : '120px',
                 opacity: showVolumeControl ? 1 : 0
               }}
             >
@@ -87,8 +88,11 @@ export default function Hero() {
                 step="0.01"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="w-full accent-white cursor-pointer"
-                style={{ height: '4px' }}
+                className={`accent-white cursor-pointer ${isMobile ? 'w-full' : '-rotate-90 w-24'}`}
+                style={{ 
+                  height: '4px',
+                  transform: isMobile ? 'none' : 'rotate(-90deg) translateX(-40px)'
+                }}
               />
             </div>
           )}
