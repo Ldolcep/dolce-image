@@ -76,8 +76,8 @@ export default function Hero() {
               className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-300 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
               style={{ 
                 padding: '8px 12px',
-                width: isMobile ? '100px' : '40px',
-                height: isMobile ? 'auto' : '150px',
+                width: isMobile ? '100px' : '36px',
+                height: isMobile ? 'auto' : '140px',
                 opacity: showVolumeControl ? 1 : 0
               }}
             >
@@ -88,10 +88,11 @@ export default function Hero() {
                 step="0.01"
                 value={volume}
                 onChange={handleVolumeChange}
-                className={`accent-white cursor-pointer ${isMobile ? 'w-full' : '-rotate-90 w-32'}`}
+                className={`accent-white cursor-pointer ${isMobile ? 'w-full' : '-rotate-90 w-28'}`}
                 style={{ 
                   height: '4px',
-                  transform: isMobile ? 'none' : 'rotate(-90deg) translateX(-60px)'
+                  transform: isMobile ? 'none' : 'rotate(-90deg) translateY(40px)',
+                  transformOrigin: 'center left'
                 }}
               />
             </div>
