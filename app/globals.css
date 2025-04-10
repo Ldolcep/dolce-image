@@ -299,3 +299,11 @@ html {
   );
   background-size: 200% 100%;
 }
+
+/*Responsive video display*/
+@media (max-width: 1024px) {
+  .video-container video {
+    object-fit: contain !important;
+  }
+}
+
