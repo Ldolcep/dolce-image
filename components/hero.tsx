@@ -94,7 +94,7 @@ export default function Hero() {
                   height: '4px',
                   transform: isMobile ? 'none':'rotate(-90deg)',
                   transformOrigin: 'center'
-                  marginTop: isMobile ? 0: '4px'
+                  marginTop: isMobile ? 0 : '4px'
                 }}
               />
             </div>
