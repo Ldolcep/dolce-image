@@ -79,7 +79,7 @@ export default function Hero() {
                 width: isMobile ? '100px' : '40px',
                 height: isMobile ? 'auto' : '160px',
                 opacity: showVolumeControl ? 1 : 0,
-                bixSizing: 'border-box'
+                boxSizing: 'border-box'
               }}
             >
               <input
@@ -92,9 +92,9 @@ export default function Hero() {
                 className={`accent-white cursor-pointer ${isMobile ? 'w-full' : '-rotate-90 w-28'}`}
                 style={{ 
                   height: '4px',
-                  transform: isMobile ? 'none' : 'rotate(-90deg)',
+                  transform: isMobile ? 'none':'rotate(-90deg)',
                   transformOrigin: 'center'
-                  marginTop: isMobile ? 0 : '4px'
+                  marginTop: isMobile ? 0: '4px'
                 }}
               />
             </div>
