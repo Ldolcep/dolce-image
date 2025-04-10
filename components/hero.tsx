@@ -73,12 +73,13 @@ export default function Hero() {
           {/* Contrôle de volume - visible uniquement quand le son est activé */}
           {showVolumeControl && (
             <div 
-              className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-300 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
+              className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-600 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
               style={{ 
                 padding: '8px 12px',
-                width: isMobile ? '100px' : '36px',
-                height: isMobile ? 'auto' : '140px',
-                opacity: showVolumeControl ? 1 : 0
+                width: isMobile ? '100px' : '48px',
+                height: isMobile ? 'auto' : '120px',
+                opacity: showVolumeControl ? 1 : 0,
+                bixSizing: 'border-box'
               }}
             >
               <input
@@ -91,8 +92,8 @@ export default function Hero() {
                 className={`accent-white cursor-pointer ${isMobile ? 'w-full' : '-rotate-90 w-28'}`}
                 style={{ 
                   height: '4px',
-                  transform: isMobile ? 'none' : 'rotate(-90deg) translateY(40px)',
-                  transformOrigin: 'center left'
+                  transform: isMobile ? 'none' : 'rotate(-90deg)',
+                  transformOrigin: 'center'
                 }}
               />
             </div>
