@@ -49,9 +49,9 @@ export default function Hero() {
   }, [isMuted, volume])
 
   return (
-    <section className="w-full relative video-container">
-      {/* Video Full Screen avec hauteur ajustée */}
-      <div className="w-full relative pt-[64px] md:pt-[72px] lg:pt-0">
+    <section className="w-full h-screen overflow-hidden relative">
+      {/* Video Full Screen */}
+      <div className="w-full h-full">
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
@@ -66,15 +66,18 @@ export default function Hero() {
         </video>
       </div>
       
-      {/* Contrôles audio - repositionnés selon l'écran */}
-      <div className={`absolute ${isMobile ? 'bottom-4 right-4' : 'bottom-8 right-8 md:bottom-12 lg:top-1/2 lg:-translate-y-1/2 lg:right-12'} flex items-center space-x-2 md:space-x-3 z-10`}>
-        {/* Contrôle de volume - visible uniquement quand le son est activé */}
+      {/* Contrôles audio avec flexbox vertical sur desktop */}
+      <div className={`absolute ${isMobile ? 'bottom-8 right-8' : 'bottom-8 right-8 lg:flex-col-reverse lg:items-center lg:space-y-reverse lg:space-y-3'} 
+                      flex ${isMobile ? 'flex-row items-center space-x-3' : 'md:flex-row md:items-center md:space-x-3 lg:space-x-0'}`}>
+        
+        {/* Contrôle de volume - hauteur fixe et largeur uniforme */}
         {showVolumeControl && (
           <div 
-            className="bg-black/30 backdrop-blur-sm px-2 md:px-3 py-1 md:py-2 rounded-full transition-all duration-300"
+            className="bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full transition-all duration-300"
             style={{ 
-              width: isMobile ? '80px' : '100px', 
-              opacity: showVolumeControl ? 1 : 0 
+              width: '100px',
+              opacity: showVolumeControl ? 1 : 0,
+              margin: isMobile ? '0' : '0 0 8px 0'
             }}
           >
             <input
@@ -85,23 +88,23 @@ export default function Hero() {
               value={volume}
               onChange={handleVolumeChange}
               className="w-full accent-white cursor-pointer"
-              style={{ height: isMobile ? '3px' : '4px' }}
+              style={{ height: '4px' }}
             />
           </div>
         )}
         
-        {/* Bouton mute/unmute - taille réduite sur mobile */}
+        {/* Bouton mute/unmute - plus petit sur desktop */}
         <button
           onClick={toggleMute}
-          className="bg-black/30 backdrop-blur-sm p-2 md:p-3 rounded-full text-white hover:bg-black/50 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="bg-black/30 backdrop-blur-sm p-2.5 rounded-full text-white hover:bg-black/50 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
           aria-label={isMuted ? "Activer le son" : "Désactiver le son"}
           onMouseOver={() => !isMuted && setShowVolumeControl(true)}
           onMouseLeave={() => setTimeout(() => setShowVolumeControl(false), 2000)}
         >
           {isMuted ? (
-            <VolumeX size={isMobile ? 16 : 20} />
+            <VolumeX size={isMobile ? 20 : 18} />
           ) : (
-            <Volume2 size={isMobile ? 16 : 20} />
+            <Volume2 size={isMobile ? 20 : 18} />
           )}
         </button>
       </div>
