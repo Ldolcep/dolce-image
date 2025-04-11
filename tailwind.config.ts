@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       spacing: {
-        '70': '17.5rem',
+        '70': '16.25rem',
       },
       screens: {
         'xxl': '1700px',
