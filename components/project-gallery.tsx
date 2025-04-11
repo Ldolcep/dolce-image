@@ -114,7 +114,7 @@ const projectsData = {
       id: "filler_1",
       backgroundImage: "/images/fillers/filler_1_bg.jpg",
       textImage: "/images/fillers/filler_1_text.png", // Image PNG avec fond transparent pour le texte
-      aspectRatio: "1/1",
+      aspectRatio: "4/3",
       isFiller: true
     },
     {
