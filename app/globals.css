@@ -143,11 +143,6 @@ html {
   aspect-ratio: var(--aspect-ratio, 1);
 }
 
-/* 
- * Ces styles doivent être ajoutés à votre fichier globals.css existant
- * Ils sont simples et robustes pour garantir la compatibilité
- */
-
 /* Masonry Grid avec CSS Columns - simple et fiable */
 .masonry-grid {
   column-count: 1;
@@ -238,76 +233,9 @@ html {
 }
 
 /* Styles spécifiques pour les filler cards avec effet 3D */
-.filler-card-container {
-  border-radius: 2px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  position: relative;
-  perspective: 1000px;
-  cursor: pointer;
-}
+/* Améliorations CSS pour des animations plus douces - Ajouter à globals.css */
 
-.filler-card-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(45deg, rgba(247, 165, 32, 0.2), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.filler-card-container:hover::before {
-  opacity: 1;
-}
-
-.filler-card-container:hover .project-img {
-  transform: scale(1.05);
-}
-
-.filler-card-container .img-container {
-  transform-style: preserve-3d;
-  transition: transform 0.3s ease;
-}
-
-.filler-card-container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateZ(-20px);
-  background: rgba(9, 71, 142, 0.1);
-  z-index: -1;
-}
-
-/* Animation pour l'effet brillant au survol */
-@keyframes shine {
-  0% {
-    background-position: -100% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.filler-card-container:hover::before {
-  animation: shine 1.5s infinite;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  background-size: 200% 100%;
-}
-
-/*Responsive video display*/
-@media (max-width: 1280px) {
-  .video-container video {
-    object-fit: contain !important;
-  }
-}
-
-/* Style de base amélioré pour les filler cards */
+/* Style de base amélioré avec meilleures transitions */
 .filler-card-container {
   border-radius: 2px;
   overflow: hidden;
@@ -316,40 +244,44 @@ html {
   perspective: 1000px;
   cursor: pointer;
   transform-style: preserve-3d;
-  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  /* Transition cubic-bezier optimisée pour un effet ressort subtil */
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  will-change: transform, box-shadow;
 }
 
 .filler-card-container:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 /* Styles pour l'image d'arrière-plan */
-.filler-card-container .img-container {
+.filler-card-container .background-layer {
   transform-style: preserve-3d;
-  transition: transform 0.3s ease-out;
+  /* Transition identique pour toutes les couches */
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   backface-visibility: hidden;
+  will-change: transform;
 }
 
 /* Styles pour l'overlay de texte */
-.filler-card-container .text-overlay {
+.filler-card-container .text-layer {
   transform-style: preserve-3d;
-  transition: transform 0.3s ease-out;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   backface-visibility: hidden;
   z-index: 2;
+  will-change: transform;
 }
 
-/* Animation brillance améliorée */
-@keyframes shine3D {
+/* Animation brillance adoucie */
+@keyframes shine3DSmooth {
   0% {
     background-position: -100% 0;
     opacity: 0;
   }
-  25% {
-    opacity: 1;
-  }
-  75% {
-    opacity: 1;
-  }
+  15% { opacity: 0.3; }
+  40% { opacity: 0.7; }
+  60% { opacity: 0.7; }
+  85% { opacity: 0.3; }
   100% {
     background-position: 200% 0;
     opacity: 0;
@@ -363,45 +295,53 @@ html {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.15),
     transparent
   );
   background-size: 200% 100%;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.5s ease;
   z-index: 1;
   pointer-events: none;
 }
 
 .filler-card-container:hover::before {
-  animation: shine3D 2s infinite;
+  animation: shine3DSmooth 2.5s infinite cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 
-/* Style pour l'effet de glow au survol */
+/* Style pour l'effet de glow au survol avec transition adoucie */
 .filler-card-container::after {
   content: '';
   position: absolute;
   inset: -20px;
-  background: radial-gradient(circle at center, rgba(247, 165, 32, 0.4), transparent 70%);
+  background: radial-gradient(circle at center, rgba(247, 165, 32, 0.3), transparent 70%);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.8s cubic-bezier(0, 0, 0.2, 1);
   z-index: -1;
   pointer-events: none;
 }
 
 .filler-card-container:hover::after {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
-/* Style pour le texte dans l'overlay */
+/* Style pour le texte dans l'overlay avec transition adoucie */
 .text-content {
+  color: white;
+  font-size: 2rem;
+  font-family: var(--font-great-vibes);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  max-width: 80%;
+  text-align: center;
   opacity: 0.9;
   transform: translateZ(0);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  /* Transition douce pour l'apparition du texte */
+  transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
 }
 
 .filler-card-container:hover .text-content {
   opacity: 1;
   transform: translateZ(10px) scale(1.05);
 }
-
