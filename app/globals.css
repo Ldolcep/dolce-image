@@ -345,3 +345,36 @@ html {
   opacity: 1;
   transform: translateZ(10px) scale(1.05);
 }
+
+/* Animation de brillance pour les filler cards */
+@keyframes shine3D {
+  0% {
+    background-position: -100% 0;
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 200% 0;
+    opacity: 0;
+  }
+}
+
+/* Style général des filler cards */
+.filler-card-container {
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  perspective: 1000px;
+  cursor: pointer;
+  transform-style: preserve-3d;
+}
+
+.filler-card-container:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
