@@ -105,7 +105,7 @@ const projectsData = {
       id: "filler_1",
       mainVisual: "/images/fillers/filler_1.jpg", // À remplacer par vos propres images
       isFiller: true,
-      aspectRatio: "1/1", // Format portrait
+      aspectRatio: "3/2", // Format portrait
     },
     {
       id: "filler_2",
