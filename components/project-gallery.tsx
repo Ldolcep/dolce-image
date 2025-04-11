@@ -19,7 +19,7 @@ interface Project {
 interface FillerItem {
   id: string
   backgroundImage: string
-  textImage: string // Laisser requis car FillerCard l'utilise
+  textImage: string // Requis par FillerCard
   aspectRatio?: string
   isFiller: boolean
 }
@@ -107,7 +107,7 @@ const projectsData = {
     },
   ],
   
-  // Fillers mise à jour (sans textContent dans la définition)
+  // Fillers mise à jour (sans textContent)
   fillers: [
     {
       id: "filler_1",
@@ -147,7 +147,7 @@ export default function ProjectGallery() {
     setAllItems(interleavedItems);
   }, []);
 
-  // Fonction pour entrelacer les projets et les fillers harmonieusement
+  // --- Logique d'entrelacement et de positionnement exacte de votre version précédente ---
   const interleaveItems = (projects: Project[], fillers: FillerItem[]) => {
     const total = projects.length + fillers.length;
     const result = [];
@@ -158,6 +158,7 @@ export default function ProjectGallery() {
     let projectIndex = 0;
     
     for (let i = 0; i < total; i++) {
+      // Utilise la vérification `includes` sur les positions pré-calculées
       if (fillerPositions.includes(i) && fillerIndex < fillers.length) {
         result.push(fillers[fillerIndex]);
         fillerIndex++;
@@ -166,8 +167,8 @@ export default function ProjectGallery() {
         projectIndex++;
       }
     }
-    
-     // Gestion des éléments restants (inchangée par rapport à votre code original)
+
+    // Gestion des éléments restants (inchangée)
     while (projectIndex < projects.length) {
         result.push(projects[projectIndex]);
         projectIndex++;
@@ -180,26 +181,29 @@ export default function ProjectGallery() {
     return result;
   };
   
-  // Fonction pour calculer les positions optimales des fillers
+  // Fonction pour calculer les positions exactes de votre version précédente
   const calculateFillerPositions = (projectCount: number, fillerCount: number) => {
     const positions = [];
-    if (fillerCount <= 0) return positions; // Ajout garde pour éviter division par zéro
+    if (fillerCount <= 0) return positions; 
 
-    const spacing = Math.ceil((projectCount + fillerCount) / (fillerCount + 1)); // +1 pour l'espacement avant/après
+    // Calcul de l'espacement exact de votre version
+    const spacing = Math.ceil(projectCount / (fillerCount + 1)); 
     
     for (let i = 0; i < fillerCount; i++) {
-      // Les positions sont calculées pour être insérées DANS la liste combinée
-      const position = (i + 1) * spacing -1; // -1 car index de tableau commence à 0
-      if (position < projectCount + fillerCount) { // Vérifier que la position est valide
+      // Calcul de la position exact de votre version
+      const position = (i + 1) * spacing; 
+      // Vérification exacte de votre version
+      if (position <= projectCount + fillerCount) { 
         positions.push(position);
-      } else {
-          // Si la position calculée est trop loin, ajouter à la fin
-          positions.push(projectCount + i); 
       }
+      // Pas d'autre logique dans la boucle selon votre code précédent
     }
     
-    return positions.sort((a,b)=> a-b); // Trier pour être sûr
+    // Pas de tri dans votre code précédent
+    return positions; 
   };
+  // --- Fin de la logique d'entrelacement exacte ---
+
 
   const openModal = (project: Project) => {
     setSelectedProject(project)
@@ -209,7 +213,7 @@ export default function ProjectGallery() {
 
   const closeModal = () => {
     setIsModalOpen(false)
-    setSelectedProject(null); // Bonne pratique de réinitialiser
+    setSelectedProject(null); 
     document.body.style.overflow = "auto"
   }
 
@@ -230,14 +234,12 @@ export default function ProjectGallery() {
       <div className="container mx-auto px-4">
         <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
 
-        {/* Grille masonry améliorée */}
+        {/* Grille masonry */}
         <div className="masonry-grid">
           {allItems.map((item) => {
-            // Utiliser le composant FillerCard pour les fillers
+            // Rendu pour les Fillers (visibles uniquement sur tablette et desktop)
             if ('isFiller' in item) {
               const filler = item as FillerItem;
-              // --- MODIFICATION ICI ---
-              // Ajout du div wrapper avec les classes de visibilité responsive
               return (
                 <div 
                   key={`filler-${filler.id}`} 
@@ -251,10 +253,9 @@ export default function ProjectGallery() {
                   />
                 </div>
               );
-              // --- FIN DE LA MODIFICATION ---
             }
             
-            // Rendu normal pour les projets (structure originale conservée)
+            // Rendu pour les Projets (structure originale conservée)
             const project = item as Project;
             return (
               <div
@@ -288,7 +289,6 @@ export default function ProjectGallery() {
       </div>
 
       {/* Project Modal */}
-      {/* Utilisation de l'opérateur && pour un rendu conditionnel propre */}
       {isModalOpen && selectedProject && (
          <ProjectModal 
              project={selectedProject} 
