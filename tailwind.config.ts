@@ -12,7 +12,7 @@ const config: Config = {
     extend: {
       spacing: {
         '70': '17.5rem',
-      }
+      },
       screens: {
         'xxl': '1700px',
       },
