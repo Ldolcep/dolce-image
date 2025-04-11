@@ -14,7 +14,7 @@ const config: Config = {
         'xxl': '1700px',
       },
       spacing: {
-          '50': '12.5rem',
+          '40': '12rem',
       }
       colors: {
         background: "var(--background)",
