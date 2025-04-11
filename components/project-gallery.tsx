@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectModal from "./project-modal"
+import FillerCard from "./filler-card" // Nouveau import
 
 // Définir les types de base
 interface Project {
@@ -12,8 +13,16 @@ interface Project {
   additionalVisuals: string[]
   description: string
   link: string
-  isFiller?: boolean
+}
+
+// Interface pour les fillers améliorés
+interface FillerItem {
+  id: string
+  backgroundImage: string
+  textImage?: string
+  textContent?: string
   aspectRatio?: string
+  isFiller: boolean
 }
 
 // Définir les données des projets
@@ -99,53 +108,51 @@ const projectsData = {
     },
   ],
   
-  // Ajouter les filler cards
+  // Fillers mise à jour avec de nouvelles propriétés
   fillers: [
     {
       id: "filler_1",
-      mainVisual: "/images/fillers/filler_1.jpg", // À remplacer par vos propres images
-      isFiller: true,
-      aspectRatio: "3/2", // Format portrait
+      backgroundImage: "/images/fillers/filler_1_bg.jpg",
+      textImage: "/images/fillers/filler_1_text.png", // Image PNG avec fond transparent pour le texte
+      aspectRatio: "1/1",
+      isFiller: true
     },
     {
       id: "filler_2",
-      mainVisual: "/images/fillers/filler_2.jpg", // À remplacer par vos propres images
-      isFiller: true,
-      aspectRatio: "3/2", // Format carré
+      backgroundImage: "/images/fillers/filler_2_bg.jpg",
+      textContent: "Creative Design", // Alternative: texte direct au lieu d'une image
+      aspectRatio: "3/2",
+      isFiller: true
     },
     {
       id: "filler_3",
-      mainVisual: "/images/fillers/filler_3.jpg", // À remplacer par vos propres images
-      isFiller: true,
-      aspectRatio: "4/3", // Format paysage
+      backgroundImage: "/images/fillers/filler_3_bg.jpg",
+      textImage: "/images/fillers/filler_3_text.png",
+      aspectRatio: "4/3",
+      isFiller: true
     },
   ]
 }
 
 export default function ProjectGallery() {
-  const [allItems, setAllItems] = useState<(Project | any)[]>([])
+  const [allItems, setAllItems] = useState<(Project | FillerItem)[]>([])
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const fillerRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
     // Combiner et entrelacer les projets et les fillers
-    const interleavedItems = interleaveItems(projectsData.projects, projectsData.fillers);
+    const interleavedItems = interleaveItems(
+      projectsData.projects, 
+      projectsData.fillers as FillerItem[]
+    );
     setAllItems(interleavedItems);
-    
-    // Réinitialiser les refs pour les fillers
-    fillerRefs.current = interleavedItems
-      .filter(item => item.isFiller)
-      .map(() => null);
   }, []);
 
   // Fonction pour entrelacer les projets et les fillers harmonieusement
-  // Cette fonction assure que les fillers sont distribués de manière équilibrée
-  const interleaveItems = (projects: Project[], fillers: Project[]) => {
+  const interleaveItems = (projects: Project[], fillers: FillerItem[]) => {
     const total = projects.length + fillers.length;
     const result = [];
     
-    // Distribuer les fillers de manière équilibrée parmi les projets
     const fillerPositions = calculateFillerPositions(projects.length, fillers.length);
     
     let fillerIndex = 0;
@@ -167,7 +174,6 @@ export default function ProjectGallery() {
   // Fonction pour calculer les positions optimales des fillers
   const calculateFillerPositions = (projectCount: number, fillerCount: number) => {
     const positions = [];
-    // Placer un filler tous les n projets, où n est calculé pour une distribution optimale
     const spacing = Math.ceil(projectCount / (fillerCount + 1));
     
     for (let i = 0; i < fillerCount; i++) {
@@ -190,33 +196,6 @@ export default function ProjectGallery() {
     setIsModalOpen(false)
     document.body.style.overflow = "auto"
   }
-  
-  // Effet 3D pour les fillers au survol
-  const handleMouseMove = (e: React.MouseEvent, index: number) => {
-    const fillerCard = fillerRefs.current[index];
-    if (!fillerCard) return;
-    
-    const rect = fillerCard.getBoundingClientRect();
-    const x = e.clientX - rect.left; // Position X relative à la carte
-    const y = e.clientY - rect.top;  // Position Y relative à la carte
-    
-    // Calculer les rotations en fonction de la position
-    const rotateY = ((x / rect.width) - 0.5) * 15; // -7.5° à +7.5°
-    const rotateX = ((y / rect.height) - 0.5) * -15; // +7.5° à -7.5°
-    
-    // Appliquer la transformation avec un léger délai pour plus de fluidité
-    fillerCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
-    fillerCard.style.zIndex = "1";
-  };
-  
-  const handleMouseLeave = (index: number) => {
-    const fillerCard = fillerRefs.current[index];
-    if (!fillerCard) return;
-    
-    // Réinitialiser la transformation avec une transition douce
-    fillerCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-    fillerCard.style.zIndex = "0";
-  };
 
   // Gérer les événements clavier pour l'accessibilité
   useEffect(() => {
@@ -237,82 +216,51 @@ export default function ProjectGallery() {
 
         {/* Grille masonry améliorée */}
         <div className="masonry-grid">
-          {allItems.map((item, index) => {
-            // Gérer les filler cards avec effet 3D
-            if (item.isFiller) {
-              const fillerIndex = fillerRefs.current.findIndex(ref => ref === null);
-              if (fillerIndex !== -1) fillerRefs.current[fillerIndex] = null; // Placeholder pour l'initialisation des refs
-              
+          {allItems.map((item) => {
+            // Utiliser le composant FillerCard pour les fillers
+            if ('isFiller' in item) {
+              const filler = item as FillerItem;
               return (
-                <div
-                  key={`filler-${item.id}`}
-                  className="masonry-item"
-                >
-                  <div
-                    ref={el => {
-                      const fillerIndex = allItems.filter(i => i.isFiller).findIndex(f => f.id === item.id);
-                      if (fillerIndex !== -1) fillerRefs.current[fillerIndex] = el;
-                    }}
-                    className="filler-card-container"
-                    style={{
-                      aspectRatio: item.aspectRatio || 'auto',
-                      transformStyle: 'preserve-3d',
-                      transition: 'transform 0.2s ease-out',
-                      willChange: 'transform',
-                      position: 'relative'
-                    }}
-                    onMouseMove={(e) => {
-                      const fillerIndex = allItems.filter(i => i.isFiller).findIndex(f => f.id === item.id);
-                      handleMouseMove(e, fillerIndex);
-                    }}
-                    onMouseLeave={() => {
-                      const fillerIndex = allItems.filter(i => i.isFiller).findIndex(f => f.id === item.id);
-                      handleMouseLeave(fillerIndex);
-                    }}
-                  >
-                    <div className="img-container" style={{ transform: 'translateZ(20px)' }}>
-                      <Image
-                        src={item.mainVisual || "/placeholder.svg"}
-                        alt="Decorative design element"
-                        width={600}
-                        height={item.aspectRatio === '2/3' ? 900 : (item.aspectRatio === '1/1' ? 600 : 400)}
-                        className="project-img"
-                        style={{ transformStyle: 'preserve-3d' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )
+                <FillerCard
+                  key={`filler-${filler.id}`}
+                  id={filler.id}
+                  backgroundImage={filler.backgroundImage}
+                  textImage={filler.textImage}
+                  textContent={filler.textContent}
+                  aspectRatio={filler.aspectRatio}
+                />
+              );
             }
             
             // Rendu normal pour les projets
+            const project = item as Project;
             return (
               <div
-                key={item.id}
+                key={project.id}
                 className="masonry-item"
-                onClick={() => openModal(item)}
-                onKeyDown={(e) => e.key === "Enter" && openModal(item)}
+                onClick={() => openModal(project)}
+                onKeyDown={(e) => e.key === "Enter" && openModal(project)}
                 tabIndex={0}
                 role="button"
-                aria-label={`View ${item.title} project details`}
+                aria-label={`View ${project.title} project details`}
               >
                 <div className="card-container">
                   <div className="img-container">
                     <Image
-                      src={item.mainVisual || "/placeholder.svg"}
-                      alt={item.title}
+                      src={project.mainVisual || "/placeholder.svg"}
+                      alt={project.title}
                       width={600}
                       height={400}
                       className="project-img"
-                      priority={item.id === "1"}
+                      priority={project.id === "1"}
                     />
                   </div>
                   <div className="project-content">
-                    <h3 className="project-title font-great-vibes">{item.title}</h3>
+                    <h3 className="project-title font-great-vibes">{project.title}</h3>
                   </div>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>

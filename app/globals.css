@@ -307,3 +307,101 @@ html {
   }
 }
 
+/* Style de base amélioré pour les filler cards */
+.filler-card-container {
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  perspective: 1000px;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.filler-card-container:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Styles pour l'image d'arrière-plan */
+.filler-card-container .img-container {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease-out;
+  backface-visibility: hidden;
+}
+
+/* Styles pour l'overlay de texte */
+.filler-card-container .text-overlay {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease-out;
+  backface-visibility: hidden;
+  z-index: 2;
+}
+
+/* Animation brillance améliorée */
+@keyframes shine3D {
+  0% {
+    background-position: -100% 0;
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 200% 0;
+    opacity: 0;
+  }
+}
+
+.filler-card-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.filler-card-container:hover::before {
+  animation: shine3D 2s infinite;
+}
+
+/* Style pour l'effet de glow au survol */
+.filler-card-container::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle at center, rgba(247, 165, 32, 0.4), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.filler-card-container:hover::after {
+  opacity: 0.6;
+}
+
+/* Style pour le texte dans l'overlay */
+.text-content {
+  opacity: 0.9;
+  transform: translateZ(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.filler-card-container:hover .text-content {
+  opacity: 1;
+  transform: translateZ(10px) scale(1.05);
+}
+
