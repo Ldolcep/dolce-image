@@ -116,7 +116,7 @@ export default function Hero() {
       </div>
 
       {/* Contrôles audio */}
-      <div className="absolute bottom-6 right-6 xxl:bottom-65">
+      <div className="absolute bottom-8 right-6 xxl:bottom-60">
         {/* Le conteneur qui déclenche le mouseenter/mouseleave */}
         <div
           ref={volumeContainerRef}
