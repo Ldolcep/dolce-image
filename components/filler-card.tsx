@@ -71,7 +71,7 @@ export default function FillerCard({
     
     // Remettre la transition pour un retour en douceur
     if (cardRef.current) {
-      cardRef.current.style.transition = 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      cardRef.current.style.transition = 'transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
       cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
       cardRef.current.style.background = 'none';
     }
