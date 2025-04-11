@@ -120,7 +120,7 @@ const projectsData = {
     {
       id: "filler_2",
       backgroundImage: "/images/fillers/filler_2_bg.jpg",
-      textContent: "Creative Design", // Alternative: texte direct au lieu d'une image
+      textImage: "/images/fillers/filler_2_text.png", // Alternative: texte direct au lieu d'une image
       aspectRatio: "3/2",
       isFiller: true
     },
