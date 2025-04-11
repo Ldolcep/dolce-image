@@ -22,9 +22,9 @@ export default function FillerCard({
   const [isHovering, setIsHovering] = useState(false);
   
   // Configurer les paramètres d'animation
-  const maxRotation = 6; // Degrés maximum de rotation
+  const maxRotation = 3; // Degrés maximum de rotation
   const textOffsetMultiplier = 15; // Pixels max de déplacement du texte
-  const bgOffsetMultiplier = -8; // Pixels max de déplacement du fond (négatif = direction opposée)
+  const bgOffsetMultiplier = -4; // Pixels max de déplacement du fond (négatif = direction opposée)
   const dampingFactor = 0.08; // Facteur d'amortissement - plus petit = plus doux
 
   // Fonction de gestion du mouvement avec amortissement manuel
