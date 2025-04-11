@@ -10,6 +10,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xxl': '1700px',
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

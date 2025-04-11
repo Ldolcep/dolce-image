@@ -9,6 +9,7 @@ export default function Hero() {
   const [volume, setVolume] = useState(0.5)
   const [showVolumeControl, setShowVolumeControl] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const volumeRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   
   // Gérer le changement d'état mute/unmute
@@ -48,6 +49,31 @@ export default function Hero() {
     }
   }, [isMuted, volume])
 
+  useEffect(() => {
+    const volumeE1 = volumeRef.current
+    if (!volumeE1) return
+
+    let closeTimeout: ReturnType<typeof setTimeout>
+
+    const handMouseLeave = () => {
+      closeTimeout = setTimeout(() => {
+        setShowVolumeControl(false)
+      },  300)
+    }
+
+    const handleMouseEnter = () => {
+      clearTimeout(closeTimeout)
+    }
+
+    volumeE1.addEventListener("mouseleave", handleMouseLeave)
+    volumeE1.addEventListener("mouseenter", handleMouseEnter)
+
+    return () => {
+      volumeE1.removeEventListener("mouseleave", handleMouseLeave)
+      volumeE1.removeEventListener("mouseenter", handleMouseEnter)
+    }
+  }, [])
+
   return (
     <section className="w-full relative pt-[64px] md:pt-[72px]">
       {/* Video Full Screen */}
@@ -67,12 +93,13 @@ export default function Hero() {
       </div>
       
       {/* Contrôles audio */}
-      <div className="absolute bottom-8 right-8">
+      <div className="absolute bottom-8 right-8 xxl:bottom-16">
         {/* Disposition du contrôleur différente selon la taille d'écran */}
         <div className={`flex ${isMobile ? 'flex-row items-center gap-3' : 'flex-col items-end gap-3'}`}>
           {/* Contrôle de volume - visible uniquement quand le son est activé */}
           {showVolumeControl && (
             <div 
+              ref={volumeRef}
               className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-600 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
               style={{ 
                 padding: isMobile ? '8px 12px' : '8px',
