@@ -102,19 +102,19 @@ const projectsData = {
   // Ajouter les filler cards
   fillers: [
     {
-      id: "filler-1",
+      id: "filler_1",
       mainVisual: "/images/fillers/filler_1.jpg", // À remplacer par vos propres images
       isFiller: true,
       aspectRatio: "1/1", // Format portrait
     },
     {
-      id: "filler-2",
+      id: "filler_2",
       mainVisual: "/images/fillers/filler_2.jpg", // À remplacer par vos propres images
       isFiller: true,
       aspectRatio: "3/2", // Format carré
     },
     {
-      id: "filler-3",
+      id: "filler_3",
       mainVisual: "/images/fillers/filler_3.jpg", // À remplacer par vos propres images
       isFiller: true,
       aspectRatio: "4/3", // Format paysage
