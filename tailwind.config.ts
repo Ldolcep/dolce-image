@@ -13,6 +13,9 @@ const config: Config = {
       screens: {
         'xxl': '1700px',
       },
+      spacing: {
+          '50': '12.5rem',
+      }
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
