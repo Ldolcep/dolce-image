@@ -96,7 +96,6 @@ export default function Hero() {
       <div className="absolute bottom-6 right-6 xxl:bottom-20">
         <div
           ref={volumeRef}
-        {/* Disposition du contrôleur différente selon la taille d'écran */}
           className={`flex ${isMobile ? 'flex-row items-center gap-3' : 'flex-col items-end gap-3'}`}
           >
           {/* Contrôle de volume - visible uniquement quand le son est activé */}
