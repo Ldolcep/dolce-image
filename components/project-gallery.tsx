@@ -103,21 +103,21 @@ const projectsData = {
   fillers: [
     {
       id: "filler-1",
-      mainVisual: "/images/fillers/filler-1.jpg", // À remplacer par vos propres images
+      mainVisual: "/images/fillers/filler_1.jpg", // À remplacer par vos propres images
       isFiller: true,
-      aspectRatio: "2/3", // Format portrait
+      aspectRatio: "1/1", // Format portrait
     },
     {
       id: "filler-2",
-      mainVisual: "/images/fillers/filler-2.jpg", // À remplacer par vos propres images
+      mainVisual: "/images/fillers/filler_2.jpg", // À remplacer par vos propres images
       isFiller: true,
-      aspectRatio: "1/1", // Format carré
+      aspectRatio: "3/2", // Format carré
     },
     {
       id: "filler-3",
-      mainVisual: "/images/fillers/filler-3.jpg", // À remplacer par vos propres images
+      mainVisual: "/images/fillers/filler_3.jpg", // À remplacer par vos propres images
       isFiller: true,
-      aspectRatio: "3/2", // Format paysage
+      aspectRatio: "4/3", // Format paysage
     },
   ]
 }
