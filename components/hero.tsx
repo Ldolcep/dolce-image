@@ -148,7 +148,7 @@ export default function Hero() {
 
       {/* Contrôles audio */}
       {/* Ajout de la classe pour le breakpoint 3xl (exemple) */}
-      <div className="absolute bottom-6 right-6 xxl:bottom-30 3xl:bottom-40"> 
+      <div className="absolute bottom-6 right-6 xxl:bottom-60"> 
         {/* Le conteneur */}
         <div
           ref={volumeContainerRef}
