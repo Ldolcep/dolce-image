@@ -55,7 +55,7 @@ export default function Hero() {
 
     let closeTimeout: ReturnType<typeof setTimeout>
 
-    const handMouseLeave = () => {
+    const handleMouseLeave = () => {
       closeTimeout = setTimeout(() => {
         setShowVolumeControl(false)
       },  300)
