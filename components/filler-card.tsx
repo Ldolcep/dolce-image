@@ -116,7 +116,7 @@ export default function FillerCard({
             inset: 0,
             overflow: 'hidden',
             transformStyle: 'preserve-3d',
-            transition: 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            transition: 'transform 1s cubic-bezier(0.34, 1.2, 0.64, 1)',
             willChange: 'transform'
           }}
         >
