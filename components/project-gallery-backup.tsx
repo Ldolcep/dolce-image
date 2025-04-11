@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectModal from "./project-modal"
-import FillerCard from "./filler-card" // Import du composant FillerCard
+import FillerCard from "./filler-card" // Nouveau import
 
 // Définir les types de base
 interface Project {
@@ -15,16 +15,17 @@ interface Project {
   link: string
 }
 
-// Interface pour les fillers (sans textContent)
+// Interface pour les fillers améliorés
 interface FillerItem {
   id: string
   backgroundImage: string
-  textImage: string // Rendu obligatoire car FillerCard l'attend
+  textImage?: string
+  textContent?: string
   aspectRatio?: string
   isFiller: boolean
 }
 
-// Définir les données des projets et fillers
+// Définir les données des projets
 const projectsData = {
   projects: [
     {
@@ -107,19 +108,19 @@ const projectsData = {
     },
   ],
   
-  // Fillers (sans textContent)
+  // Fillers mise à jour avec de nouvelles propriétés
   fillers: [
     {
       id: "filler_1",
       backgroundImage: "/images/fillers/filler_1_bg.jpg",
-      textImage: "/images/fillers/filler_1_text.png", 
+      textImage: "/images/fillers/filler_1_text.png", // Image PNG avec fond transparent pour le texte
       aspectRatio: "4/3",
       isFiller: true
     },
     {
       id: "filler_2",
       backgroundImage: "/images/fillers/filler_2_bg.jpg",
-      textImage: "/images/fillers/filler_2_text.png",
+      textImage: "/images/fillers/filler_2_text.png", // Alternative: texte direct au lieu d'une image
       aspectRatio: "3/2",
       isFiller: true
     },
@@ -142,7 +143,7 @@ export default function ProjectGallery() {
     // Combiner et entrelacer les projets et les fillers
     const interleavedItems = interleaveItems(
       projectsData.projects, 
-      projectsData.fillers as FillerItem[] // Utilise le type FillerItem mis à jour
+      projectsData.fillers as FillerItem[]
     );
     setAllItems(interleavedItems);
   }, []);
@@ -167,58 +168,36 @@ export default function ProjectGallery() {
       }
     }
     
-    // S'assurer que tous les projets restants sont ajoutés si les fillers sont placés tôt
-    while (projectIndex < projects.length) {
-      result.push(projects[projectIndex]);
-      projectIndex++;
-    }
-    
-    // S'assurer que tous les fillers restants sont ajoutés (moins probable avec cette logique)
-    while (fillerIndex < fillers.length) {
-      result.push(fillers[fillerIndex]);
-      fillerIndex++;
-    }
-    
     return result;
   };
   
   // Fonction pour calculer les positions optimales des fillers
   const calculateFillerPositions = (projectCount: number, fillerCount: number) => {
-    const positions: number[] = [];
-    if (fillerCount <= 0) return positions; // Pas de fillers à positionner
-
-    // +1 pour espacer avant le premier et après le dernier projet potentiel
-    const spacing = Math.floor((projectCount + fillerCount) / (fillerCount + 1)); 
-    let currentPos = spacing;
-
+    const positions = [];
+    const spacing = Math.ceil(projectCount / (fillerCount + 1));
+    
     for (let i = 0; i < fillerCount; i++) {
-      // S'assurer que la position est valide dans la liste combinée
-      if(currentPos < projectCount + fillerCount) {
-          positions.push(currentPos);
-      } else {
-         // Si on dépasse, on met les fillers restants à la fin
-         positions.push(projectCount + i); 
+      const position = (i + 1) * spacing;
+      if (position <= projectCount + fillerCount) {
+        positions.push(position);
       }
-      currentPos += spacing + 1; // +1 car le filler prend une place
     }
     
-    // Trier les positions pour être sûr (même si la logique devrait déjà le faire)
-    return positions.sort((a, b) => a - b);
+    return positions;
   };
 
   const openModal = (project: Project) => {
     setSelectedProject(project)
     setIsModalOpen(true)
-    document.body.style.overflow = "hidden" // Empêche le scroll du body derrière la modale
+    document.body.style.overflow = "hidden"
   }
 
   const closeModal = () => {
     setIsModalOpen(false)
-    setSelectedProject(null); // Réinitialiser le projet sélectionné
-    document.body.style.overflow = "auto" // Rétablit le scroll du body
+    document.body.style.overflow = "auto"
   }
 
-  // Gérer les événements clavier pour l'accessibilité de la modale
+  // Gérer les événements clavier pour l'accessibilité
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
@@ -228,63 +207,56 @@ export default function ProjectGallery() {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isModalOpen]) // Dépendance à isModalOpen
+  }, [isModalOpen])
 
   return (
     <section id="projects" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
 
-        {/* Grille masonry */}
-        <div className="masonry-grid"> {/* Assurez-vous que ce style existe dans votre CSS */}
+        {/* Grille masonry améliorée */}
+        <div className="masonry-grid">
           {allItems.map((item) => {
-            // Rendu pour les Fillers (visibles uniquement sur tablette et desktop)
+            // Utiliser le composant FillerCard pour les fillers
             if ('isFiller' in item) {
               const filler = item as FillerItem;
               return (
-                <div 
-                  key={`filler-${filler.id}`} 
-                  className="hidden md:block masonry-item" // Classes pour visibilité et layout masonry
-                >
-                  <FillerCard
-                    id={filler.id}
-                    backgroundImage={filler.backgroundImage}
-                    textImage={filler.textImage} // textImage est requis par FillerCard
-                    aspectRatio={filler.aspectRatio}
-                  />
-                </div>
+                <FillerCard
+                  key={`filler-${filler.id}`}
+                  id={filler.id}
+                  backgroundImage={filler.backgroundImage}
+                  textImage={filler.textImage}
+                  textContent={filler.textContent}
+                  aspectRatio={filler.aspectRatio}
+                />
               );
             }
             
-            // Rendu pour les Projets (toujours visibles)
+            // Rendu normal pour les projets
             const project = item as Project;
             return (
               <div
                 key={project.id}
-                className="masonry-item" // Classe pour layout masonry
+                className="masonry-item"
                 onClick={() => openModal(project)}
                 onKeyDown={(e) => e.key === "Enter" && openModal(project)}
-                tabIndex={0} // Rendre l'élément focusable
-                role="button" // Indiquer que c'est un élément interactif
+                tabIndex={0}
+                role="button"
                 aria-label={`View ${project.title} project details`}
               >
-                {/* Conteneur pour le style de carte (optionnel, dépend de votre CSS) */}
-                <div className="card-container overflow-hidden rounded-sm shadow-md transition-shadow duration-300 hover:shadow-xl cursor-pointer">
-                  <div className="img-container relative aspect-video"> {/* Ratio 16:9 par défaut, ajuste si besoin */}
+                <div className="card-container">
+                  <div className="img-container">
                     <Image
-                      src={project.mainVisual || "/placeholder.svg"} // Fallback image
+                      src={project.mainVisual || "/placeholder.svg"}
                       alt={project.title}
-                      fill // Prend toute la place du parent relatif
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Ajuster selon votre layout
-                      className="object-cover" // Assure que l'image couvre sans se déformer
-                      priority={project.id === "1" || project.id === "2"} // Donner la priorité aux premières images
+                      width={600}
+                      height={400}
+                      className="project-img"
+                      priority={project.id === "1"}
                     />
                   </div>
-                  {/* Contenu superposé ou en dessous (dépend du style désiré) */}
-                  <div className="project-content p-4 bg-white"> {/* Exemple avec fond blanc */}
-                    <h3 className="project-title font-great-vibes text-xl md:text-2xl text-gray-800">{project.title}</h3>
-                    {/* Vous pourriez ajouter un extrait de la description ici si désiré */}
-                    {/* <p className="text-sm text-gray-600 mt-1 line-clamp-2">{project.description}</p> */}
+                  <div className="project-content">
+                    <h3 className="project-title font-great-vibes">{project.title}</h3>
                   </div>
                 </div>
               </div>
@@ -294,14 +266,7 @@ export default function ProjectGallery() {
       </div>
 
       {/* Project Modal */}
-      {/* Rendu conditionnel amélioré pour ne monter/démonter la modale que si nécessaire */}
-      {isModalOpen && selectedProject && (
-         <ProjectModal 
-            project={selectedProject} 
-            isOpen={isModalOpen} 
-            onClose={closeModal} 
-         />
-      )}
+      {selectedProject && <ProjectModal project={selectedProject} isOpen={isModalOpen} onClose={closeModal} />}
     </section>
   )
 }
