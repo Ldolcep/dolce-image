@@ -93,13 +93,15 @@ export default function Hero() {
       </div>
       
       {/* Contrôles audio */}
-      <div className="absolute bottom-8 right-8 xxl:bottom-16">
+      <div className="absolute bottom-6 right-6 xxl:bottom-20">
+        <div
+          ref={volumeRef}
         {/* Disposition du contrôleur différente selon la taille d'écran */}
-        <div className={`flex ${isMobile ? 'flex-row items-center gap-3' : 'flex-col items-end gap-3'}`}>
+          className={`flex ${isMobile ? 'flex-row items-center gap-3' : 'flex-col items-end gap-3'}`}
+          >
           {/* Contrôle de volume - visible uniquement quand le son est activé */}
           {showVolumeControl && (
             <div 
-              ref={volumeRef}
               className={`bg-black/30 backdrop-blur-sm rounded-full transition-all duration-600 flex items-center justify-center ${isMobile ? 'mb-0' : 'mb-2'}`}
               style={{ 
                 padding: isMobile ? '8px 12px' : '8px',
