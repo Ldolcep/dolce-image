@@ -1,10 +1,12 @@
+// project-modal.tsx
+
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { ChevronLeft, ChevronRight, X } from "lucide-react" // Import icons
 
 interface Project {
   id: string
@@ -22,158 +24,161 @@ interface ProjectModalProps {
 }
 
 export default function ProjectModal({ project, isOpen, onClose }: ProjectModalProps) {
-  const [currentImage, setCurrentImage] = useState(project.mainVisual)
+  // Combine visuals into a single array for easier carousel management
+  const allVisuals = useMemo(() => [project.mainVisual, ...project.additionalVisuals], [project]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
 
-  // Reset current image when project changes
-  useEffect(() => {
-    setCurrentImage(project.mainVisual)
-  }, [project])
-
-  // Handle animation classes
+  // Reset current image index when project changes or modal opens
   useEffect(() => {
     if (isOpen) {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
+      setCurrentImageIndex(0)
+       // Small delay for animation class
+       setTimeout(() => {
         setIsAnimating(true)
       }, 10)
     } else {
-      setIsAnimating(false)
+        setIsAnimating(false)
     }
-  }, [isOpen])
+  }, [project, isOpen])
+
 
   // Handle click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      // Close only if clicking directly on the overlay, not the content
+      if (event.target === event.currentTarget) {
         onClose()
       }
     }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
+    // Get the overlay element for direct click detection
+    const overlay = document.getElementById(`modal-overlay-${project.id}`);
+    if (isOpen && overlay) {
+      overlay.addEventListener("mousedown", handleClickOutside)
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+      if (overlay) {
+         overlay.removeEventListener("mousedown", handleClickOutside)
+      }
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, project.id])
 
-  // Handle keyboard navigation for thumbnails
-  const handleKeyDown = (e: React.KeyboardEvent, image: string) => {
-    if (e.key === "Enter" || e.key === " ") {
-      setCurrentImage(image)
-    }
-  }
+
+  const handleNext = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allVisuals.length);
+  };
+
+  const handlePrevious = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allVisuals.length) % allVisuals.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentImageIndex(index);
+  };
 
   if (!isOpen) return null
 
+  const currentImage = allVisuals[currentImageIndex];
+
   return (
+    // Overlay - Added ID for click outside detection
     <div
-      className={`modal-overlay ${isAnimating ? "open" : ""}`}
+      id={`modal-overlay-${project.id}`}
+      className={`fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${isAnimating ? "opacity-100" : "opacity-0"}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby={`modal-title-${project.id}`}
     >
-      <div ref={modalRef} className={`modal-content ${isAnimating ? "open" : ""}`}>
-        {/* Close button */}
+      {/* Modal Content Box */}
+      <div
+        ref={modalRef}
+        className={`bg-white w-full max-w-4xl h-auto max-h-[90vh] rounded-sm shadow-xl flex flex-col md:flex-row transition-all duration-400 ease-out ${isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
+      >
+        {/* Close Button - Positioned relative to the content box */}
         <button
-          className="absolute top-4 right-4 z-10 p-2 bg-white/80 rounded-full hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-orange"
-          onClick={onClose}
-          aria-label="Close modal"
+            className="absolute -top-3 -right-3 z-20 p-1.5 bg-gray-700 text-white rounded-full hover:bg-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            onClick={onClose}
+            aria-label="Close modal"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+            <X size={20} />
         </button>
 
-        {/* Main image with smooth transition */}
-        <div className="relative w-full h-[300px] md:h-[400px] mb-6 overflow-hidden rounded-md">
-          <Image
-            src={currentImage || "/placeholder.svg"}
-            alt={project.title}
-            fill
-            className="object-cover transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, 800px"
-            priority
-          />
-        </div>
-
-        {/* Thumbnails with improved interaction */}
-        <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
-          <button
-            className={`relative w-20 h-20 flex-shrink-0 transition-all duration-300 rounded-sm ${
-              currentImage === project.mainVisual
-                ? "ring-2 ring-primary-orange scale-105"
-                : "opacity-70 hover:opacity-100"
-            }`}
-            onClick={() => setCurrentImage(project.mainVisual)}
-            onKeyDown={(e) => handleKeyDown(e, project.mainVisual)}
-            aria-label="View main image"
-            aria-pressed={currentImage === project.mainVisual}
-            tabIndex={0}
-          >
+        {/* === Left Column: Image Carousel === */}
+        <div className="w-full md:w-1/2 p-4 md:p-6 flex flex-col justify-center relative">
+          {/* Main Image Container */}
+          <div className="relative w-full aspect-square mb-4 overflow-hidden bg-gray-100">
+             {/* Image with transition (optional: add key for smooth crossfade) */}
             <Image
-              src={project.mainVisual || "/placeholder.svg"}
-              alt="Thumbnail"
+              key={currentImage} // Add key to trigger re-render/transition on src change
+              src={currentImage || "/placeholder.svg"}
+              alt={project.title}
               fill
-              className="object-cover"
-              sizes="80px"
+              className="object-contain transition-opacity duration-300" // Use object-contain
+              sizes="(max-width: 768px) 90vw, 40vw"
+              priority={currentImageIndex === 0} // Prioritize the first image
             />
-          </button>
-          {project.additionalVisuals.map((image, index) => (
-            <button
-              key={index}
-              className={`relative w-20 h-20 flex-shrink-0 transition-all duration-300 rounded-sm ${
-                currentImage === image ? "ring-2 ring-primary-orange scale-105" : "opacity-70 hover:opacity-100"
-              }`}
-              onClick={() => setCurrentImage(image)}
-              onKeyDown={(e) => handleKeyDown(e, image)}
-              aria-label={`View image ${index + 1}`}
-              aria-pressed={currentImage === image}
-              tabIndex={0}
-            >
-              <Image
-                src={image || "/placeholder.svg"}
-                alt={`Thumbnail ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="80px"
-              />
-            </button>
-          ))}
+            {/* Navigation Arrows */}
+            {allVisuals.length > 1 && (
+                <>
+                    <button
+                        onClick={handlePrevious}
+                        className="absolute top-1/2 left-2 md:left-4 transform -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+                        aria-label="Previous image"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    <button
+                        onClick={handleNext}
+                        className="absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+                        aria-label="Next image"
+                    >
+                        <ChevronRight size={24} />
+                    </button>
+                </>
+            )}
+          </div>
+
+          {/* Pagination Dots */}
+           {allVisuals.length > 1 && (
+               <div className="flex justify-center gap-2 mt-auto"> {/* Pushes dots to bottom */}
+                   {allVisuals.map((_, index) => (
+                       <button
+                           key={index}
+                           onClick={() => goToSlide(index)}
+                           className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                               currentImageIndex === index ? 'bg-gray-800' : 'bg-gray-300 hover:bg-gray-400'
+                           }`}
+                           aria-label={`Go to image ${index + 1}`}
+                           aria-pressed={currentImageIndex === index}
+                       />
+                   ))}
+               </div>
+           )}
         </div>
 
-        {/* Project details with improved typography */}
-        <h2 id={`modal-title-${project.id}`} className="font-great-vibes text-3xl md:text-4xl mb-4">
-          {project.title}
-        </h2>
-        <p className="font-poppins text-base mb-8 leading-relaxed">{project.description}</p>
-
-        <Link
-          href={project.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center bg-primary-orange text-white px-6 py-3 font-poppins transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2"
-        >
-          View Project
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 ml-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </Link>
+        {/* === Right Column: Text Content === */}
+        <div className="w-full md:w-1/2 p-4 md:p-6 flex flex-col overflow-y-auto max-h-[80vh] md:max-h-full"> {/* Allow scrolling for text */}
+          <h2 id={`modal-title-${project.id}`} className="font-poppins text-2xl md:text-3xl font-semibold mb-4 text-gray-800"> {/* Adjusted font */}
+            {project.title}
+          </h2>
+          <p className="font-poppins text-sm md:text-base text-gray-600 mb-6 leading-relaxed flex-grow"> {/* Adjusted font and size */}
+            {project.description}
+          </p>
+          {/* Optional: Keep the link button if needed */}
+          {project.link && (
+            <Link
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex self-start items-center bg-primary-orange text-white px-5 py-2.5 text-sm font-medium rounded-sm transition-all duration-300 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 mt-auto" // mt-auto pushes button down
+            >
+              View Project
+              <ChevronRight size={18} className="ml-1" />{/* Smaller icon */}
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   )
