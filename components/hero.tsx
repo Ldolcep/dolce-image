@@ -135,7 +135,7 @@ export default function Hero() {
       <div className="w-full h-full">
         <video
           ref={videoRef}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
           autoPlay
           muted // Commence en mute
           loop
