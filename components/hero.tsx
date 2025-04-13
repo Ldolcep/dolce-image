@@ -130,12 +130,12 @@ export default function Hero() {
   }, [isMobile, showVolumeControl, volumeContainerRef]);
 
   return (
-    <section className="w-full relative pt-[64px] md:pt-[72px]">
+    <section className="aspect-video w-full max-w-7xl mx-auto overflow-hidden relative bg-black">
       {/* Video Full Screen */}
       <div className="w-full h-full">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover"
+          className="w-full h-auto object-contain"
           autoPlay
           muted // Commence en mute
           loop
