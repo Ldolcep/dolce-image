@@ -130,9 +130,9 @@ export default function Hero() {
   }, [isMobile, showVolumeControl, volumeContainerRef]);
 
   return (
-    <section className="w-full max-w-[1280px] mx-auto aspect-video overflow-hidden bg-black">
+    <section className="w-full bg-black">
       {/* Video Full Screen */}
-      <div className="w-full h-full">
+      <div className="w-full max-w-[1280px] mx-auto aspect-video overflow-hidden">
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
