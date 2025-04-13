@@ -130,17 +130,17 @@ export default function Hero() {
   }, [isMobile, showVolumeControl, volumeContainerRef]);
 
   return (
-    <section className="aspect-video w-full max-w-7xl mx-auto overflow-hidden relative bg-black">
+    <section className="w-full max-w-[1280px] mx-auto aspect-video overflow-hidden bg-black">
       {/* Video Full Screen */}
       <div className="w-full h-full">
         <video
           ref={videoRef}
-          className="w-full h-auto object-contain"
+          className="w-full h-full object-cover"
           autoPlay
           muted // Commence en mute
           loop
           playsInline
-        >
+          >
           <source src="/hero-video/dolce-banner.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
