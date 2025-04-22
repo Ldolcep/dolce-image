@@ -113,7 +113,6 @@ const projectsData = {
       link: "https://example.com/content",
     },
   ]
-}
   
   // Fillers mise à jour (sans textContent)
   fillers: [
