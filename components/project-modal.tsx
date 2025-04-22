@@ -326,7 +326,10 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           </div>
           
           {/* Right Column: Content */}
-          <div className="w-full md:w-1/2 p-8 overflow-y-auto">
+          <div 
+            className="w-full md:w-1/2 p-8 overflow-y-auto"
+            style={{maxHeight: 'calc(95vh - 40px)'}}
+          >
             <h2 
               id={`modal-title-${project.id}`} 
               className="font-great-vibes text-2xl md:text-3xl font-medium mb-4"
