@@ -1,10 +1,11 @@
+// project-modal.tsx - Version améliorée responsive
 "use client"
 
 import type React from "react"
 import { useState, useEffect, useRef, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { X, ChevronLeft, ChevronRight, Info, ArrowLeft } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, Info, ArrowLeft } from 'lucide-react'
 import { useIsMobile } from "@/hooks/use-mobile"
 
 interface Project {
@@ -27,15 +28,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const [isInfoVisible, setIsInfoVisible] = useState(false)
-  
-  // États et refs pour le swipe fluide
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const [swipeOffset, setSwipeOffset] = useState(0)
-  const slideRef = useRef<HTMLDivElement>(null)
-  
-  // Refs générales
   const modalRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile() // Utilise le hook existant
 
@@ -43,7 +37,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   useEffect(() => {
     setCurrentImageIndex(0)
     setIsInfoVisible(false)
-    setSwipeOffset(0)
   }, [project])
 
   // Handle animation classes
@@ -91,7 +84,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen, onClose])
 
-  // Navigation standard
   const handleNext = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allVisuals.length)
   }
@@ -100,135 +92,49 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allVisuals.length) % allVisuals.length)
   }
 
-  // Toggle du panneau d'info
+  // Toggle pour afficher/masquer les infos (sur mobile)
   const toggleInfo = () => {
     setIsInfoVisible(!isInfoVisible)
   }
 
-  // Gestion du swipe avec animation fluide
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX)
+  // Gestion du swipe
+  const minSwipeDistance = 50
+  
+  const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null)
-    setIsDragging(true)
-    setSwipeOffset(0)
-    
-    // Désactiver la transition pour suivre le doigt en temps réel
-    if (slideRef.current) {
-      slideRef.current.style.transition = 'none'
-    }
+    setTouchStart(e.targetTouches[0].clientX)
   }
   
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!touchStart) return
-    
-    const currentTouch = e.targetTouches[0].clientX
-    setTouchEnd(currentTouch)
-    
-    // Calculer le déplacement
-    const delta = touchStart - currentTouch
-    const screenWidth = window.innerWidth
-    
-    // Ajouter de la résistance aux limites du carrousel
-    let offset: number
-    if ((currentImageIndex === 0 && delta < 0) || 
-        (currentImageIndex === allVisuals.length - 1 && delta > 0)) {
-      // Résistance aux extrémités (1/3 du mouvement normal)
-      offset = delta / 3
-    } else {
-      offset = delta
-    }
-    
-    setSwipeOffset(offset)
-    
-    // Appliquer la transformation directement pour suivre le doigt
-    if (slideRef.current) {
-      slideRef.current.style.transform = `translateX(${-offset}px)`
-    }
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
   }
   
-  const handleTouchEnd = () => {
-    setIsDragging(false)
-    
+  const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return
-    
     const distance = touchStart - touchEnd
-    const screenWidth = window.innerWidth
-    const threshold = screenWidth * 0.15 // 15% de la largeur de l'écran
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
     
-    // Ajouter une transition pour l'animation de fin de swipe
-    if (slideRef.current) {
-      slideRef.current.style.transition = 'transform 0.3s cubic-bezier(0.33, 1, 0.68, 1)'
+    if (isLeftSwipe) {
+      handleNext()
     }
-    
-    if (Math.abs(distance) > threshold) {
-      // Swipe suffisant pour changer d'image
-      if (distance > 0 && currentImageIndex < allVisuals.length - 1) {
-        // Swipe vers la gauche - compléter l'animation
-        if (slideRef.current) {
-          slideRef.current.style.transform = `translateX(-${screenWidth}px)`
-        }
-        
-        // Changer l'image après la fin de l'animation
-        setTimeout(() => {
-          handleNext()
-          // Réinitialiser la position sans transition
-          if (slideRef.current) {
-            slideRef.current.style.transition = 'none'
-            slideRef.current.style.transform = 'translateX(0)'
-          }
-        }, 300)
-      } else if (distance < 0 && currentImageIndex > 0) {
-        // Swipe vers la droite - compléter l'animation
-        if (slideRef.current) {
-          slideRef.current.style.transform = `translateX(${screenWidth}px)`
-        }
-        
-        setTimeout(() => {
-          handlePrevious()
-          if (slideRef.current) {
-            slideRef.current.style.transition = 'none'
-            slideRef.current.style.transform = 'translateX(0)'
-          }
-        }, 300)
-      } else {
-        // Effet de rebond aux limites du carrousel
-        if (slideRef.current) {
-          slideRef.current.style.transform = 'translateX(0)'
-          
-          if (currentImageIndex === 0 && distance < 0) {
-            slideRef.current.classList.add('bounce-right')
-            setTimeout(() => {
-              slideRef.current.classList.remove('bounce-right')
-            }, 500)
-          } else if (currentImageIndex === allVisuals.length - 1 && distance > 0) {
-            slideRef.current.classList.add('bounce-left')
-            setTimeout(() => {
-              slideRef.current.classList.remove('bounce-left')
-            }, 500)
-          }
-        }
-      }
-    } else {
-      // Swipe pas assez important, retour à la position initiale
-      if (slideRef.current) {
-        slideRef.current.style.transform = 'translateX(0)'
-      }
+    if (isRightSwipe) {
+      handlePrevious()
     }
-    
-    setSwipeOffset(0)
   }
 
   if (!isOpen) return null
 
-  // Rendu conditionnel mobile vs desktop
+  // Utilisation de l'approche mobile ou desktop en fonction de la taille de l'écran
   if (isMobile) {
+    // Version mobile (plein écran)
     return (
       <div className="fixed inset-0 bg-black z-50 overflow-hidden" 
         role="dialog"
         aria-modal="true"
         aria-labelledby={`modal-title-${project.id}`}>
         
-        {/* Barre supérieure */}
+        {/* Barre de navigation supérieure */}
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 to-transparent">
           <button 
             onClick={onClose}
@@ -249,14 +155,12 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           </button>
         </div>
         
-        {/* Container d'image avec gestion du swipe fluide */}
+        {/* Contenu principal (image) avec gestion du swipe */}
         <div 
-          ref={slideRef}
-          className={`h-full w-full ${isDragging ? 'press-effect pressed' : 'press-effect'}`}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          style={{ touchAction: 'pan-y' }}
+          className="h-full w-full"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           <Image
             src={allVisuals[currentImageIndex]}
@@ -268,7 +172,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           />
         </div>
         
-        {/* Boutons de navigation (si plus d'une image) */}
+        {/* Boutons de navigation (semi-transparents) */}
         {allVisuals.length > 1 && (
           <>
             <button 
@@ -304,22 +208,13 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           </div>
         )}
         
-        {/* Panneau d'information avec bords arrondis améliorés */}
+        {/* Panneau d'information (apparaît depuis le bas) */}
         <div 
-          className={`absolute left-0 right-0 bottom-0 bg-white shadow-lg transition-transform duration-300 transform ${
-            isInfoVisible ? 'translate-y-0 panel-slide-up' : 'translate-y-full'
+          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-xl transition-transform duration-300 transform ${
+            isInfoVisible ? 'translate-y-0' : 'translate-y-full'
           }`}
-          style={{ 
-            maxHeight: '70vh',
-            borderTopLeftRadius: '8px',
-            borderTopRightRadius: '8px'
-          }}
+          style={{ maxHeight: '70vh' }}
         >
-          {/* Poignée/indicateur */}
-          <div className="flex justify-center pt-2 pb-1">
-            <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
-          </div>
-          
           <div className="p-4 border-b flex items-center">
             <button 
               onClick={toggleInfo}
@@ -357,9 +252,10 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       </div>
     )
   } else {
-    // Version desktop
+    // Version desktop (modal traditionnel mais optimisé)
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300"
+      <div 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300"
         style={{ opacity: isAnimating ? 1 : 0 }}
         role="dialog"
         aria-modal="true"
@@ -367,7 +263,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       >
         <div 
           ref={modalRef} 
-          className="bg-white w-full max-w-4xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
+          className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
           style={{ 
             transform: isAnimating ? 'scale(1)' : 'scale(0.95)',
             opacity: isAnimating ? 1 : 0
