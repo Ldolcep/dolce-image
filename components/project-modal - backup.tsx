@@ -11,7 +11,7 @@ interface Project {
   title: string
   mainVisual: string
   additionalVisuals: string[]
-  description: string | string[]
+  description: string
   link: string
 }
 
@@ -196,14 +196,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
             {project.title}
           </h2>
           <div className="font-poppins text-base text-gray-700 leading-relaxed">
-            {Array.isArray(project.description)?(
-              project.description.map((paragraph, index)=>(
-                <p key={index} className="mb-4 last:mb-0">{paragraph}</p>
-              ))
-            ):(
-              <p>{project.description}</p>
-            )
-            )}
+            {project.description}
           </div>
         </div>
         

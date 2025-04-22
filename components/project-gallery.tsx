@@ -32,25 +32,29 @@ const projectsData = {
       title: "Le Boudoir Miadana",
       mainVisual: "/images/projects/le-boudoir-miadana-main.jpg",
       additionalVisuals: [
-        "/images/projects/brand-identity-1.jpg",
-        "/images/projects/brand-identity-2.jpg",
-        "/images/projects/brand-identity-3.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-1.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-2.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-3.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-4.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-5.jpg",
       ],
-      description:
-        "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
-      link: "https://example.com/brand-identity",
+      description: "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
+      link: "https://ellipse-real-estate.com/",
     },
     {
       id: "2",
       title: "Ellipse Real Estate",
       mainVisual: "/images/projects/ellipse-real-estate-main.jpg",
       additionalVisuals: [
-        "/images/projects/web-design-1.jpg",
+        "/images/projects/ellipse-real-estate-gallery-1.jpg",
         "/images/projects/web-design-2.jpg",
         "/images/projects/web-design-3.jpg",
       ],
-      description:
-        "A responsive e-commerce website with a focus on user experience and conversion optimization, resulting in a 40% increase in sales.",
+      description: [
+        "ELLIPSE REAL ESTATE est un groupe immobilier spécialisé dans les biens d'exception, basé à Nice, dans le sud de la France.",
+        "Dans le cadre de leur volonté d'expansion et de l'ouverture d'une seconde agence en Grèce, sur l'île de Zakynthos, leur souhait était de moderniser leur identité visuelle ainsi que leur présence digitale.",
+        "Nous avons dans un premier temps imaginé un nouveau logo, élégant et intemporel, reflètant la prestance, le luxe et l'esprit grec. Nous avons également réalisé une refonte complète de leur site internet."
+      ],
       link: "https://ellipse-real-estate.com/",
     },
     {
@@ -62,8 +66,7 @@ const projectsData = {
         "/images/projects/digital-marketing-2.jpg",
         "/images/projects/digital-marketing-3.jpg",
       ],
-      description:
-        "A comprehensive digital marketing campaign that increased brand awareness by 65% and generated a 3x return on ad spend.",
+      description: "A comprehensive digital marketing campaign that increased brand awareness by 65% and generated a 3x return on ad spend.",
       link: "https://example.com/digital-marketing",
     },
     {
@@ -71,12 +74,12 @@ const projectsData = {
       title: "Dolce",
       mainVisual: "/images/projects/dolce-main.jpg",
       additionalVisuals: [
-        "/images/projects/social-media-1.jpg",
-        "/images/projects/social-media-2.jpg",
-        "/images/projects/social-media-3.jpg",
+        "/images/projects/dolce-gallery-1.jpg",
+        "/images/projects/dolce-gallery-2.jpg",
+        "/images/projects/dolce-gallery-3.jpg",
+        "/images/projects/dolce-gallery-4.jpg",
       ],
-      description:
-        "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
+      description: "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
       link: "https://example.com/social-media",
     },
     {
@@ -84,12 +87,17 @@ const projectsData = {
       title: "Ilios Immobilier",
       mainVisual: "/images/projects/ilios-immobilier-main.jpg",
       additionalVisuals: [
-        "/images/projects/ui-ux-1.jpg",
-        "/images/projects/ui-ux-2.jpg",
-        "/images/projects/ui-ux-3.jpg",
+        "/images/projects/ilios-immobilier-gallery-1.jpg",
+        "/images/projects/ilios-immobilier-gallery-2.jpg",
+        "/images/projects/ilios-immobilier-gallery-3.jpg",
+        "/images/projects/ilios-immobilier-gallery-4.jpg",
+        "/images/projects/ilios-immobilier-gallery-5.jpg"
       ],
-      description:
-        "A complete user interface and experience redesign for a mobile app, resulting in a 60% increase in user retention.",
+      description: [
+        "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
+        "Nous avons conçu un logotype moderne et dynamique, reflétant la nature technologique et innovante de l'application.",
+        "L'identité visuelle s'accompagne d'un système graphique cohérent qui a été décliné sur l'ensemble des supports de communication."
+      ],
       link: "https://example.com/ui-ux",
     },
     {
@@ -101,11 +109,11 @@ const projectsData = {
         "/images/projects/pickup-gallery-2.jpg",
         "/images/projects/pickup-gallery-3.jpg",
       ],
-      description:
-        "A content strategy and creation service that increased organic traffic by 85% and conversions by 35% within 6 months.",
+      description: "A content strategy and creation service that increased organic traffic by 85% and conversions by 35% within 6 months.",
       link: "https://example.com/content",
     },
-  ],
+  ]
+}
   
   // Fillers mise à jour (sans textContent)
   fillers: [

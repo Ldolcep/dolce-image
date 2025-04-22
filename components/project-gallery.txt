@@ -32,20 +32,22 @@ const projectsData = {
       title: "Le Boudoir Miadana",
       mainVisual: "/images/projects/le-boudoir-miadana-main.jpg",
       additionalVisuals: [
-        "/images/projects/brand-identity-1.jpg",
-        "/images/projects/brand-identity-2.jpg",
-        "/images/projects/brand-identity-3.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-1.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-2.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-3.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-4.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-5.jpg",
       ],
       description:
         "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
-      link: "https://example.com/brand-identity",
+      link: "https://ellipse-real-estate.com/",
     },
     {
       id: "2",
       title: "Ellipse Real Estate",
       mainVisual: "/images/projects/ellipse-real-estate-main.jpg",
       additionalVisuals: [
-        "/images/projects/web-design-1.jpg",
+        "/images/projects/ellipse-real-estate-gallery-1.jpg",
         "/images/projects/web-design-2.jpg",
         "/images/projects/web-design-3.jpg",
       ],
@@ -71,9 +73,10 @@ const projectsData = {
       title: "Dolce",
       mainVisual: "/images/projects/dolce-main.jpg",
       additionalVisuals: [
-        "/images/projects/social-media-1.jpg",
-        "/images/projects/social-media-2.jpg",
-        "/images/projects/social-media-3.jpg",
+        "/images/projects/dolce-gallery-1.jpg",
+        "/images/projects/dolce-gallery-2.jpg",
+        "/images/projects/dolce-gallery-3.jpg",
+        "/images/projects/dolce-gallery-4.jpg",
       ],
       description:
         "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
@@ -84,12 +87,22 @@ const projectsData = {
       title: "Ilios Immobilier",
       mainVisual: "/images/projects/ilios-immobilier-main.jpg",
       additionalVisuals: [
-        "/images/projects/ui-ux-1.jpg",
-        "/images/projects/ui-ux-2.jpg",
-        "/images/projects/ui-ux-3.jpg",
+        "/images/projects/ilios-immobilier-gallery-1.jpg",
+        "/images/projects/ilios-immobilier-gallery-2.jpg",
+        "/images/projects/ilios-immobilier-gallery-3.jpg",
+        "/images/projects/ilios-immobilier-gallery-4.jpg"
+        "/images/projects/ilios-immobilier-gallery-5.jpg"
       ],
       description:
-        "A complete user interface and experience redesign for a mobile app, resulting in a 60% increase in user retention.",
+        "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.
+
+Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.
+
+La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.
+
+L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.
+
+Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature.",
       link: "https://example.com/ui-ux",
     },
     {

@@ -15,12 +15,11 @@ interface Project {
   link: string
 }
 
-// Interface pour les fillers améliorés
+// Interface pour les fillers (sans textContent)
 interface FillerItem {
   id: string
   backgroundImage: string
-  textImage?: string
-  textContent?: string
+  textImage: string // Requis par FillerCard
   aspectRatio?: string
   isFiller: boolean
 }
@@ -33,20 +32,22 @@ const projectsData = {
       title: "Le Boudoir Miadana",
       mainVisual: "/images/projects/le-boudoir-miadana-main.jpg",
       additionalVisuals: [
-        "/images/projects/brand-identity-1.jpg",
-        "/images/projects/brand-identity-2.jpg",
-        "/images/projects/brand-identity-3.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-1.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-2.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-3.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-4.jpg",
+        "/images/projects/le-boudoir-miadana-gallery-5.jpg",
       ],
       description:
         "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
-      link: "https://example.com/brand-identity",
+      link: "https://ellipse-real-estate.com/",
     },
     {
       id: "2",
       title: "Ellipse Real Estate",
       mainVisual: "/images/projects/ellipse-real-estate-main.jpg",
       additionalVisuals: [
-        "/images/projects/web-design-1.jpg",
+        "/images/projects/ellipse-real-estate-gallery-1.jpg",
         "/images/projects/web-design-2.jpg",
         "/images/projects/web-design-3.jpg",
       ],
@@ -72,9 +73,10 @@ const projectsData = {
       title: "Dolce",
       mainVisual: "/images/projects/dolce-main.jpg",
       additionalVisuals: [
-        "/images/projects/social-media-1.jpg",
-        "/images/projects/social-media-2.jpg",
-        "/images/projects/social-media-3.jpg",
+        "/images/projects/dolce-gallery-1.jpg",
+        "/images/projects/dolce-gallery-2.jpg",
+        "/images/projects/dolce-gallery-3.jpg",
+        "/images/projects/dolce-gallery-4.jpg",
       ],
       description:
         "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
@@ -85,12 +87,22 @@ const projectsData = {
       title: "Ilios Immobilier",
       mainVisual: "/images/projects/ilios-immobilier-main.jpg",
       additionalVisuals: [
-        "/images/projects/ui-ux-1.jpg",
-        "/images/projects/ui-ux-2.jpg",
-        "/images/projects/ui-ux-3.jpg",
+        "/images/projects/ilios-immobilier-gallery-1.jpg",
+        "/images/projects/ilios-immobilier-gallery-2.jpg",
+        "/images/projects/ilios-immobilier-gallery-3.jpg",
+        "/images/projects/ilios-immobilier-gallery-4.jpg"
+        "/images/projects/ilios-immobilier-gallery-5.jpg"
       ],
       description:
-        "A complete user interface and experience redesign for a mobile app, resulting in a 60% increase in user retention.",
+        "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.
+
+Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.
+
+La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.
+
+L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.
+
+Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature.",
       link: "https://example.com/ui-ux",
     },
     {
@@ -108,19 +120,19 @@ const projectsData = {
     },
   ],
   
-  // Fillers mise à jour avec de nouvelles propriétés
+  // Fillers mise à jour (sans textContent)
   fillers: [
     {
       id: "filler_1",
       backgroundImage: "/images/fillers/filler_1_bg.jpg",
-      textImage: "/images/fillers/filler_1_text.png", // Image PNG avec fond transparent pour le texte
+      textImage: "/images/fillers/filler_1_text.png", 
       aspectRatio: "4/3",
       isFiller: true
     },
     {
       id: "filler_2",
       backgroundImage: "/images/fillers/filler_2_bg.jpg",
-      textImage: "/images/fillers/filler_2_text.png", // Alternative: texte direct au lieu d'une image
+      textImage: "/images/fillers/filler_2_text.png",
       aspectRatio: "3/2",
       isFiller: true
     },
@@ -143,12 +155,12 @@ export default function ProjectGallery() {
     // Combiner et entrelacer les projets et les fillers
     const interleavedItems = interleaveItems(
       projectsData.projects, 
-      projectsData.fillers as FillerItem[]
+      projectsData.fillers as FillerItem[] // Utilise le type FillerItem nettoyé
     );
     setAllItems(interleavedItems);
   }, []);
 
-  // Fonction pour entrelacer les projets et les fillers harmonieusement
+  // --- Logique d'entrelacement et de positionnement exacte de votre version précédente ---
   const interleaveItems = (projects: Project[], fillers: FillerItem[]) => {
     const total = projects.length + fillers.length;
     const result = [];
@@ -159,6 +171,7 @@ export default function ProjectGallery() {
     let projectIndex = 0;
     
     for (let i = 0; i < total; i++) {
+      // Utilise la vérification `includes` sur les positions pré-calculées
       if (fillerPositions.includes(i) && fillerIndex < fillers.length) {
         result.push(fillers[fillerIndex]);
         fillerIndex++;
@@ -167,24 +180,43 @@ export default function ProjectGallery() {
         projectIndex++;
       }
     }
-    
+
+    // Gestion des éléments restants (inchangée)
+    while (projectIndex < projects.length) {
+        result.push(projects[projectIndex]);
+        projectIndex++;
+    }
+    while (fillerIndex < fillers.length) {
+        result.push(fillers[fillerIndex]);
+        fillerIndex++;
+    }
+
     return result;
   };
   
-  // Fonction pour calculer les positions optimales des fillers
+  // Fonction pour calculer les positions exactes de votre version précédente
   const calculateFillerPositions = (projectCount: number, fillerCount: number) => {
     const positions = [];
-    const spacing = Math.ceil(projectCount / (fillerCount + 1));
+    if (fillerCount <= 0) return positions; 
+
+    // Calcul de l'espacement exact de votre version
+    const spacing = Math.ceil(projectCount / (fillerCount + 1)); 
     
     for (let i = 0; i < fillerCount; i++) {
-      const position = (i + 1) * spacing;
-      if (position <= projectCount + fillerCount) {
+      // Calcul de la position exact de votre version
+      const position = (i + 1) * spacing; 
+      // Vérification exacte de votre version
+      if (position <= projectCount + fillerCount) { 
         positions.push(position);
       }
+      // Pas d'autre logique dans la boucle selon votre code précédent
     }
     
-    return positions;
+    // Pas de tri dans votre code précédent
+    return positions; 
   };
+  // --- Fin de la logique d'entrelacement exacte ---
+
 
   const openModal = (project: Project) => {
     setSelectedProject(project)
@@ -194,6 +226,7 @@ export default function ProjectGallery() {
 
   const closeModal = () => {
     setIsModalOpen(false)
+    setSelectedProject(null); 
     document.body.style.overflow = "auto"
   }
 
@@ -214,25 +247,28 @@ export default function ProjectGallery() {
       <div className="container mx-auto px-4">
         <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
 
-        {/* Grille masonry améliorée */}
+        {/* Grille masonry */}
         <div className="masonry-grid">
           {allItems.map((item) => {
-            // Utiliser le composant FillerCard pour les fillers
+            // Rendu pour les Fillers (visibles uniquement sur tablette et desktop)
             if ('isFiller' in item) {
               const filler = item as FillerItem;
               return (
-                <FillerCard
-                  key={`filler-${filler.id}`}
-                  id={filler.id}
-                  backgroundImage={filler.backgroundImage}
-                  textImage={filler.textImage}
-                  textContent={filler.textContent}
-                  aspectRatio={filler.aspectRatio}
-                />
+                <div 
+                  key={`filler-${filler.id}`} 
+                  className="masonry-item hidden md:block" // Caché < md, visible >= md + classe masonry
+                > 
+                  <FillerCard
+                    id={filler.id}
+                    backgroundImage={filler.backgroundImage}
+                    textImage={filler.textImage} // textContent n'est plus passé
+                    aspectRatio={filler.aspectRatio}
+                  />
+                </div>
               );
             }
             
-            // Rendu normal pour les projets
+            // Rendu pour les Projets (structure originale conservée)
             const project = item as Project;
             return (
               <div
@@ -266,7 +302,13 @@ export default function ProjectGallery() {
       </div>
 
       {/* Project Modal */}
-      {selectedProject && <ProjectModal project={selectedProject} isOpen={isModalOpen} onClose={closeModal} />}
+      {isModalOpen && selectedProject && (
+         <ProjectModal 
+             project={selectedProject} 
+             isOpen={isModalOpen} 
+             onClose={closeModal} 
+         />
+      )}
     </section>
   )
 }
