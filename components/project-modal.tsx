@@ -90,8 +90,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const currentImage = allVisuals[currentImageIndex]
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300"
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300"
       style={{ opacity: isAnimating ? 1 : 0 }}
       role="dialog"
       aria-modal="true"
@@ -196,13 +195,12 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
             {project.title}
           </h2>
           <div className="font-poppins text-base text-gray-700 leading-relaxed">
-            {Array.isArray(project.description)?(
-              project.description.map((paragraph, index)=>(
+            {Array.isArray(project.description) ? (
+              project.description.map((paragraph, index) => (
                 <p key={index} className="mb-4 last:mb-0">{paragraph}</p>
               ))
-            ):(
+            ) : (
               <p>{project.description}</p>
-            )
             )}
           </div>
         </div>
