@@ -79,7 +79,13 @@ const projectsData = {
         "/images/projects/dolce-gallery-3.jpg",
         "/images/projects/dolce-gallery-4.jpg",
       ],
-      description: "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
+      description: [
+        "Notre première mission a bien entendu été celle de développer notre propre identité visuelle.",
+        "DOLCE puise son inspiration de la beauté de la Méditerranée, de l'élégance de la French Riviera des années 60 et de la Dolce Vita.",
+        "Notre souhait était donc d'avoir une identité visuelle qui retranscrirait cette inspiration avec une touche de modernité.",
+        "Le logo inspire l’élégance, la typographie dotée de sérifs confére une touche de sophistication et de finesse.",
+        "Le jeu graphique réalisé avec la lettre ‘o’. crée une dualité visuelle captivante. Les éléments graphiques reprennent la forme de vagues, tracées au pinceau pour induire la dimension artistique."
+      ],
       link: "https://example.com/social-media",
     },
     {

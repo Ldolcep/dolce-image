@@ -345,3 +345,49 @@
   transform: scale(1);
   opacity: 1;
 }
+
+/* Ajoutez ces styles d'animation dans votre fichier globals.css */
+
+/* Animation de rebond pour les limites du carrousel */
+@keyframes bounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(10px); }
+}
+
+@keyframes bounce-left {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-10px); }
+}
+
+.bounce-right {
+  animation: bounce 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.bounce-left {
+  animation: bounce-left 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* Effet de pression lors du toucher */
+.press-effect {
+  transition: transform 0.2s ease;
+}
+
+.press-effect.pressed {
+  transform: scale(0.98);
+}
+
+/* Animation d'ouverture du panneau d'information */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.panel-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
