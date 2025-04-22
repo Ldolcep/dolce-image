@@ -112,7 +112,7 @@ const projectsData = {
       description: "A content strategy and creation service that increased organic traffic by 85% and conversions by 35% within 6 months.",
       link: "https://example.com/content",
     },
-  ]
+  ],
   
   // Fillers mise à jour (sans textContent)
   fillers: [
@@ -138,7 +138,7 @@ const projectsData = {
       isFiller: true
     },
   ]
-}
+};
 
 export default function ProjectGallery() {
   const [allItems, setAllItems] = useState<(Project | FillerItem)[]>([])
