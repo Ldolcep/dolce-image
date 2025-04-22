@@ -263,7 +263,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       >
         <div 
           ref={modalRef} 
-          className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
+          className="bg-white w-full max-w-5xl max-h-[95vh] flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
           style={{ 
             transform: isAnimating ? 'scale(1)' : 'scale(0.95)',
             opacity: isAnimating ? 1 : 0
