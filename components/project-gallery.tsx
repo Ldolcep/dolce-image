@@ -110,10 +110,10 @@ const projectsData = {
         "/images/projects/pickup-gallery-3.jpg",
       ],
       description: [
-        "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle."
-        "Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature."
-        "La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste."
-        "L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes."
+        "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
+        "Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.",
+        "La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.",
+        "L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
         "Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature."
       ],
       link: "https://example.com/content",
