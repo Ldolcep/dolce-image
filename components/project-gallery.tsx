@@ -91,7 +91,7 @@ const projectsData = {
         "/images/projects/ilios-immobilier-gallery-2.jpg",
         "/images/projects/ilios-immobilier-gallery-3.jpg",
         "/images/projects/ilios-immobilier-gallery-4.jpg",
-        "/images/projects/ilios-immobilier-gallery-5.jpg"
+        "/images/projects/ilios-immobilier-gallery-5.jpg",
       ],
       description: [
         "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
