@@ -31,7 +31,12 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile() // Utilise le hook existant
+  
+  // États pour la gestion du glissement du panneau d'information
+  const [dragStartY, setDragStartY] = useState<number | null>(null)
+  const [dragCurrentY, setDragCurrentY] = useState<number | null>(null)
 
   // Reset current image when project changes
   useEffect(() => {
@@ -97,7 +102,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     setIsInfoVisible(!isInfoVisible)
   }
 
-  // Gestion du swipe
+  // Gestion du swipe pour les images
   const minSwipeDistance = 50
   
   const onTouchStart = (e: React.TouchEvent) => {
@@ -121,6 +126,41 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     if (isRightSwipe) {
       handlePrevious()
     }
+  }
+  
+  // Gestion du glissement du panneau d'information
+  const handlePanelTouchStart = (e: React.TouchEvent) => {
+    setDragStartY(e.touches[0].clientY)
+  }
+  
+  const handlePanelTouchMove = (e: React.TouchEvent) => {
+    if (dragStartY === null) return
+    setDragCurrentY(e.touches[0].clientY)
+    
+    const deltaY = e.touches[0].clientY - dragStartY
+    if (deltaY > 0 && panelRef.current) {
+      // Seulement permettre de glisser vers le bas
+      panelRef.current.style.transform = `translateY(${deltaY}px)`
+    }
+  }
+  
+  const handlePanelTouchEnd = () => {
+    if (dragStartY === null || dragCurrentY === null) return
+    
+    const deltaY = dragCurrentY - dragStartY
+    if (deltaY > 70) {
+      // Si glissé suffisamment bas, fermer le panneau
+      setIsInfoVisible(false)
+    }
+    
+    // Réinitialiser la position du panneau
+    if (panelRef.current) {
+      panelRef.current.style.transform = ''
+    }
+    
+    // Réinitialiser les états
+    setDragStartY(null)
+    setDragCurrentY(null)
   }
 
   if (!isOpen) return null
@@ -147,17 +187,24 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           <h3 id={`modal-title-${project.id}`} className="text-white text-lg font-medium truncate mx-4">{project.title}</h3>
           
           <button 
-            className={`text-white rounded-full p-2 ${isInfoVisible ? 'bg-white/20' : ''}`}
+            className={`text-white rounded-full py-2 px-4 flex items-center gap-1 ${
+              isInfoVisible ? 'bg-white/30' : 'bg-black/40 backdrop-blur-sm'
+            }`}
             onClick={toggleInfo}
             aria-label={isInfoVisible ? "Masquer la description" : "Afficher la description"}
           >
-            <Info size={24} />
+            <Info size={18} />
+            <span className="text-sm">Description</span>
           </button>
         </div>
         
-        {/* Contenu principal (image) avec gestion du swipe */}
+        {/* Contenu principal (image) avec gestion du swipe et effet de flou quand info est visible */}
         <div 
-          className="h-full w-full"
+          className="h-full w-full transition-all duration-300"
+          style={{ 
+            filter: isInfoVisible ? 'blur(2px)' : 'none',
+            transform: isInfoVisible ? 'scale(0.98)' : 'scale(1)'
+          }}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -208,25 +255,27 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           </div>
         )}
         
-        {/* Panneau d'information (apparaît depuis le bas) */}
+        {/* Panneau d'information (apparaît depuis le bas) avec grip et gestion du glissement */}
         <div 
-          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-sm transition-transform duration-300 transform ${
+          ref={panelRef}
+          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg transition-transform duration-300 transform ${
             isInfoVisible ? 'translate-y-0' : 'translate-y-full'
           }`}
-          style={{ maxHeight: '70vh' }}
+          style={{ maxHeight: '50vh' }}
+          onTouchStart={handlePanelTouchStart}
+          onTouchMove={handlePanelTouchMove}
+          onTouchEnd={handlePanelTouchEnd}
         >
-          <div className="p-4 border-b flex items-center">
-            <button 
-              onClick={toggleInfo}
-              className="mr-2"
-              aria-label="Fermer le panneau d'information"
-            >
-              <ArrowLeft size={20} />
-            </button>
+          {/* Grip élégant pour indiquer qu'on peut glisser */}
+          <div className="w-full flex justify-center py-2 cursor-grab">
+            <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
+          </div>
+          
+          <div className="p-4 border-b">
             <h2 className="font-great-vibes text-2xl">{project.title}</h2>
           </div>
           
-          <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(70vh - 57px)' }}>
+          <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(50vh - 80px)' }}>
             <div className="space-y-4">
               {Array.isArray(project.description) ? (
                 project.description.map((paragraph, idx) => (
@@ -325,10 +374,10 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
             </div>
           </div>
           
-          {/* Right Column: Content */}
+          {/* Right Column: Content with scrollable height */}
           <div 
             className="w-full md:w-1/2 p-8 overflow-y-auto"
-            style={{maxHeight: 'calc(95vh - 40px)'}}
+            style={{ maxHeight: 'calc(95vh - 40px)' }}
           >
             <h2 
               id={`modal-title-${project.id}`} 
