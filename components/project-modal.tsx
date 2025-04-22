@@ -210,7 +210,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         
         {/* Panneau d'information (apparaît depuis le bas) */}
         <div 
-          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-xl transition-transform duration-300 transform ${
+          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg transition-transform duration-300 transform ${
             isInfoVisible ? 'translate-y-0' : 'translate-y-full'
           }`}
           style={{ maxHeight: '70vh' }}
