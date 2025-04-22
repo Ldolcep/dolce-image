@@ -32,6 +32,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const imageColumnRef = useRef<HTMLDivElement>(null)
+  const descriptionColumnRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile() // Utilise le hook existant
   
   // États pour la gestion du glissement du panneau d'information
@@ -43,6 +45,25 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     setCurrentImageIndex(0)
     setIsInfoVisible(false)
   }, [project])
+
+  // Effet pour synchroniser la hauteur de la colonne de description avec celle de l'image
+  useEffect(() => {
+    const adjustHeight = () => {
+      if (imageColumnRef.current && descriptionColumnRef.current && !isMobile) {
+        const imageHeight = imageColumnRef.current.offsetHeight;
+        descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
+      }
+    };
+    
+    // Ajuster initialement et lors des redimensionnements
+    if (isOpen) {
+      // Petit délai pour s'assurer que l'image est chargée
+      setTimeout(adjustHeight, 100);
+      window.addEventListener('resize', adjustHeight);
+    }
+    
+    return () => window.removeEventListener('resize', adjustHeight);
+  }, [isOpen, isMobile, currentImageIndex]);
 
   // Handle animation classes
   useEffect(() => {
@@ -312,111 +333,10 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       >
         <div 
           ref={modalRef} 
-          className="bg-white w-full max-w-5xl max-h-[95vh] flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
+          className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
           style={{ 
             transform: isAnimating ? 'scale(1)' : 'scale(0.95)',
             opacity: isAnimating ? 1 : 0
           }}
-        >
-          {/* Left Column: Image Slider (ratio 4:5) */}
-          <div className="w-full md:w-1/2 relative">
-            <div className="relative" style={{ aspectRatio: '4/5' }}>
-              <Image
-                src={allVisuals[currentImageIndex]}
-                alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-              />
-              
-              {/* Navigation Buttons - Left/Right */}
-              {allVisuals.length > 1 && (
-                <>
-                  <button 
-                    onClick={handlePrevious}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-white/80 hover:bg-white transition-colors"
-                    aria-label="Image précédente"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  
-                  <button 
-                    onClick={handleNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 rounded-full bg-white/80 hover:bg-white transition-colors"
-                    aria-label="Image suivante"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                </>
-              )}
-              
-              {/* Progress Bar at bottom */}
-              {allVisuals.length > 1 && (
-                <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center p-4">
-                  <div className="flex space-x-2">
-                    {allVisuals.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          currentImageIndex === index 
-                            ? 'bg-white scale-110' 
-                            : 'bg-white/50 hover:bg-white/70'
-                        }`}
-                        aria-label={`Aller à l'image ${index + 1}`}
-                        aria-current={currentImageIndex === index}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Right Column: Content with scrollable height */}
-          <div 
-            className="w-full md:w-1/2 p-8 overflow-y-auto"
-            style={{ maxHeight: 'calc(95vh - 40px)' }}
-          >
-            <h2 
-              id={`modal-title-${project.id}`} 
-              className="font-great-vibes text-2xl md:text-3xl font-medium mb-4"
-            >
-              {project.title}
-            </h2>
-            <div className="font-poppins text-base text-gray-700 leading-relaxed">
-              {Array.isArray(project.description) ? (
-                project.description.map((paragraph, index) => (
-                  <p key={index} className="mb-4 last:mb-0">{paragraph}</p>
-                ))
-              ) : (
-                <p>{project.description}</p>
-              )}
-            </div>
-            
-            {project.link && (
-              <a 
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-poppins block mt-6 text-primary-blue hover:underline"
-              >
-                Visiter le site du projet
-              </a>
-            )}
-          </div>
-          
-          {/* Close button - better positioning for visibility */}
-          <button
-            className="absolute -top-5 -right-5 z-20 bg-primary-orange text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-orange/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-orange"
-            onClick={onClose}
-            aria-label="Fermer"
-          >
-            <X size={20} />
-          </button>
-        </div>
-      </div>
-    )
   }
 }
