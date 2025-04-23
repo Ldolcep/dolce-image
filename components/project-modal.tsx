@@ -1,4 +1,4 @@
-// project-modal.tsx - Version améliorée responsive avec hauteur fixe pour desktop
+// project-modal.tsx - Version améliorée responsive
 "use client"
 
 import type React from "react"
@@ -36,9 +36,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const descriptionColumnRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile() // Utilise le hook existant
   
-  // État pour stocker la hauteur de l'image
-  const [imageHeight, setImageHeight] = useState<number>(0)
-  
   // États pour la gestion du glissement du panneau d'information
   const [dragStartY, setDragStartY] = useState<number | null>(null)
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null)
@@ -52,38 +49,20 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   // Effet pour synchroniser la hauteur de la colonne de description avec celle de l'image
   useEffect(() => {
     const adjustHeight = () => {
-      if (!imageColumnRef.current || !descriptionColumnRef.current || isMobile) return;
-      
-      // Obtenir la hauteur réelle de la colonne d'image
-      const imgHeight = imageColumnRef.current.offsetHeight;
-      setImageHeight(imgHeight);
-      
-      // Appliquer cette hauteur à la colonne de description
-      descriptionColumnRef.current.style.height = `${imgHeight}px`;
+      if (imageColumnRef.current && descriptionColumnRef.current && !isMobile) {
+        const imageHeight = imageColumnRef.current.offsetHeight;
+        descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
+      }
     };
     
-    // Première synchronisation après chargement de l'image
+    // Ajuster initialement et lors des redimensionnements
     if (isOpen) {
-      // Utiliser un délai pour s'assurer que l'image est chargée et rendue
-      const timer = setTimeout(adjustHeight, 100);
-      
-      // Ajouter un écouteur pour le redimensionnement de la fenêtre
+      // Petit délai pour s'assurer que l'image est chargée
+      setTimeout(adjustHeight, 100);
       window.addEventListener('resize', adjustHeight);
-      
-      // Ajouter un écouteur pour les changements d'image qui peuvent affecter la hauteur
-      const imgElement = imageColumnRef.current?.querySelector('img');
-      if (imgElement) {
-        imgElement.addEventListener('load', adjustHeight);
-      }
-      
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener('resize', adjustHeight);
-        if (imgElement) {
-          imgElement.removeEventListener('load', adjustHeight);
-        }
-      };
     }
+    
+    return () => window.removeEventListener('resize', adjustHeight);
   }, [isOpen, isMobile, currentImageIndex]);
 
   // Handle animation classes
@@ -343,7 +322,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       </div>
     )
   } else {
-    // Version desktop (modal traditionnel mais optimisé) avec hauteur fixe basée sur l'image
+    // Version desktop (modal traditionnel mais optimisé)
     return (
       <div 
         className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300"
@@ -357,25 +336,19 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
           style={{ 
             transform: isAnimating ? 'scale(1)' : 'scale(0.95)',
-            opacity: isAnimating ? 1 : 0,
-            maxHeight: '90vh' // Hauteur maximale pour assurer que ça rentre dans l'écran
+            opacity: isAnimating ? 1 : 0
           }}
         >
-          {/* Left Column: Image Slider - Cette colonne définit la hauteur */}
-          <div 
-            className="w-full md:w-1/2 relative flex-shrink-0" 
-            ref={imageColumnRef}
-          >
-            <div className="relative">
+          {/* Left Column: Image Slider avec référence pour synchroniser la hauteur */}
+          <div className="w-full md:w-1/2 relative" ref={imageColumnRef}>
+            <div className="relative" style={{ aspectRatio: '4/5' }}>
               <Image
                 src={allVisuals[currentImageIndex]}
                 alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-                width={800}
-                height={1000}
-                className="object-contain w-full h-auto"
+                fill
+                className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
-                style={{ display: 'block' }} // Assure que l'image se comporte correctement
               />
               
               {/* Navigation Buttons - Left/Right */}
@@ -409,8 +382,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
                         onClick={() => setCurrentImageIndex(index)}
                         className={`w-2 h-2 rounded-full transition-all ${
                           currentImageIndex === index 
-                            ? 'bg-black scale-110' 
-                            : 'bg-black/50 hover:bg-black/70'
+                            ? 'bg-white scale-110' 
+                            : 'bg-white/50 hover:bg-white/70'
                         }`}
                         aria-label={`Aller à l'image ${index + 1}`}
                         aria-current={currentImageIndex === index}
@@ -422,13 +395,10 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
             </div>
           </div>
           
-          {/* Right Column: Content avec défilement si nécessaire */}
+          {/* Right Column: Content with scrollable height synchronized to image height */}
           <div 
-            ref={descriptionColumnRef}
             className="w-full md:w-1/2 p-8 overflow-y-auto"
-            style={{ 
-              height: imageHeight > 0 ? `${imageHeight}px` : 'auto' // Utilise la hauteur de l'image
-            }}
+            ref={descriptionColumnRef}
           >
             <h2 
               id={`modal-title-${project.id}`} 
