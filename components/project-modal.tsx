@@ -51,7 +51,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     const adjustHeight = () => {
       if (imageColumnRef.current && descriptionColumnRef.current && !isMobile) {
         const imageHeight = imageColumnRef.current.offsetHeight;
-        descriptionColumnRef.current.style.maxHeight = `${h}px`;
+        descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
       }
     };
     
@@ -399,7 +399,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           <div 
             className="w-full md:w-1/2 p-8 overflow-y-auto"
             ref={descriptionColumnRef}
-            style={{maxHeight: 0}}
           >
             <h2 
               id={`modal-title-${project.id}`} 
