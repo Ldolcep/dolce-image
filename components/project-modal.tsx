@@ -1,4 +1,4 @@
-// project-modal.tsx - Version corrigée pour résoudre les erreurs client-side
+// project-modal.tsx - Version améliorée avec fond blanc et effet de pile
 "use client"
 
 import type React from "react"
@@ -40,6 +40,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   
   const modalRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLDivElement>(null)
+  const prevImageRef = useRef<HTMLDivElement>(null) // Référence pour l'image précédente
+  const nextImageRef = useRef<HTMLDivElement>(null) // Référence pour l'image suivante
   const panelRef = useRef<HTMLDivElement>(null)
   const gripRef = useRef<HTMLDivElement>(null)
   
@@ -51,7 +53,10 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   // États pour la gestion du glissement du panneau d'information (mobile)
   const [dragStartY, setDragStartY] = useState<number | null>(null)
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null)
-  const [panelHeight, setPanelHeight] = useState(0)
+  const [dragDistance, setDragDistance] = useState(0)
+  
+  // États pour la gestion des images pré-chargées
+  const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({})
   
   // Flags additionnels pour gérer les erreurs
   const [isInitialized, setIsInitialized] = useState(false)
@@ -67,29 +72,72 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   useEffect(() => {
     setCurrentImageIndex(0)
     setIsInfoVisible(false)
+    setImagesLoaded({}) // Reset des images chargées
   }, [project])
 
-  // --- useEffect pour précharger les images ---
+  // Calculer les indices des images adjacentes
+  const prevIndex = useMemo(() => 
+    (currentImageIndex - 1 + allVisuals.length) % allVisuals.length, 
+    [currentImageIndex, allVisuals.length]
+  );
+  
+  const nextIndex = useMemo(() => 
+    (currentImageIndex + 1) % allVisuals.length, 
+    [currentImageIndex, allVisuals.length]
+  );
+
+  // --- useEffect pour précharger toutes les images ---
   useEffect(() => {
-    if (!isBrowserEnvironment) return;
+    if (!isBrowserEnvironment || !isOpen) return;
     
-    // Seulement si on est en environnement navigateur et que le modal est ouvert
-    if (isOpen && isMobile && allVisuals.length > 1) {
+    // Fonction pour précharger une image
+    const preloadImage = (src: string) => {
+      return new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          setImagesLoaded(prev => ({ ...prev, [src]: true }));
+          resolve();
+        };
+        img.onerror = () => {
+          console.error(`Erreur lors du chargement de l'image: ${src}`);
+          resolve(); // Résoudre quand même pour ne pas bloquer
+        };
+        img.src = src;
+      });
+    };
+    
+    // Précharger toutes les images du projet
+    const preloadAllImages = async () => {
       try {
-        // Précharger toutes les images du projet pour une navigation fluide
-        allVisuals.forEach((imgSrc) => {
-          if (imgSrc !== allVisuals[currentImageIndex]) { // Ne pas recharger l'image actuelle
-            const img = new Image();
-            img.src = imgSrc;
+        // Précharger d'abord les images adjacentes pour une expérience optimale
+        if (allVisuals.length > 1) {
+          // Commencer par l'image courante, puis les adjacentes
+          await Promise.all([
+            preloadImage(allVisuals[currentImageIndex]),
+            preloadImage(allVisuals[prevIndex]),
+            preloadImage(allVisuals[nextIndex])
+          ]);
+          
+          // Puis charger le reste des images en arrière-plan
+          const otherImages = allVisuals.filter((_, i) => 
+            i !== currentImageIndex && i !== prevIndex && i !== nextIndex
+          );
+          
+          if (otherImages.length > 0) {
+            Promise.all(otherImages.map(preloadImage));
           }
-        });
+        } else if (allVisuals.length === 1) {
+          await preloadImage(allVisuals[0]);
+        }
       } catch (error) {
         console.error("Erreur lors du préchargement des images:", error);
       }
-    }
-  }, [isOpen, isMobile, allVisuals, currentImageIndex, isBrowserEnvironment]);
+    };
+    
+    preloadAllImages();
+  }, [isOpen, allVisuals, currentImageIndex, prevIndex, nextIndex, isBrowserEnvironment]);
   
-  // --- useEffect pour synchroniser la hauteur RESTAURÉ ---
+  // --- useEffect pour synchroniser la hauteur ---
   useEffect(() => {
     if (!isBrowserEnvironment) return;
     
@@ -150,30 +198,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     }
   }, [isOpen])
 
-  // Calculate panel height for mobile grip
-  useEffect(() => {
-    if (!isBrowserEnvironment) return;
-    
-    if (isOpen && isMobile && panelRef.current) {
-      try {
-        const updateHeight = () => {
-          if (panelRef.current) {
-            setPanelHeight(panelRef.current.getBoundingClientRect().height);
-          }
-        };
-        
-        updateHeight();
-        window.addEventListener('resize', updateHeight);
-        
-        return () => {
-          window.removeEventListener('resize', updateHeight);
-        };
-      } catch (error) {
-        console.error("Erreur lors du calcul de la hauteur du panneau:", error);
-      }
-    }
-  }, [isOpen, isMobile, isInfoVisible, isBrowserEnvironment]);
-  
   // Gestion des événements tactiles avec une meilleure sélectivité
   useEffect(() => {
     if (!isBrowserEnvironment) return;
@@ -295,8 +319,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     setSwipeDirection(null);
     
     // Reset any applied transforms on the image
-    if (imageRef.current) {
-      try {
+    try {
+      if (imageRef.current) {
         // Réinitialiser après une courte temporisation pour éviter les conflits d'animation
         setTimeout(() => {
           if (imageRef.current) {
@@ -306,9 +330,20 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
             imageRef.current.style.transformOrigin = 'center center'; // Reset transform origin
           }
         }, 50);
-      } catch (error) {
-        console.error("Erreur lors de la réinitialisation de l'état de swipe:", error);
       }
+      
+      // Reset également les transformations des images adjacentes
+      if (prevImageRef.current) {
+        prevImageRef.current.style.transform = 'translateX(-15%) scale(0.9) rotate(-5deg)';
+        prevImageRef.current.style.opacity = '0.5';
+      }
+      
+      if (nextImageRef.current) {
+        nextImageRef.current.style.transform = 'translateX(15%) scale(0.9) rotate(5deg)';
+        nextImageRef.current.style.opacity = '0.5';
+      }
+    } catch (error) {
+      console.error("Erreur lors de la réinitialisation de l'état de swipe:", error);
     }
   }
 
@@ -318,9 +353,9 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     
     try {
       const distance = currentX - startX;
-      const maxRotation = 25; // Angle maximum de rotation augmenté (était 15)
+      const maxRotation = 25; // Angle maximum de rotation augmenté
       const screenWidth = window.innerWidth;
-      const swipeThreshold = screenWidth * 0.3; // Distance minimale pour changer d'image (légèrement réduite)
+      const swipeThreshold = screenWidth * 0.3; // Distance minimale pour changer d'image
       
       // Calcul de la rotation proportionnelle avec coefficient amplifié
       const rotation = (distance / screenWidth) * maxRotation * 1.3; // Amplification de 30%
@@ -332,13 +367,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       setSwipeRotation(rotation);
       
       // Déterminer la direction du swipe
-      if (distance > 0) {
-        setSwipeDirection('right');
-      } else if (distance < 0) {
-        setSwipeDirection('left');
-      } else {
-        setSwipeDirection(null);
-      }
+      const direction = distance > 0 ? 'right' : distance < 0 ? 'left' : null;
+      setSwipeDirection(direction);
       
       // Appliquer la transformation en temps réel avec une origine de rotation décalée
       // pour un effet plus naturel (comme si on tenait la carte par un coin)
@@ -349,6 +379,44 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       imageRef.current.style.transform = transform;
       imageRef.current.style.opacity = opacity.toString();
       imageRef.current.style.transition = 'none';
+      imageRef.current.style.zIndex = '10'; // Assurer que l'image actuelle est au-dessus
+      
+      // Animer les images adjacentes en fonction de la direction du swipe
+      if (prevImageRef.current && nextImageRef.current) {
+        // Quand on swipe vers la gauche (next), l'image suivante devient plus visible
+        if (distance < 0) {
+          const nextVisibility = Math.min(0.8, 0.5 + Math.abs(distance) / (screenWidth * 1.5));
+          const nextScale = 0.9 + (Math.abs(distance) / screenWidth) * 0.2;
+          const nextRotation = 5 - (Math.abs(distance) / screenWidth) * 10;
+          const nextTranslateX = 15 - (Math.abs(distance) / screenWidth) * 30;
+          
+          nextImageRef.current.style.opacity = nextVisibility.toString();
+          nextImageRef.current.style.transform = `translateX(${nextTranslateX}%) scale(${nextScale}) rotate(${nextRotation}deg)`;
+          nextImageRef.current.style.zIndex = '5';
+          
+          // Cacher l'image précédente
+          prevImageRef.current.style.opacity = '0.2';
+          prevImageRef.current.style.transform = 'translateX(-20%) scale(0.8) rotate(-8deg)';
+          prevImageRef.current.style.zIndex = '1';
+        } 
+        // Quand on swipe vers la droite (previous), l'image précédente devient plus visible
+        else if (distance > 0) {
+          const prevVisibility = Math.min(0.8, 0.5 + Math.abs(distance) / (screenWidth * 1.5));
+          const prevScale = 0.9 + (Math.abs(distance) / screenWidth) * 0.2;
+          const prevRotation = -5 + (Math.abs(distance) / screenWidth) * 10;
+          const prevTranslateX = -15 + (Math.abs(distance) / screenWidth) * 30;
+          
+          prevImageRef.current.style.opacity = prevVisibility.toString();
+          prevImageRef.current.style.transform = `translateX(${prevTranslateX}%) scale(${prevScale}) rotate(${prevRotation}deg)`;
+          prevImageRef.current.style.zIndex = '5';
+          
+          // Cacher l'image suivante
+          nextImageRef.current.style.opacity = '0.2';
+          nextImageRef.current.style.transform = 'translateX(20%) scale(0.8) rotate(8deg)';
+          nextImageRef.current.style.zIndex = '1';
+        }
+      }
+      
     } catch (error) {
       console.error("Erreur lors du calcul de l'animation Tinder:", error);
     }
@@ -360,23 +428,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     try {
       // Ignorer si on touche le panneau info
       if (panelRef.current?.contains(e.target as Node)) return;
-      
-      // Préchargement des images adjacentes pour une animation fluide
-      if (allVisuals.length > 1) {
-        try {
-          const nextIndex = (currentImageIndex + 1) % allVisuals.length;
-          const prevIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
-          
-          // Précharger les images suivante et précédente
-          const nextImage = new Image();
-          nextImage.src = allVisuals[nextIndex];
-          
-          const prevImage = new Image();
-          prevImage.src = allVisuals[prevIndex];
-        } catch (imageError) {
-          console.error("Erreur lors du préchargement des images:", imageError);
-        }
-      }
       
       setTouchEnd(null);
       setTouchStart(e.targetTouches[0].clientX);
@@ -437,6 +488,14 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           imageRef.current.style.transform = `translateX(-120%) rotate(-${finalRotation}deg) scale(0.95)`;
           imageRef.current.style.opacity = '0';
           
+          // Animer l'image suivante pour qu'elle prenne la place
+          if (nextImageRef.current) {
+            nextImageRef.current.style.transition = 'transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.175), opacity 0.35s ease-out';
+            nextImageRef.current.style.transform = 'translateX(0) rotate(0deg) scale(1)';
+            nextImageRef.current.style.opacity = '1';
+            nextImageRef.current.style.zIndex = '15';
+          }
+          
           // Delay the image change to allow animation to complete
           setTimeout(() => handleNext(), 300);
         } else if (isRightSwipe) {
@@ -444,6 +503,14 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.3)); // Assurer une rotation minimale
           imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.95)`;
           imageRef.current.style.opacity = '0';
+          
+          // Animer l'image précédente pour qu'elle prenne la place
+          if (prevImageRef.current) {
+            prevImageRef.current.style.transition = 'transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.175), opacity 0.35s ease-out';
+            prevImageRef.current.style.transform = 'translateX(0) rotate(0deg) scale(1)';
+            prevImageRef.current.style.opacity = '1';
+            prevImageRef.current.style.zIndex = '15';
+          }
           
           // Delay the image change to allow animation to complete
           setTimeout(() => handlePrevious(), 300);
@@ -453,6 +520,19 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           imageRef.current.style.transform = 'translateX(0) rotate(0deg)';
           imageRef.current.style.opacity = '1';
           imageRef.current.style.transformOrigin = 'center center'; // Reset transform origin
+          
+          // Remettre les images adjacentes à leur place
+          if (prevImageRef.current) {
+            prevImageRef.current.style.transition = 'transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.175), opacity 0.35s ease-out';
+            prevImageRef.current.style.transform = 'translateX(-15%) scale(0.9) rotate(-5deg)';
+            prevImageRef.current.style.opacity = '0.5';
+          }
+          
+          if (nextImageRef.current) {
+            nextImageRef.current.style.transition = 'transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.175), opacity 0.35s ease-out';
+            nextImageRef.current.style.transform = 'translateX(15%) scale(0.9) rotate(5deg)';
+            nextImageRef.current.style.opacity = '0.5';
+          }
         }
       }
     } catch (error) {
@@ -472,13 +552,13 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       // Calculer l'opacité en fonction du déplacement
       if (isInfoVisible) {
         // Si panel ouvert, réduire l'opacité en glissant vers le bas
-        const opacity = Math.max(0, 1 - (deltaY / 200));
+        const opacity = Math.max(0, 1 - (deltaY / 300)); // Réduire plus lentement
         contentElements.forEach(el => {
           (el as HTMLElement).style.opacity = opacity.toString();
         });
       } else {
         // Si panel fermé, augmenter l'opacité en glissant vers le haut
-        const opacity = Math.min(1, Math.abs(deltaY) / 150);
+        const opacity = Math.min(1, Math.abs(deltaY) / 200); // Augmenter plus lentement
         contentElements.forEach(el => {
           (el as HTMLElement).style.opacity = opacity.toString();
           // Rendre le contenu visible pendant le glissement
@@ -501,6 +581,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       }
       
       setDragStartY(e.touches[0].clientY);
+      setDragDistance(0);
       
       if (panelRef.current) {
         panelRef.current.style.transition = 'none';
@@ -523,33 +604,61 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       setDragCurrentY(currentY);
       
       const deltaY = currentY - dragStartY;
-      const deadZone = 10; // Zone morte en pixels pour éviter les micro-mouvements accidentels
+      setDragDistance(deltaY);
+      
+      const deadZone = 5; // Zone morte en pixels réduite pour plus de sensibilité
       
       // Ne rien faire si le mouvement est dans la zone morte
       if (Math.abs(deltaY) < deadZone) return;
       
-      // Limiter le déplacement différemment selon l'état
-      if (isInfoVisible) {
-        // Panel ouvert - permettre uniquement de glisser vers le bas
-        if (deltaY > deadZone) {
-          // Appliquer une résistance progressive pour un effet plus naturel
-          const resistedDeltaY = Math.pow(deltaY, 0.8);
-          panelRef.current.style.transform = `translateY(${resistedDeltaY}px)`;
-        }
-      } else {
-        // Panel fermé - permettre uniquement de glisser vers le haut
-        if (deltaY < -deadZone) {
-          // Limiter le mouvement vers le haut avec résistance
-          const maxUpwardMovement = -60; // Permettre un mouvement plus grand
-          const normalizedDeltaY = Math.max(deltaY * 0.8, maxUpwardMovement);
-          panelRef.current.style.transform = `translateY(${normalizedDeltaY}px)`;
-        }
-      }
+      // Appliquer la transformation directement en fonction du mouvement du doigt
+      // sans limiter la direction (pour un suivi plus fluide)
+      panelRef.current.style.transform = `translateY(${deltaY}px)`;
       
-      // Mettre à jour l'opacité du contenu en temps réel en fonction du déplacement
+      // Mettre à jour l'opacité du contenu en temps réel
       updateContentVisibility(deltaY);
+      
+      // Mettre à jour dynamiquement le texte du grip
+      updateGripText(deltaY);
+      
     } catch (error) {
       console.error("Erreur dans handlePanelTouchMove:", error);
+    }
+  }
+  
+  // Mise à jour dynamique du texte du grip pendant le mouvement
+  const updateGripText = (deltaY: number) => {
+    try {
+      const gripTitle = gripRef.current?.querySelector('h2');
+      if (!gripTitle) return;
+      
+      // Calculer le pourcentage de progression vers l'état opposé
+      const panelHeight = panelRef.current?.getBoundingClientRect().height || 0;
+      const thresholdRatio = panelHeight * 0.2; // 20% de la hauteur du panneau comme seuil
+      
+      if (isInfoVisible) {
+        // Si le panneau est ouvert et qu'on glisse vers le bas
+        if (deltaY > 0) {
+          const progress = Math.min(1, deltaY / thresholdRatio);
+          if (progress > 0.5) {
+            (gripTitle as HTMLElement).textContent = 'DESCRIPTION';
+          } else {
+            (gripTitle as HTMLElement).textContent = project.title;
+          }
+        }
+      } else {
+        // Si le panneau est fermé et qu'on glisse vers le haut
+        if (deltaY < 0) {
+          const progress = Math.min(1, Math.abs(deltaY) / thresholdRatio);
+          if (progress > 0.5) {
+            (gripTitle as HTMLElement).textContent = project.title;
+          } else {
+            (gripTitle as HTMLElement).textContent = 'DESCRIPTION';
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Erreur dans updateGripText:", error);
     }
   }
   
@@ -558,7 +667,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       if (dragStartY === null || dragCurrentY === null || !panelRef.current) return;
       
       const deltaY = dragCurrentY - dragStartY;
-      const threshold = 50; // Seuil réduit pour décider si on ouvre/ferme
+      // Seuil de décision réduit pour être plus sensible
+      const threshold = 40;
       
       // Utiliser une courbe cubique pour une animation plus naturelle
       panelRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -568,23 +678,43 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         if (deltaY > threshold) {
           setIsInfoVisible(false);
           
-          // Animer la disparition du contenu
+          // Animer la disparition du contenu de manière plus progressive
           const contentElements = panelRef.current.querySelectorAll('.panel-content');
           contentElements.forEach(el => {
+            // Transition plus lente pour l'opacité
+            (el as HTMLElement).style.transition = 'opacity 0.5s ease-out';
             (el as HTMLElement).style.opacity = '0';
+            
+            // Retarder le masquage de l'élément pour permettre à l'animation de finir
             setTimeout(() => {
               if (!isInfoVisible && el) {
                 (el as HTMLElement).style.display = 'none';
               }
-            }, 300);
+            }, 500); // Délai augmenté pour une transition plus progressive
           });
+          
+          // Changer le texte du grip
+          const gripTitle = gripRef.current?.querySelector('h2');
+          if (gripTitle) {
+            (gripTitle as HTMLElement).textContent = 'DESCRIPTION';
+            (gripTitle as HTMLElement).className = 'font-poppins text-sm uppercase font-medium tracking-wide text-center max-w-[90%] mt-0';
+          }
         } else {
           // Pas assez glissé, retour à la position ouverte avec animation du contenu
           panelRef.current.style.transform = '';
+          
           const contentElements = panelRef.current.querySelectorAll('.panel-content');
           contentElements.forEach(el => {
+            (el as HTMLElement).style.transition = 'opacity 0.3s ease-in';
             (el as HTMLElement).style.opacity = '1';
           });
+          
+          // S'assurer que le titre est correct
+          const gripTitle = gripRef.current?.querySelector('h2');
+          if (gripTitle) {
+            (gripTitle as HTMLElement).textContent = project.title;
+            (gripTitle as HTMLElement).className = 'font-great-vibes text-2xl text-center truncate max-w-[90%] mt-2';
+          }
         }
       } else {
         // Si panel fermé et glissé assez vers le haut
@@ -595,18 +725,28 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           const contentElements = panelRef.current.querySelectorAll('.panel-content');
           contentElements.forEach(el => {
             (el as HTMLElement).style.display = 'block';
+            (el as HTMLElement).style.transition = 'opacity 0.4s ease-in';
+            
             // Petit délai pour s'assurer que l'élément est visible avant l'animation
             setTimeout(() => {
               if (el) (el as HTMLElement).style.opacity = '1';
             }, 10);
           });
+          
+          // Changer le texte du grip
+          const gripTitle = gripRef.current?.querySelector('h2');
+          if (gripTitle) {
+            (gripTitle as HTMLElement).textContent = project.title;
+            (gripTitle as HTMLElement).className = 'font-great-vibes text-2xl text-center truncate max-w-[90%] mt-2';
+          }
         } else {
           // Pas assez glissé, retour à la position fermée
           panelRef.current.style.transform = '';
           
-          // Masquer le contenu
+          // Masquer le contenu progressivement
           const contentElements = panelRef.current.querySelectorAll('.panel-content');
           contentElements.forEach(el => {
+            (el as HTMLElement).style.transition = 'opacity 0.3s ease-out';
             (el as HTMLElement).style.opacity = '0';
             setTimeout(() => {
               if (!isInfoVisible && el) {
@@ -614,6 +754,13 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
               }
             }, 300);
           });
+          
+          // S'assurer que le titre est correct
+          const gripTitle = gripRef.current?.querySelector('h2');
+          if (gripTitle) {
+            (gripTitle as HTMLElement).textContent = 'DESCRIPTION';
+            (gripTitle as HTMLElement).className = 'font-poppins text-sm uppercase font-medium tracking-wide text-center max-w-[90%] mt-0';
+          }
         }
       }
     } catch (error) {
@@ -622,293 +769,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
       // Réinitialiser les états
       setDragStartY(null);
       setDragCurrentY(null);
+      setDragDistance(0);
     }
   }
-
-  // Si le composant n'est pas initialisé ou si nous ne sommes pas dans un navigateur, 
-  // retarder le rendu pour éviter des erreurs d'hydratation
-  if (!isInitialized || !isBrowserEnvironment) {
-    if (!isOpen) return null;
-    return <div className="fixed inset-0 bg-black z-50"></div>;
-  }
-
-  if (!isOpen) return null
-
-  // --- VERSION MOBILE (MODIFIÉE) ---
-  if (isMobile) {
-    return (
-      <div className="fixed inset-0 bg-black z-50 overflow-hidden"
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={`modal-title-${project.id}`}>
-        {/* Barre de navigation supérieure */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 to-transparent">
-          <button onClick={onClose} className="text-white rounded-full p-2" aria-label="Fermer">
-            <X size={24} />
-          </button>
-          <h3 id={`modal-title-${project.id}`} className="text-white text-lg font-medium truncate mx-4 flex-1 text-center">
-            {project.title}
-          </h3>
-          <div className="w-8 h-8"></div> {/* Spacer pour équilibrer */}
-        </div>
-        
-        {/* Contenu principal (image avec animation Tinder) */}
-        <div 
-          className="h-full w-full transition-all duration-300" 
-          style={{ 
-            filter: isInfoVisible ? 'blur(2px)' : 'none', 
-            transform: isInfoVisible ? 'scale(0.98)' : 'scale(1)'
-          }}
-          onTouchStart={onTouchStart} 
-          onTouchMove={onTouchMove} 
-          onTouchEnd={onTouchEnd}
-        >
-          <div 
-            ref={imageRef}
-            className="relative h-full w-full will-change-transform"
-            style={{ transformOrigin: 'center' }}
-          >
-            <Image 
-              src={allVisuals[currentImageIndex]} 
-              alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} 
-              fill 
-              className="object-contain" 
-              sizes="100vw" 
-              priority={true} // Priorité à toutes les images pour garantir un chargement rapide
-              key={allVisuals[currentImageIndex]}
-            />
-          </div>
-        </div>
-        
-        {/* Boutons de navigation */}
-        {allVisuals.length > 1 && !isSwiping && (
-          <>
-            <button 
-              onClick={handlePrevious} 
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white active:bg-black/50" 
-              aria-label="Image précédente"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button 
-              onClick={handleNext} 
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white active:bg-black/50" 
-              aria-label="Image suivante"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </>
-        )}
-        
-        {/* Indicateurs de pagination - Repositionnés au-dessus du grip */}
-        {allVisuals.length > 1 && (
-          <div 
-            className={`absolute left-0 right-0 flex justify-center space-x-2 transition-opacity duration-300 ${isInfoVisible ? 'opacity-0' : 'opacity-100'}`} 
-            style={{ 
-              bottom: `calc(20vh + 20px)`, // 20px au-dessus du grip qui fait 20vh de hauteur 
-              zIndex: 5 // Assurer que les dots restent au-dessus
-            }} 
-            aria-label="Indicateurs d'images"
-            aria-hidden={isInfoVisible}
-          >
-            <div className="px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full">
-              {allVisuals.map((_, idx) => (
-                <button 
-                  key={idx} 
-                  onClick={() => setCurrentImageIndex(idx)} 
-                  className={`w-2.5 h-2.5 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`} 
-                  aria-label={`Aller à l'image ${idx + 1}`} 
-                  aria-current={currentImageIndex === idx ? "step" : undefined}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Nouveau panneau d'information avec grip plus grand toujours visible */}
-        <div 
-          ref={panelRef} 
-          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-lg transition-transform duration-400 ease-out transform`} 
-          style={{ 
-            maxHeight: '75vh',
-            transform: isInfoVisible ? 'translateY(0)' : `translateY(calc(100% - 20vh))` // Grip plus grand (20vh)
-          }}
-          aria-hidden={!isInfoVisible}
-        >
-          {/* Grip avec titre visible - hauteur augmentée */}
-          <div 
-            ref={gripRef}
-            className="w-full flex flex-col items-center justify-center p-4 cursor-grab active:cursor-grabbing min-h-[20vh]"
-            onTouchStart={handlePanelTouchStart}
-            onTouchMove={handlePanelTouchMove}
-            onTouchEnd={handlePanelTouchEnd}
-          >
-            <div className="w-12 h-1.5 bg-gray-300 rounded-full mb-2"></div>
-            <h2 className="font-great-vibes text-2xl text-center truncate max-w-[90%] mt-2">{project.title}</h2>
-          </div>
-          
-          {/* Contenu du panneau avec classe panel-content pour la manipulation programmée */}
-          <div 
-            className="p-5 overflow-y-auto panel-content"
-            style={{ 
-              maxHeight: 'calc(75vh - 20vh)',
-              display: isInfoVisible ? 'block' : 'none', // État initial basé sur isInfoVisible
-              opacity: isInfoVisible ? '1' : '0' // État initial basé sur isInfoVisible
-            }}
-          >
-            <div className="space-y-4">
-              {Array.isArray(project.description) ? (
-                project.description.map((paragraph, idx) => (
-                  <p key={idx} className="font-poppins text-gray-700 text-sm leading-relaxed">{paragraph}</p>
-                ))
-              ) : (
-                <p className="font-poppins text-gray-700 text-sm leading-relaxed">{project.description}</p>
-              )}
-            </div>
-            {project.link && (
-              <a 
-                href={project.link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="font-poppins block mt-5 text-primary-blue hover:underline text-sm font-medium"
-              >
-                Visiter le site du projet
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  } else {
-    // --- VERSION DESKTOP (INCHANGÉE) ---
-    return (
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300"
-        style={{ opacity: isAnimating ? 1 : 0 }}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={`modal-title-${project.id}`}
-      >
-        <div
-          ref={modalRef}
-          // Classes de base restaurées (pas de max-h conditionnel)
-          className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
-          style={{
-            transform: isAnimating ? 'scale(1)' : 'scale(0.95)',
-            opacity: isAnimating ? 1 : 0
-          }}
-        >
-          {/* Left Column: Image Slider */}
-          {/* Ref ajoutée ici */}
-          <div className="w-full md:w-1/2 relative" ref={imageColumnRef}>
-            {/* Ratio 4/5 conservé */}
-            <div className="relative" style={{ aspectRatio: '4/5' }}>
-              <Image
-                src={allVisuals[currentImageIndex]}
-                alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-                fill
-                 // Utiliser object-contain ou object-cover selon préférence
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority={currentImageIndex === 0}
-                key={allVisuals[currentImageIndex]}
-              />
-
-              {/* --- Navigation Buttons - Style mis à jour --- */}
-              {allVisuals.length > 1 && (
-                <>
-                  <button
-                    onClick={handlePrevious}
-                    // Style des flèches repris de la version précédente
-                    className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow"
-                    aria-label="Image précédente"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-
-                  <button
-                    onClick={handleNext}
-                     // Style des flèches repris de la version précédente
-                    className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow"
-                    aria-label="Image suivante"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                </>
-              )}
-
-              {/* --- Indicateurs de pagination - Style mis à jour --- */}
-              {allVisuals.length > 1 && (
-                 // Positionnement et style du conteneur des points repris
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center" aria-label="Indicateurs d'images">
-                  {/* Style du fond des points repris */}
-                  <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                    {allVisuals.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                         // Style des points individuels repris
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          currentImageIndex === index
-                            ? 'bg-white scale-125'
-                            : 'bg-white/60 hover:bg-white/80'
-                        }`}
-                        aria-label={`Aller à l'image ${index + 1}`}
-                        aria-current={currentImageIndex === index ? "step" : undefined}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div> {/* Fin Colonne Gauche */}
-
-          {/* Right Column: Content */}
-          <div
-            // Classe overflow-y-auto restaurée par défaut, ref ajoutée
-            className="w-full md:w-1/2 p-8 overflow-y-auto"
-            ref={descriptionColumnRef}
-          >
-            <h2
-              id={`modal-title-${project.id}`}
-              className="font-great-vibes text-2xl md:text-3xl font-medium mb-4"
-            >
-              {project.title}
-            </h2>
-            {/* Structure du contenu texte restaurée */}
-            <div className="font-poppins text-base text-gray-700 leading-relaxed">
-              {Array.isArray(project.description) ? (
-                project.description.map((paragraph, index) => (
-                  <p key={index} className="mb-4 last:mb-0">{paragraph}</p>
-                ))
-              ) : (
-                <p>{project.description}</p>
-              )}
-            </div>
-
-            {project.link && (
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-poppins block mt-6 text-primary-blue hover:underline"
-              >
-                Visiter le site du projet
-              </a>
-            )}
-          </div> {/* Fin Colonne Droite */}
-
-          {/* Close button - Style restauré */}
-          <button
-            className="absolute -top-5 -right-5 z-20 bg-primary-orange text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-orange/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-orange"
-            onClick={onClose}
-            aria-label="Fermer"
-          >
-            <X size={20} />
-          </button>
-        </div> {/* Fin Conteneur Modal */}
-      </div>
-    )
-  }
-}
