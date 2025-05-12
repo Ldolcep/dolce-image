@@ -1,4 +1,4 @@
-// project-modal.tsx - Version améliorée avec animation Tinder et grip redesigné
+// project-modal.tsx - Version corrigée pour résoudre les erreurs client-side
 "use client"
 
 import type React from "react"
@@ -43,7 +43,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const panelRef = useRef<HTMLDivElement>(null)
   const gripRef = useRef<HTMLDivElement>(null)
   
-  // Références restaurées pour le useEffect de synchronisation
+  // Références pour la synchronisation
   const imageColumnRef = useRef<HTMLDivElement>(null)
   const descriptionColumnRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile() // Utilise le hook existant
@@ -52,6 +52,16 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const [dragStartY, setDragStartY] = useState<number | null>(null)
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null)
   const [panelHeight, setPanelHeight] = useState(0)
+  
+  // Flags additionnels pour gérer les erreurs
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [isBrowserEnvironment, setIsBrowserEnvironment] = useState(false)
+
+  // Détection de l'environnement navigateur
+  useEffect(() => {
+    setIsBrowserEnvironment(typeof window !== 'undefined');
+    setIsInitialized(true);
+  }, []);
 
   // Reset current image when project changes
   useEffect(() => {
@@ -61,28 +71,41 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
 
   // --- useEffect pour précharger les images ---
   useEffect(() => {
+    if (!isBrowserEnvironment) return;
+    
+    // Seulement si on est en environnement navigateur et que le modal est ouvert
     if (isOpen && isMobile && allVisuals.length > 1) {
-      // Précharger toutes les images du projet pour une navigation fluide
-      allVisuals.forEach((imgSrc) => {
-        if (imgSrc !== allVisuals[currentImageIndex]) { // Ne pas recharger l'image actuelle
-          const img = new Image();
-          img.src = imgSrc;
-        }
-      });
+      try {
+        // Précharger toutes les images du projet pour une navigation fluide
+        allVisuals.forEach((imgSrc) => {
+          if (imgSrc !== allVisuals[currentImageIndex]) { // Ne pas recharger l'image actuelle
+            const img = new Image();
+            img.src = imgSrc;
+          }
+        });
+      } catch (error) {
+        console.error("Erreur lors du préchargement des images:", error);
+      }
     }
-  }, [isOpen, isMobile, allVisuals, currentImageIndex]);
+  }, [isOpen, isMobile, allVisuals, currentImageIndex, isBrowserEnvironment]);
   
   // --- useEffect pour synchroniser la hauteur RESTAURÉ ---
   useEffect(() => {
+    if (!isBrowserEnvironment) return;
+    
     const adjustHeight = () => {
-      // Assure que les refs existent et qu'on n'est pas en mobile
-      if (imageColumnRef.current && descriptionColumnRef.current && !isMobile) {
-        const imageHeight = imageColumnRef.current.offsetHeight;
-        // Applique maxHeight à la colonne description
-        descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
-      } else if (descriptionColumnRef.current && !isMobile) {
-         // Si l'image n'a pas de ref ou n'est pas prête, on retire le maxHeight
-         descriptionColumnRef.current.style.maxHeight = '';
+      try {
+        // Assure que les refs existent et qu'on n'est pas en mobile
+        if (imageColumnRef.current && descriptionColumnRef.current && !isMobile) {
+          const imageHeight = imageColumnRef.current.offsetHeight;
+          // Applique maxHeight à la colonne description
+          descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
+        } else if (descriptionColumnRef.current && !isMobile) {
+           // Si l'image n'a pas de ref ou n'est pas prête, on retire le maxHeight
+           descriptionColumnRef.current.style.maxHeight = '';
+        }
+      } catch (error) {
+        console.error("Erreur lors de l'ajustement de la hauteur:", error);
       }
     };
 
@@ -96,17 +119,25 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         clearTimeout(timerId);
         window.removeEventListener('resize', adjustHeight);
         // Important: Retirer le maxHeight quand le modal se ferme ou passe en mobile
-        if (descriptionColumnRef.current) {
-            descriptionColumnRef.current.style.maxHeight = '';
+        try {
+          if (descriptionColumnRef.current) {
+              descriptionColumnRef.current.style.maxHeight = '';
+          }
+        } catch (error) {
+          console.error("Erreur lors du nettoyage:", error);
         }
       }
     }
      // Si on passe en mobile pendant que c'est ouvert, retirer maxHeight
      else if (descriptionColumnRef.current) {
-         descriptionColumnRef.current.style.maxHeight = '';
+         try {
+           descriptionColumnRef.current.style.maxHeight = '';
+         } catch (error) {
+           console.error("Erreur lors de la réinitialisation de la hauteur:", error);
+         }
      }
 
-  }, [isOpen, isMobile, currentImageIndex]); // Dépendances: ouverture, état mobile, image actuelle
+  }, [isOpen, isMobile, currentImageIndex, isBrowserEnvironment]);
 
   // Handle animation classes
   useEffect(() => {
@@ -121,68 +152,104 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
 
   // Calculate panel height for mobile grip
   useEffect(() => {
+    if (!isBrowserEnvironment) return;
+    
     if (isOpen && isMobile && panelRef.current) {
-      const updateHeight = () => {
-        if (panelRef.current) {
-          setPanelHeight(panelRef.current.getBoundingClientRect().height);
-        }
-      };
-      
-      updateHeight();
-      window.addEventListener('resize', updateHeight);
-      
-      return () => {
-        window.removeEventListener('resize', updateHeight);
-      };
+      try {
+        const updateHeight = () => {
+          if (panelRef.current) {
+            setPanelHeight(panelRef.current.getBoundingClientRect().height);
+          }
+        };
+        
+        updateHeight();
+        window.addEventListener('resize', updateHeight);
+        
+        return () => {
+          window.removeEventListener('resize', updateHeight);
+        };
+      } catch (error) {
+        console.error("Erreur lors du calcul de la hauteur du panneau:", error);
+      }
     }
-  }, [isOpen, isMobile, isInfoVisible]);
+  }, [isOpen, isMobile, isInfoVisible, isBrowserEnvironment]);
   
   // Gestion des événements tactiles avec une meilleure sélectivité
   useEffect(() => {
+    if (!isBrowserEnvironment) return;
+    
     // Cette fonction empêche le défilement du document quand le modal est ouvert en mobile
     const preventDocumentScroll = (e: TouchEvent) => {
-      // Si le modal est ouvert et qu'on est sur mobile, empêcher le scroll du document
-      // sauf si l'événement vient du panneau de contenu quand il est déplié
-      if (isOpen && isMobile) {
-        // Vérifier si le touch vient du contenu déplié (autoriser le scroll)
-        const target = e.target as Node;
-        const panelContent = panelRef.current?.querySelector('.panel-content');
-        
-        if (panelContent && isInfoVisible && panelContent.contains(target)) {
-          // Permettre le scroll dans le contenu déplié
-          return true;
-        } else {
-          // Empêcher le scroll partout ailleurs
-          e.preventDefault();
+      try {
+        // Si le modal est ouvert et qu'on est sur mobile, empêcher le scroll du document
+        // sauf si l'événement vient du panneau de contenu quand il est déplié
+        if (isOpen && isMobile) {
+          // Vérifier si le touch vient du contenu déplié (autoriser le scroll)
+          const target = e.target as Node;
+          const panelContent = panelRef.current?.querySelector('.panel-content');
+          
+          if (panelContent && isInfoVisible && panelContent.contains(target)) {
+            // Permettre le scroll dans le contenu déplié
+            return true;
+          } else {
+            // Empêcher le scroll partout ailleurs
+            if (e.cancelable) {
+              e.preventDefault();
+            }
+          }
         }
+      } catch (error) {
+        console.error("Erreur dans preventDocumentScroll:", error);
       }
     };
     
     // Ajouter l'écouteur d'événement avec passive: false pour permettre preventDefault()
-    document.addEventListener('touchmove', preventDocumentScroll, { passive: false });
+    try {
+      document.addEventListener('touchmove', preventDocumentScroll, { passive: false });
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'écouteur touchmove:", error);
+      // Fallback en mode passif si nécessaire
+      document.addEventListener('touchmove', preventDocumentScroll);
+    }
     
     return () => {
-      document.removeEventListener('touchmove', preventDocumentScroll);
+      try {
+        document.removeEventListener('touchmove', preventDocumentScroll);
+      } catch (error) {
+        console.error("Erreur lors du retrait de l'écouteur touchmove:", error);
+      }
     };
-  }, [isOpen, isMobile, isInfoVisible]);
+  }, [isOpen, isMobile, isInfoVisible, isBrowserEnvironment]);
 
   // Handle click outside to close
   useEffect(() => {
+    if (!isBrowserEnvironment) return;
+    
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose()
+      try {
+        if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+          onClose()
+        }
+      } catch (error) {
+        console.error("Erreur dans handleClickOutside:", error);
+        // En cas d'erreur, on ferme quand même le modal
+        onClose();
       }
     }
+    
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside)
     }
+    
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, isBrowserEnvironment])
 
   // Handle keyboard navigation
   useEffect(() => {
+    if (!isBrowserEnvironment) return;
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return; // Ne rien faire si fermé
 
@@ -199,8 +266,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  // Utilisation de useCallback pour handleNext/Previous serait idéal ici
-  }, [isOpen, onClose, allVisuals.length]) 
+  }, [isOpen, onClose, allVisuals.length, isBrowserEnvironment])
 
   const handleNext = () => {
     resetSwipeState();
@@ -230,15 +296,19 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     
     // Reset any applied transforms on the image
     if (imageRef.current) {
-      // Réinitialiser après une courte temporisation pour éviter les conflits d'animation
-      setTimeout(() => {
-        if (imageRef.current) {
-          imageRef.current.style.transform = '';
-          imageRef.current.style.transition = '';
-          imageRef.current.style.opacity = '1';
-          imageRef.current.style.transformOrigin = 'center center'; // Reset transform origin
-        }
-      }, 50);
+      try {
+        // Réinitialiser après une courte temporisation pour éviter les conflits d'animation
+        setTimeout(() => {
+          if (imageRef.current) {
+            imageRef.current.style.transform = '';
+            imageRef.current.style.transition = '';
+            imageRef.current.style.opacity = '1';
+            imageRef.current.style.transformOrigin = 'center center'; // Reset transform origin
+          }
+        }, 50);
+      } catch (error) {
+        console.error("Erreur lors de la réinitialisation de l'état de swipe:", error);
+      }
     }
   }
 
@@ -246,267 +316,320 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const calculateSwipeAnimation = (currentX: number, startX: number) => {
     if (!imageRef.current) return;
     
-    const distance = currentX - startX;
-    const maxRotation = 25; // Angle maximum de rotation augmenté (était 15)
-    const screenWidth = window.innerWidth;
-    const swipeThreshold = screenWidth * 0.3; // Distance minimale pour changer d'image (légèrement réduite)
-    
-    // Calcul de la rotation proportionnelle avec coefficient amplifié
-    const rotation = (distance / screenWidth) * maxRotation * 1.3; // Amplification de 30%
-    
-    // Amplifier légèrement le déplacement pour un effet plus dynamique
-    const normalizedDistance = distance * 1.2; // Amplification de 20%
-    
-    setSwipeDistance(normalizedDistance);
-    setSwipeRotation(rotation);
-    
-    // Déterminer la direction du swipe
-    if (distance > 0) {
-      setSwipeDirection('right');
-    } else if (distance < 0) {
-      setSwipeDirection('left');
-    } else {
-      setSwipeDirection(null);
+    try {
+      const distance = currentX - startX;
+      const maxRotation = 25; // Angle maximum de rotation augmenté (était 15)
+      const screenWidth = window.innerWidth;
+      const swipeThreshold = screenWidth * 0.3; // Distance minimale pour changer d'image (légèrement réduite)
+      
+      // Calcul de la rotation proportionnelle avec coefficient amplifié
+      const rotation = (distance / screenWidth) * maxRotation * 1.3; // Amplification de 30%
+      
+      // Amplifier légèrement le déplacement pour un effet plus dynamique
+      const normalizedDistance = distance * 1.2; // Amplification de 20%
+      
+      setSwipeDistance(normalizedDistance);
+      setSwipeRotation(rotation);
+      
+      // Déterminer la direction du swipe
+      if (distance > 0) {
+        setSwipeDirection('right');
+      } else if (distance < 0) {
+        setSwipeDirection('left');
+      } else {
+        setSwipeDirection(null);
+      }
+      
+      // Appliquer la transformation en temps réel avec une origine de rotation décalée
+      // pour un effet plus naturel (comme si on tenait la carte par un coin)
+      imageRef.current.style.transformOrigin = distance > 0 ? '20% 110%' : '80% 110%';
+      const transform = `translateX(${normalizedDistance}px) rotate(${rotation}deg)`;
+      const opacity = 1 - Math.min(0.3, Math.abs(distance) / (screenWidth * 1.5));
+      
+      imageRef.current.style.transform = transform;
+      imageRef.current.style.opacity = opacity.toString();
+      imageRef.current.style.transition = 'none';
+    } catch (error) {
+      console.error("Erreur lors du calcul de l'animation Tinder:", error);
     }
-    
-    // Appliquer la transformation en temps réel avec une origine de rotation décalée
-    // pour un effet plus naturel (comme si on tenait la carte par un coin)
-    imageRef.current.style.transformOrigin = distance > 0 ? '20% 110%' : '80% 110%';
-    const transform = `translateX(${normalizedDistance}px) rotate(${rotation}deg)`;
-    const opacity = 1 - Math.min(0.3, Math.abs(distance) / (screenWidth * 1.5));
-    
-    imageRef.current.style.transform = transform;
-    imageRef.current.style.opacity = opacity.toString();
-    imageRef.current.style.transition = 'none';
   }
 
   // Gestion du swipe Tinder pour les images (mobile)
   const minSwipeDistance = 50; // Réduit pour permettre un swipe plus sensible
   const onTouchStart = (e: React.TouchEvent) => {
-    // Ignorer si on touche le panneau info
-    if (panelRef.current?.contains(e.target as Node)) return;
-    
-    // Préchargement des images adjacentes pour une animation fluide
-    if (allVisuals.length > 1) {
-      const nextIndex = (currentImageIndex + 1) % allVisuals.length;
-      const prevIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
+    try {
+      // Ignorer si on touche le panneau info
+      if (panelRef.current?.contains(e.target as Node)) return;
       
-      // Précharger les images suivante et précédente
-      const nextImage = new Image();
-      nextImage.src = allVisuals[nextIndex];
+      // Préchargement des images adjacentes pour une animation fluide
+      if (allVisuals.length > 1) {
+        try {
+          const nextIndex = (currentImageIndex + 1) % allVisuals.length;
+          const prevIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
+          
+          // Précharger les images suivante et précédente
+          const nextImage = new Image();
+          nextImage.src = allVisuals[nextIndex];
+          
+          const prevImage = new Image();
+          prevImage.src = allVisuals[prevIndex];
+        } catch (imageError) {
+          console.error("Erreur lors du préchargement des images:", imageError);
+        }
+      }
       
-      const prevImage = new Image();
-      prevImage.src = allVisuals[prevIndex];
-    }
-    
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-    setCurrentTouchX(e.targetTouches[0].clientX);
-    setCurrentTouchY(e.targetTouches[0].clientY);
-    setIsSwiping(true);
-    
-    // Reset any previous transforms
-    if (imageRef.current) {
-      imageRef.current.style.transition = 'none';
+      setTouchEnd(null);
+      setTouchStart(e.targetTouches[0].clientX);
+      setCurrentTouchX(e.targetTouches[0].clientX);
+      setCurrentTouchY(e.targetTouches[0].clientY);
+      setIsSwiping(true);
+      
+      // Reset any previous transforms
+      if (imageRef.current) {
+        imageRef.current.style.transition = 'none';
+      }
+    } catch (error) {
+      console.error("Erreur dans onTouchStart:", error);
+      // En cas d'erreur, désactiver le swipe
+      setIsSwiping(false);
     }
   }
   
   const onTouchMove = (e: React.TouchEvent) => {
-    if (touchStart === null || !isSwiping) return;
-    
-    // Prévenir le comportement par défaut pour éviter les conflits avec le scroll
-    e.preventDefault();
-    
-    // Update currentTouch positions
-    setCurrentTouchX(e.targetTouches[0].clientX);
-    setCurrentTouchY(e.targetTouches[0].clientY);
-    setTouchEnd(e.targetTouches[0].clientX);
-    
-    // Calculate and apply the Tinder animation
-    calculateSwipeAnimation(e.targetTouches[0].clientX, touchStart);
-  }
-  
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd || !isSwiping) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
-    if (imageRef.current) {
-      // Add transition for smooth animation completion
-      // Utilise cubic-bezier pour une animation plus dynamique
-      imageRef.current.style.transition = 'transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.175), opacity 0.35s ease-out';
+    try {
+      if (touchStart === null || !isSwiping) return;
       
-      if (isLeftSwipe) {
-        // Complete the swipe animation before changing image with animation améliorée
-        const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.3)); // Assurer une rotation minimale
-        imageRef.current.style.transform = `translateX(-120%) rotate(-${finalRotation}deg) scale(0.95)`;
-        imageRef.current.style.opacity = '0';
-        
-        // Delay the image change to allow animation to complete
-        setTimeout(() => handleNext(), 300);
-      } else if (isRightSwipe) {
-        // Complete the swipe animation before changing image avec animation améliorée
-        const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.3)); // Assurer une rotation minimale
-        imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.95)`;
-        imageRef.current.style.opacity = '0';
-        
-        // Delay the image change to allow animation to complete
-        setTimeout(() => handlePrevious(), 300);
-      } else {
-        // Return to center with elastic animation if not enough distance
-        // Cubique bezier pour un effet de "ressort" plus prononcé
-        imageRef.current.style.transform = 'translateX(0) rotate(0deg)';
-        imageRef.current.style.opacity = '1';
-        imageRef.current.style.transformOrigin = 'center center'; // Reset transform origin
+      // Prévenir le comportement par défaut pour éviter les conflits avec le scroll
+      if (e.cancelable) {
+        e.preventDefault();
       }
+      
+      // Update currentTouch positions
+      setCurrentTouchX(e.targetTouches[0].clientX);
+      setCurrentTouchY(e.targetTouches[0].clientY);
+      setTouchEnd(e.targetTouches[0].clientX);
+      
+      // Calculate and apply the Tinder animation
+      calculateSwipeAnimation(e.targetTouches[0].clientX, touchStart);
+    } catch (error) {
+      console.error("Erreur dans onTouchMove:", error);
+      // En cas d'erreur, réinitialiser l'état
+      resetSwipeState();
     }
-    
-    // Reset states
-    resetSwipeState();
+  }
+
+  const onTouchEnd = () => {
+    try {
+      if (!touchStart || !touchEnd || !isSwiping) return;
+      
+      const distance = touchStart - touchEnd;
+      const isLeftSwipe = distance > minSwipeDistance;
+      const isRightSwipe = distance < -minSwipeDistance;
+      
+      if (imageRef.current) {
+        // Add transition for smooth animation completion
+        // Utilise cubic-bezier pour une animation plus dynamique
+        imageRef.current.style.transition = 'transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.175), opacity 0.35s ease-out';
+        
+        if (isLeftSwipe) {
+          // Complete the swipe animation before changing image with animation améliorée
+          const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.3)); // Assurer une rotation minimale
+          imageRef.current.style.transform = `translateX(-120%) rotate(-${finalRotation}deg) scale(0.95)`;
+          imageRef.current.style.opacity = '0';
+          
+          // Delay the image change to allow animation to complete
+          setTimeout(() => handleNext(), 300);
+        } else if (isRightSwipe) {
+          // Complete the swipe animation before changing image avec animation améliorée
+          const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.3)); // Assurer une rotation minimale
+          imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.95)`;
+          imageRef.current.style.opacity = '0';
+          
+          // Delay the image change to allow animation to complete
+          setTimeout(() => handlePrevious(), 300);
+        } else {
+          // Return to center with elastic animation if not enough distance
+          // Cubique bezier pour un effet de "ressort" plus prononcé
+          imageRef.current.style.transform = 'translateX(0) rotate(0deg)';
+          imageRef.current.style.opacity = '1';
+          imageRef.current.style.transformOrigin = 'center center'; // Reset transform origin
+        }
+      }
+    } catch (error) {
+      console.error("Erreur dans onTouchEnd:", error);
+    } finally {
+      // Reset states
+      resetSwipeState();
+    }
+  }
+
+  // Fonction pour mettre à jour l'opacité du contenu en temps réel
+  const updateContentVisibility = (deltaY: number) => {
+    try {
+      const contentElements = panelRef.current?.querySelectorAll('.panel-content');
+      if (!contentElements) return;
+      
+      // Calculer l'opacité en fonction du déplacement
+      if (isInfoVisible) {
+        // Si panel ouvert, réduire l'opacité en glissant vers le bas
+        const opacity = Math.max(0, 1 - (deltaY / 200));
+        contentElements.forEach(el => {
+          (el as HTMLElement).style.opacity = opacity.toString();
+        });
+      } else {
+        // Si panel fermé, augmenter l'opacité en glissant vers le haut
+        const opacity = Math.min(1, Math.abs(deltaY) / 150);
+        contentElements.forEach(el => {
+          (el as HTMLElement).style.opacity = opacity.toString();
+          // Rendre le contenu visible pendant le glissement
+          (el as HTMLElement).style.display = opacity > 0.1 ? 'block' : 'none';
+        });
+      }
+    } catch (error) {
+      console.error("Erreur dans updateContentVisibility:", error);
+    }
   }
 
   // Gestion du glissement du panneau d'information (mobile)
   const handlePanelTouchStart = (e: React.TouchEvent) => {
-    e.stopPropagation(); // Empêcher la propagation pour éviter le swipe d'image
-    
-    // Empêcher le comportement de pull-to-refresh
-    e.preventDefault();
-    
-    setDragStartY(e.touches[0].clientY);
-    
-    if (panelRef.current) {
-      panelRef.current.style.transition = 'none';
+    try {
+      e.stopPropagation(); // Empêcher la propagation pour éviter le swipe d'image
+      
+      // Empêcher le comportement de pull-to-refresh seulement si cancelable
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      
+      setDragStartY(e.touches[0].clientY);
+      
+      if (panelRef.current) {
+        panelRef.current.style.transition = 'none';
+      }
+    } catch (error) {
+      console.error("Erreur dans handlePanelTouchStart:", error);
     }
   }
   
   const handlePanelTouchMove = (e: React.TouchEvent) => {
-    if (dragStartY === null || !panelRef.current) return;
-    
-    // Empêcher le comportement par défaut du navigateur (pull-to-refresh, scroll, etc.)
-    e.preventDefault();
-    
-    const currentY = e.touches[0].clientY;
-    setDragCurrentY(currentY);
-    
-    const deltaY = currentY - dragStartY;
-    const deadZone = 10; // Zone morte en pixels pour éviter les micro-mouvements accidentels
-    
-    // Ne rien faire si le mouvement est dans la zone morte
-    if (Math.abs(deltaY) < deadZone) return;
-    
-    // Limiter le déplacement différemment selon l'état
-    if (isInfoVisible) {
-      // Panel ouvert - permettre uniquement de glisser vers le bas
-      if (deltaY > deadZone) {
-        // Appliquer une résistance progressive pour un effet plus naturel
-        const resistedDeltaY = Math.pow(deltaY, 0.8);
-        panelRef.current.style.transform = `translateY(${resistedDeltaY}px)`;
+    try {
+      if (dragStartY === null || !panelRef.current) return;
+      
+      // Empêcher le comportement par défaut du navigateur seulement si cancelable
+      if (e.cancelable) {
+        e.preventDefault();
       }
-    } else {
-      // Panel fermé - permettre uniquement de glisser vers le haut
-      if (deltaY < -deadZone) {
-        // Limiter le mouvement vers le haut avec résistance
-        const maxUpwardMovement = -60; // Permettre un mouvement plus grand
-        const normalizedDeltaY = Math.max(deltaY * 0.8, maxUpwardMovement);
-        panelRef.current.style.transform = `translateY(${normalizedDeltaY}px)`;
+      
+      const currentY = e.touches[0].clientY;
+      setDragCurrentY(currentY);
+      
+      const deltaY = currentY - dragStartY;
+      const deadZone = 10; // Zone morte en pixels pour éviter les micro-mouvements accidentels
+      
+      // Ne rien faire si le mouvement est dans la zone morte
+      if (Math.abs(deltaY) < deadZone) return;
+      
+      // Limiter le déplacement différemment selon l'état
+      if (isInfoVisible) {
+        // Panel ouvert - permettre uniquement de glisser vers le bas
+        if (deltaY > deadZone) {
+          // Appliquer une résistance progressive pour un effet plus naturel
+          const resistedDeltaY = Math.pow(deltaY, 0.8);
+          panelRef.current.style.transform = `translateY(${resistedDeltaY}px)`;
+        }
+      } else {
+        // Panel fermé - permettre uniquement de glisser vers le haut
+        if (deltaY < -deadZone) {
+          // Limiter le mouvement vers le haut avec résistance
+          const maxUpwardMovement = -60; // Permettre un mouvement plus grand
+          const normalizedDeltaY = Math.max(deltaY * 0.8, maxUpwardMovement);
+          panelRef.current.style.transform = `translateY(${normalizedDeltaY}px)`;
+        }
       }
-    }
-    
-    // Mettre à jour l'opacité du contenu en temps réel en fonction du déplacement
-    updateContentVisibility(deltaY);
-  }
-  
-  // Fonction pour mettre à jour l'opacité du contenu en temps réel
-  const updateContentVisibility = (deltaY: number) => {
-    const contentElements = panelRef.current?.querySelectorAll('.panel-content');
-    if (!contentElements) return;
-    
-    // Calculer l'opacité en fonction du déplacement
-    if (isInfoVisible) {
-      // Si panel ouvert, réduire l'opacité en glissant vers le bas
-      const opacity = Math.max(0, 1 - (deltaY / 200));
-      contentElements.forEach(el => {
-        (el as HTMLElement).style.opacity = opacity.toString();
-      });
-    } else {
-      // Si panel fermé, augmenter l'opacité en glissant vers le haut
-      const opacity = Math.min(1, Math.abs(deltaY) / 150);
-      contentElements.forEach(el => {
-        (el as HTMLElement).style.opacity = opacity.toString();
-        // Rendre le contenu visible pendant le glissement
-        (el as HTMLElement).style.display = opacity > 0.1 ? 'block' : 'none';
-      });
+      
+      // Mettre à jour l'opacité du contenu en temps réel en fonction du déplacement
+      updateContentVisibility(deltaY);
+    } catch (error) {
+      console.error("Erreur dans handlePanelTouchMove:", error);
     }
   }
   
   const handlePanelTouchEnd = () => {
-    if (dragStartY === null || dragCurrentY === null || !panelRef.current) return;
-    
-    const deltaY = dragCurrentY - dragStartY;
-    const threshold = 50; // Seuil réduit pour décider si on ouvre/ferme
-    
-    // Utiliser une courbe cubique pour une animation plus naturelle
-    panelRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-    
-    if (isInfoVisible) {
-      // Si panel ouvert et glissé assez vers le bas
-      if (deltaY > threshold) {
-        setIsInfoVisible(false);
-        
-        // Animer la disparition du contenu
-        const contentElements = panelRef.current.querySelectorAll('.panel-content');
-        contentElements.forEach(el => {
-          (el as HTMLElement).style.opacity = '0';
-          setTimeout(() => {
-            if (!isInfoVisible && el) {
-              (el as HTMLElement).style.display = 'none';
-            }
-          }, 300);
-        });
+    try {
+      if (dragStartY === null || dragCurrentY === null || !panelRef.current) return;
+      
+      const deltaY = dragCurrentY - dragStartY;
+      const threshold = 50; // Seuil réduit pour décider si on ouvre/ferme
+      
+      // Utiliser une courbe cubique pour une animation plus naturelle
+      panelRef.current.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+      
+      if (isInfoVisible) {
+        // Si panel ouvert et glissé assez vers le bas
+        if (deltaY > threshold) {
+          setIsInfoVisible(false);
+          
+          // Animer la disparition du contenu
+          const contentElements = panelRef.current.querySelectorAll('.panel-content');
+          contentElements.forEach(el => {
+            (el as HTMLElement).style.opacity = '0';
+            setTimeout(() => {
+              if (!isInfoVisible && el) {
+                (el as HTMLElement).style.display = 'none';
+              }
+            }, 300);
+          });
+        } else {
+          // Pas assez glissé, retour à la position ouverte avec animation du contenu
+          panelRef.current.style.transform = '';
+          const contentElements = panelRef.current.querySelectorAll('.panel-content');
+          contentElements.forEach(el => {
+            (el as HTMLElement).style.opacity = '1';
+          });
+        }
       } else {
-        // Pas assez glissé, retour à la position ouverte avec animation du contenu
-        panelRef.current.style.transform = '';
-        const contentElements = panelRef.current.querySelectorAll('.panel-content');
-        contentElements.forEach(el => {
-          (el as HTMLElement).style.opacity = '1';
-        });
+        // Si panel fermé et glissé assez vers le haut
+        if (deltaY < -threshold) {
+          setIsInfoVisible(true);
+          
+          // Animer l'apparition du contenu
+          const contentElements = panelRef.current.querySelectorAll('.panel-content');
+          contentElements.forEach(el => {
+            (el as HTMLElement).style.display = 'block';
+            // Petit délai pour s'assurer que l'élément est visible avant l'animation
+            setTimeout(() => {
+              if (el) (el as HTMLElement).style.opacity = '1';
+            }, 10);
+          });
+        } else {
+          // Pas assez glissé, retour à la position fermée
+          panelRef.current.style.transform = '';
+          
+          // Masquer le contenu
+          const contentElements = panelRef.current.querySelectorAll('.panel-content');
+          contentElements.forEach(el => {
+            (el as HTMLElement).style.opacity = '0';
+            setTimeout(() => {
+              if (!isInfoVisible && el) {
+                (el as HTMLElement).style.display = 'none';
+              }
+            }, 300);
+          });
+        }
       }
-    } else {
-      // Si panel fermé et glissé assez vers le haut
-      if (deltaY < -threshold) {
-        setIsInfoVisible(true);
-        
-        // Animer l'apparition du contenu
-        const contentElements = panelRef.current.querySelectorAll('.panel-content');
-        contentElements.forEach(el => {
-          (el as HTMLElement).style.display = 'block';
-          // Petit délai pour s'assurer que l'élément est visible avant l'animation
-          setTimeout(() => {
-            if (el) (el as HTMLElement).style.opacity = '1';
-          }, 10);
-        });
-      } else {
-        // Pas assez glissé, retour à la position fermée
-        panelRef.current.style.transform = '';
-        
-        // Masquer le contenu
-        const contentElements = panelRef.current.querySelectorAll('.panel-content');
-        contentElements.forEach(el => {
-          (el as HTMLElement).style.opacity = '0';
-          setTimeout(() => {
-            if (!isInfoVisible && el) {
-              (el as HTMLElement).style.display = 'none';
-            }
-          }, 300);
-        });
-      }
+    } catch (error) {
+      console.error("Erreur dans handlePanelTouchEnd:", error);
+    } finally {
+      // Réinitialiser les états
+      setDragStartY(null);
+      setDragCurrentY(null);
     }
-    
-    // Réinitialiser les états
-    setDragStartY(null);
-    setDragCurrentY(null);
+  }
+
+  // Si le composant n'est pas initialisé ou si nous ne sommes pas dans un navigateur, 
+  // retarder le rendu pour éviter des erreurs d'hydratation
+  if (!isInitialized || !isBrowserEnvironment) {
+    if (!isOpen) return null;
+    return <div className="fixed inset-0 bg-black z-50"></div>;
   }
 
   if (!isOpen) return null
@@ -531,32 +654,32 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         </div>
         
         {/* Contenu principal (image avec animation Tinder) */}
+        <div 
+          className="h-full w-full transition-all duration-300" 
+          style={{ 
+            filter: isInfoVisible ? 'blur(2px)' : 'none', 
+            transform: isInfoVisible ? 'scale(0.98)' : 'scale(1)'
+          }}
+          onTouchStart={onTouchStart} 
+          onTouchMove={onTouchMove} 
+          onTouchEnd={onTouchEnd}
+        >
           <div 
-            className="h-full w-full transition-all duration-300" 
-            style={{ 
-              filter: isInfoVisible ? 'blur(2px)' : 'none', 
-              transform: isInfoVisible ? 'scale(0.98)' : 'scale(1)'
-            }}
-            onTouchStart={onTouchStart} 
-            onTouchMove={onTouchMove} 
-            onTouchEnd={onTouchEnd}
+            ref={imageRef}
+            className="relative h-full w-full will-change-transform"
+            style={{ transformOrigin: 'center' }}
           >
-            <div 
-              ref={imageRef}
-              className="relative h-full w-full will-change-transform"
-              style={{ transformOrigin: 'center' }}
-            >
-              <Image 
-                src={allVisuals[currentImageIndex]} 
-                alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} 
-                fill 
-                className="object-contain" 
-                sizes="100vw" 
-                priority={true} // Priorité à toutes les images pour garantir un chargement rapide
-                key={allVisuals[currentImageIndex]}
-              />
-            </div>
+            <Image 
+              src={allVisuals[currentImageIndex]} 
+              alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} 
+              fill 
+              className="object-contain" 
+              sizes="100vw" 
+              priority={true} // Priorité à toutes les images pour garantir un chargement rapide
+              key={allVisuals[currentImageIndex]}
+            />
           </div>
+        </div>
         
         {/* Boutons de navigation */}
         {allVisuals.length > 1 && !isSwiping && (
@@ -606,7 +729,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
         {/* Nouveau panneau d'information avec grip plus grand toujours visible */}
         <div 
           ref={panelRef} 
-          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-lg transition-transform duration-400 ease-out transform ${isInfoVisible ? 'translate-y-0' : 'translate-y-calc'}`} 
+          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-lg transition-transform duration-400 ease-out transform`} 
           style={{ 
             maxHeight: '75vh',
             transform: isInfoVisible ? 'translateY(0)' : `translateY(calc(100% - 20vh))` // Grip plus grand (20vh)
@@ -627,7 +750,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
           
           {/* Contenu du panneau avec classe panel-content pour la manipulation programmée */}
           <div 
-            className={`p-5 overflow-y-auto panel-content`}
+            className="p-5 overflow-y-auto panel-content"
             style={{ 
               maxHeight: 'calc(75vh - 20vh)',
               display: isInfoVisible ? 'block' : 'none', // État initial basé sur isInfoVisible
