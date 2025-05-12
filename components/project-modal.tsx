@@ -1,5 +1,5 @@
 // ========================================================================
-// === project-modal.tsx - VERSION INTÉGRALE ET CORRIGÉE (VRAIMENT CETTE FOIS) ===
+// === project-modal.tsx - VERSION INTÉGRALE ET CORRIGÉE (DÉFINITIVE) ===
 // ========================================================================
 "use client"
 
@@ -35,7 +35,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isInfoVisible, setIsInfoVisible] = useState(false);
-  const [nextImageIndex, setNextImageIndex] = useState(allVisuals.length > 1 ? 1 : 0);
+  const [nextImageStateIndex, setNextImageStateIndex] = useState(allVisuals.length > 1 ? 1 : 0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [currentTouchX, setCurrentTouchX] = useState<number | null>(null);
@@ -72,11 +72,12 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   }, [isMounted]);
 
   const prevIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
-  const currentNextIndexInternal = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
+  const nextIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
 
   useEffect(() => {
-      setNextImageIndex(currentNextIndexInternal);
-  }, [currentNextIndexInternal]);
+      setNextImageStateIndex(nextIndex);
+  }, [nextIndex]);
+
 
   const resetSwipeState = useCallback(() => {
     setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null);
@@ -282,9 +283,21 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
 
   // --- EFFECTS ---
   useEffect(() => {
+    if (isOpen && isMobile && isMounted && initialCollapsedY !== null) {
+        setPanelTranslateY(initialCollapsedY);
+        requestAnimationFrame(() => {
+            if (panelRef.current) panelRef.current.style.transition = `transform ${PANEL_ANIMATION_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1)`;
+        });
+    } else if (!isOpen) {
+        setPanelTranslateY(null); setIsInfoVisible(false);
+        if (panelRef.current) panelRef.current.style.transition = 'none';
+    }
+  }, [isOpen, isMobile, isMounted, initialCollapsedY]);
+
+  useEffect(() => {
     if (isOpen) {
         const newNextIndexState = allVisuals.length > 1 ? 1 : 0;
-        setCurrentImageIndex(0); setNextImageIndex(newNextIndexState);
+        setCurrentImageIndex(0); setNextImageStateIndex(newNextIndexState);
         resetSwipeState(); setImagesLoaded({}); setIsInfoVisible(false);
         if(isMobile && isMounted && initialCollapsedY !== null) { setPanelTranslateY(initialCollapsedY); }
     }
@@ -311,7 +324,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     };
     const preloadAllImages = async () => {
         try {
-            const priorityIndices = [...new Set([currentImageIndex, nextIndex, prevIndex])]; // nextIndex est l'état
+            // Utilise prevIndex et nextIndex (les constantes useMemo) pour le preloading
+            const priorityIndices = [...new Set([currentImageIndex, nextIndex, prevIndex])];
             await Promise.all(priorityIndices.map(idx => allVisuals[idx] ? preloadImage(allVisuals[idx]) : Promise.resolve()));
             const otherImages = allVisuals.filter((_, i) => !priorityIndices.includes(i));
             Promise.all(otherImages.map(src => src ? preloadImage(src) : Promise.resolve()));
@@ -322,52 +336,56 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
 
   useEffect(() => {
     if (!isMounted || !isOpen || isMobile) { try { if (descriptionColumnRef.current) descriptionColumnRef.current.style.maxHeight = ''; } catch (e) {} return; };
-    const adjustHeight = () => { /* ... */ };
+    const adjustHeight = () => {
+        try {
+            if (imageColumnRef.current && descriptionColumnRef.current) {
+                descriptionColumnRef.current.style.maxHeight = `${imageColumnRef.current.offsetHeight}px`;
+            } else if (descriptionColumnRef.current) {
+                descriptionColumnRef.current.style.maxHeight = '';
+            }
+        } catch (error) { console.error("Height sync error:", error); }
+    };
     const timerId = setTimeout(adjustHeight, 150); window.addEventListener('resize', adjustHeight);
-    return () => { /* Cleanup */ };
+    return () => { clearTimeout(timerId); window.removeEventListener('resize', adjustHeight); try { if (descriptionColumnRef.current) descriptionColumnRef.current.style.maxHeight = ''; } catch(e) {} };
   }, [isOpen, isMobile, currentImageIndex, isMounted]);
 
   useEffect(() => {
     if (!isMounted || !isMobile || !isOpen) return;
-    const preventDocumentScroll = (e: TouchEvent) => { /* ... */ };
+    const preventDocumentScroll = (e: TouchEvent) => {
+        try {
+            const target = e.target as Node;
+            const panelContent = panelRef.current?.querySelector('.panel-content');
+            if (isInfoVisible && panelContent?.contains(target) && panelContent.scrollHeight > panelContent.clientHeight) { return true; }
+            if (e.cancelable) e.preventDefault();
+        } catch (error) { console.error("Scroll prevention error:", error); }
+    };
     document.addEventListener('touchmove', preventDocumentScroll, { passive: false });
     return () => document.removeEventListener('touchmove', preventDocumentScroll);
   }, [isOpen, isMobile, isInfoVisible, isMounted]);
 
    useEffect(() => {
         if (!isMounted || isMobile || !isOpen) return;
-        const handleClickOutside = (event: MouseEvent) => { /* ... */ };
+        const handleClickOutside = (event: MouseEvent) => {
+            try { if (modalRef.current && !modalRef.current.contains(event.target as Node)) onClose(); }
+            catch (error) { console.error("Click outside error:", error); onClose(); }
+        };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen, onClose, isMobile, isMounted]);
 
-  // --- Desktop Keyboard Nav Effect (handler DÉFINI INLINE) ---
   useEffect(() => {
       if (!isMounted || isMobile || !isOpen) return;
-
-      // Fonction définie directement dans l'effet
       const handleKeyDownInEffect = (e: KeyboardEvent) => {
-          if (!isOpen) return; // Re-check isOpen
-          if (e.key === "Escape") {
-              onClose();
-          } else if (allVisuals.length > 1) {
-              if (e.key === "ArrowRight") {
-                  handleNext(); // useCallback
-                  setTimeout(resetSwipeState, 0); // useCallback
-              } else if (e.key === "ArrowLeft") {
-                  handlePrevious(); // useCallback
-                  setTimeout(resetSwipeState, 0); // useCallback
-              }
+          if (!isOpen) return;
+          if (e.key === "Escape") { onClose(); }
+          else if (allVisuals.length > 1) {
+              if (e.key === "ArrowRight") { handleNext(); setTimeout(resetSwipeState, 0); }
+              else if (e.key === "ArrowLeft") { handlePrevious(); setTimeout(resetSwipeState, 0); }
           }
       };
-
       window.addEventListener("keydown", handleKeyDownInEffect);
       return () => window.removeEventListener("keydown", handleKeyDownInEffect);
-
-  }, [ // Dépendances exhaustives pour la fonction inline
-      isMobile, isOpen, isMounted, onClose, allVisuals.length,
-      handleNext, handlePrevious, resetSwipeState
-  ]);
+  }, [isMobile, isOpen, isMounted, onClose, allVisuals.length, handleNext, handlePrevious, resetSwipeState]);
 
 
    // --- RENDER FALLBACK ---
@@ -391,11 +409,11 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
                  <div className="w-8 h-8 shrink-0"></div>
              </div>
              <div className="absolute inset-0 pt-16 pb-[--grip-visible-height] overflow-hidden" style={{ '--grip-visible-height': collapsedGripVisibleHeight } as React.CSSProperties} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-                 {allVisuals.length > 1 && (<div ref={nextImageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ transform: 'scale(0.95) translateY(8px)', opacity: 0.7, zIndex: 5, }}> {allVisuals[nextImageIndex] && (<Image key={allVisuals[nextImageIndex]} src={allVisuals[nextImageIndex]} alt={`Aperçu ${nextImageIndex + 1}`} fill className="object-contain" sizes="100vw" loading="lazy" />)} </div>)}
+                 {allVisuals.length > 1 && (<div ref={nextImageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ transform: 'scale(0.95) translateY(8px)', opacity: 0.7, zIndex: 5, }}> {allVisuals[nextImageStateIndex] && (<Image key={allVisuals[nextImageStateIndex]} src={allVisuals[nextImageStateIndex]} alt={`Aperçu ${nextImageStateIndex + 1}`} fill className="object-contain" sizes="100vw" loading="lazy" />)} </div>)}
                  <div ref={imageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ zIndex: 10 }}> {allVisuals[currentImageIndex] && (<Image key={allVisuals[currentImageIndex]} src={allVisuals[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} fill className="object-contain" sizes="100vw" priority={true} />)} </div>
              </div>
              {allVisuals.length > 1 && !isSwiping && !isDraggingPanel && (<> <button onClick={() => { handlePrevious(); setTimeout(resetSwipeState,0); }} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Précédent" style={{ transform: 'translateY(-50%)' }}> <ChevronLeft size={24} /> </button> <button onClick={() => { handleNext(); setTimeout(resetSwipeState,0);}} className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Suivant" style={{ transform: 'translateY(-50%)' }}> <ChevronRight size={24} /> </button> </>)}
-             {allVisuals.length > 1 && (<div className={`absolute left-0 right-0 flex justify-center space-x-2 transition-opacity duration-300 z-10 ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ bottom: `calc(${GRIP_HEIGHT_COLLAPSED} + 15px)` }} aria-label="Indicateurs" aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}> <div className="px-3 py-1.5 bg-black/20 backdrop-blur-sm rounded-full"> {allVisuals.map((_, idx) => (<button key={idx} onClick={() => { setCurrentImageIndex(idx); /* nextImageIndex se met à jour via l'effet sur currentImageIndex */ setTimeout(resetSwipeState,0); }} className={`w-2 h-2 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`} aria-label={`Image ${idx + 1}`} aria-current={currentImageIndex === idx ? "step" : undefined} />))} </div> </div>)}
+             {allVisuals.length > 1 && (<div className={`absolute left-0 right-0 flex justify-center space-x-2 transition-opacity duration-300 z-10 ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ bottom: `calc(${GRIP_HEIGHT_COLLAPSED} + 15px)` }} aria-label="Indicateurs" aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}> <div className="px-3 py-1.5 bg-black/20 backdrop-blur-sm rounded-full"> {allVisuals.map((_, idx) => (<button key={idx} onClick={() => { setCurrentImageIndex(idx); setTimeout(resetSwipeState,0); }} className={`w-2 h-2 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`} aria-label={`Image ${idx + 1}`} aria-current={currentImageIndex === idx ? "step" : undefined} />))} </div> </div>)}
              <div ref={panelRef} className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-2xl transform will-change-transform cursor-grab active:cursor-grabbing touch-none`} style={{ height: GRIP_HEIGHT_EXPANDED, maxHeight: GRIP_HEIGHT_EXPANDED, transform: panelTransform, zIndex: 30, }} aria-hidden={!isInfoVisible} onTouchStart={handlePanelTouchStart} onTouchMove={handlePanelTouchMove} onTouchEnd={handlePanelTouchEnd} >
                 <div ref={gripRef} className="w-full flex flex-col items-center pt-3 pb-2 pointer-events-none"> <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-3 shrink-0"></div> <div className="flex-grow flex items-center justify-center w-full px-4 overflow-hidden min-h-[calc(${GRIP_HEIGHT_COLLAPSED}-30px)]"> {!isInfoVisible && ( <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider">Description</span> )} </div> </div>
                 <div className="panel-content px-5 pb-5 overflow-y-auto pointer-events-auto touch-auto" style={{ height: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED})`, maxHeight: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED})`, display: 'block', opacity: isInfoVisible ? 1 : 0, transition: `opacity ${CONTENT_FADE_DURATION}ms ease-out`, WebkitOverflowScrolling: 'touch', }}> <div className="space-y-4"> {Array.isArray(project.description) ? ( project.description.map((p, i) => <p key={i} className="font-poppins text-gray-700 text-sm leading-relaxed">{p}</p>)) : (<p className="font-poppins text-gray-700 text-sm leading-relaxed">{project.description}</p>)} </div> {project.link && (<a href={project.link} target="_blank" rel="noopener noreferrer" className="font-poppins block mt-5 text-primary-blue hover:underline text-sm font-medium">Visiter le site</a>)} <div className="h-[calc(env(safe-area-inset-bottom,0px)+20px)]"></div> </div>
@@ -410,7 +428,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
                  <div className="relative" style={{ aspectRatio: '4/5' }}>
                    {allVisuals[currentImageIndex] && ( <Image src={allVisuals[currentImageIndex]} alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} fill className="object-contain" sizes="(max-width: 768px) 100vw, 50vw" priority={currentImageIndex === 0} key={allVisuals[currentImageIndex]} /> )}
                    {allVisuals.length > 1 && ( <> <button onClick={() => {handlePrevious(); setTimeout(resetSwipeState, 0);}} className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" aria-label="Image précédente"> <ChevronLeft size={20} /> </button> <button onClick={() => {handleNext(); setTimeout(resetSwipeState, 0);}} className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" aria-label="Image suivante"> <ChevronRight size={20} /> </button> </> )}
-                   {allVisuals.length > 1 && ( <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center" > <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full"> {allVisuals.map((_, index) => ( <button key={index} onClick={() => {setCurrentImageIndex(index); /* nextImageIndex via effet */ setTimeout(resetSwipeState,0);}} className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'}`} aria-label={`Aller à l'image ${index + 1}`} aria-current={currentImageIndex === index ? "step" : undefined} /> ))} </div> </div> )}
+                   {allVisuals.length > 1 && ( <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center" > <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full"> {allVisuals.map((_, index) => ( <button key={index} onClick={() => {setCurrentImageIndex(index); setTimeout(resetSwipeState,0);}} className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'}`} aria-label={`Aller à l'image ${index + 1}`} aria-current={currentImageIndex === index ? "step" : undefined} /> ))} </div> </div> )}
                  </div>
                </div>
                <div className="w-full md:w-1/2 p-8 overflow-y-auto" ref={descriptionColumnRef} >
