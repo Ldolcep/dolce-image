@@ -576,7 +576,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     const collapsedGripVisibleHeight = `calc(${GRIP_HEIGHT_COLLAPSED} + 0px)`;
 
     return (
-      <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none" // White bg, disable text select
+      // White bg, disable text select
+      <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none"
         ref={modalRef}
         role="dialog"
         aria-modal="true"
