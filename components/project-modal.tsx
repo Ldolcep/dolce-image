@@ -1,11 +1,10 @@
-// project-modal.tsx - Version restaurée avec styles des contrôles slider mis à jour
+// project-modal.tsx - Version améliorée avec animation Tinder et grip redesigné
 "use client"
 
 import type React from "react"
 import { useState, useEffect, useRef, useMemo } from "react"
 import Image from "next/image"
-// import Link from "next/link" // Non utilisé
-import { X, ChevronLeft, ChevronRight, Info /*, ArrowLeft */ } from 'lucide-react' // ArrowLeft non utilisé
+import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useIsMobile } from "@/hooks/use-mobile"
 
 interface Project {
@@ -28,10 +27,22 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const [isInfoVisible, setIsInfoVisible] = useState(false)
+  
+  // États pour le swipe Tinder
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const [currentTouchX, setCurrentTouchX] = useState<number | null>(null)
+  const [currentTouchY, setCurrentTouchY] = useState<number | null>(null)
+  const [swipeDistance, setSwipeDistance] = useState(0)
+  const [swipeRotation, setSwipeRotation] = useState(0)
+  const [isSwiping, setIsSwiping] = useState(false)
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null)
+  
   const modalRef = useRef<HTMLDivElement>(null)
+  const imageRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const gripRef = useRef<HTMLDivElement>(null)
+  
   // Références restaurées pour le useEffect de synchronisation
   const imageColumnRef = useRef<HTMLDivElement>(null)
   const descriptionColumnRef = useRef<HTMLDivElement>(null)
@@ -40,6 +51,7 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
   // États pour la gestion du glissement du panneau d'information (mobile)
   const [dragStartY, setDragStartY] = useState<number | null>(null)
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null)
+  const [panelHeight, setPanelHeight] = useState(0)
 
   // Reset current image when project changes
   useEffect(() => {
@@ -94,6 +106,24 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     }
   }, [isOpen])
 
+  // Calculate panel height for mobile grip
+  useEffect(() => {
+    if (isOpen && isMobile && panelRef.current) {
+      const updateHeight = () => {
+        if (panelRef.current) {
+          setPanelHeight(panelRef.current.getBoundingClientRect().height);
+        }
+      };
+      
+      updateHeight();
+      window.addEventListener('resize', updateHeight);
+      
+      return () => {
+        window.removeEventListener('resize', updateHeight);
+      };
+    }
+  }, [isOpen, isMobile, isInfoVisible]);
+
   // Handle click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -128,129 +158,347 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   // Utilisation de useCallback pour handleNext/Previous serait idéal ici
-  // Mais pour l'instant, on les ajoute aux dépendances pour éviter les warnings potentiels
-  }, [isOpen, onClose, allVisuals.length]) // handleNext, handlePrevious
+  }, [isOpen, onClose, allVisuals.length]) 
 
-  // Utiliser useCallback pour éviter de recréer les fonctions à chaque render si elles sont dans les dépendances de useEffect
-  // const handleNext = useCallback(() => { ... }, [allVisuals.length]);
-  // const handlePrevious = useCallback(() => { ... }, [allVisuals.length]);
-  // Si utilisées, ajouter 'handleNext', 'handlePrevious' dans le tableau de dépendances de useEffect[handleKeyDown]
-
-   const handleNext = () => {
+  const handleNext = () => {
+    resetSwipeState();
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allVisuals.length)
   }
 
   const handlePrevious = () => {
+    resetSwipeState();
     setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allVisuals.length) % allVisuals.length)
   }
-
 
   // Toggle pour afficher/masquer les infos (sur mobile)
   const toggleInfo = () => {
     setIsInfoVisible(!isInfoVisible)
   }
 
-  // Gestion du swipe pour les images (mobile)
-  const minSwipeDistance = 50
+  // Reset swipe state
+  const resetSwipeState = () => {
+    setTouchStart(null);
+    setTouchEnd(null);
+    setCurrentTouchX(null);
+    setCurrentTouchY(null);
+    setSwipeDistance(0);
+    setSwipeRotation(0);
+    setIsSwiping(false);
+    setSwipeDirection(null);
+    
+    // Reset any applied transforms on the image
+    if (imageRef.current) {
+      imageRef.current.style.transform = '';
+      imageRef.current.style.transition = '';
+      imageRef.current.style.opacity = '1';
+    }
+  }
+
+  // Calcul des paramètres de l'animation Tinder
+  const calculateSwipeAnimation = (currentX: number, startX: number) => {
+    if (!imageRef.current) return;
+    
+    const distance = currentX - startX;
+    const maxRotation = 15; // Angle maximum de rotation
+    const screenWidth = window.innerWidth;
+    const swipeThreshold = screenWidth * 0.35; // Distance minimale pour changer d'image
+    
+    // Calcul de la rotation proportionnelle
+    const rotation = (distance / screenWidth) * maxRotation;
+    // Normaliser la distance pour l'affichage
+    const normalizedDistance = distance;
+    
+    setSwipeDistance(normalizedDistance);
+    setSwipeRotation(rotation);
+    
+    // Déterminer la direction du swipe
+    if (distance > 0) {
+      setSwipeDirection('right');
+    } else if (distance < 0) {
+      setSwipeDirection('left');
+    } else {
+      setSwipeDirection(null);
+    }
+    
+    // Appliquer la transformation en temps réel
+    const transform = `translateX(${normalizedDistance}px) rotate(${rotation}deg)`;
+    const opacity = 1 - Math.min(0.3, Math.abs(distance) / (screenWidth * 1.5));
+    
+    imageRef.current.style.transform = transform;
+    imageRef.current.style.opacity = opacity.toString();
+    imageRef.current.style.transition = 'none';
+  }
+
+  // Gestion du swipe Tinder pour les images (mobile)
+  const minSwipeDistance = 60;
   const onTouchStart = (e: React.TouchEvent) => {
     // Ignorer si on touche le panneau info
     if (panelRef.current?.contains(e.target as Node)) return;
-    setTouchEnd(null)
-    setTouchStart(e.targetTouches[0].clientX)
-  }
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (touchStart === null) return; // Ne pas tracker si le start n'est pas sur l'image
-    setTouchEnd(e.targetTouches[0].clientX)
-  }
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > minSwipeDistance
-    const isRightSwipe = distance < -minSwipeDistance
-    if (isLeftSwipe) {
-      handleNext()
-    } else if (isRightSwipe) {
-      handlePrevious()
-    }
-    // Reset touch points
-    setTouchStart(null);
+    
     setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setCurrentTouchX(e.targetTouches[0].clientX);
+    setCurrentTouchY(e.targetTouches[0].clientY);
+    setIsSwiping(true);
+    
+    // Reset any previous transforms
+    if (imageRef.current) {
+      imageRef.current.style.transition = 'none';
+    }
+  }
+  
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStart === null || !isSwiping) return;
+    
+    // Update currentTouch positions
+    setCurrentTouchX(e.targetTouches[0].clientX);
+    setCurrentTouchY(e.targetTouches[0].clientY);
+    setTouchEnd(e.targetTouches[0].clientX);
+    
+    // Calculate and apply the Tinder animation
+    calculateSwipeAnimation(e.targetTouches[0].clientX, touchStart);
+  }
+  
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd || !isSwiping) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (imageRef.current) {
+      // Add transition for smooth animation completion
+      imageRef.current.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+      
+      if (isLeftSwipe) {
+        // Complete the swipe animation before changing image
+        imageRef.current.style.transform = `translateX(-100%) rotate(-${Math.abs(swipeRotation)}deg)`;
+        imageRef.current.style.opacity = '0';
+        
+        // Delay the image change to allow animation to complete
+        setTimeout(() => handleNext(), 250);
+      } else if (isRightSwipe) {
+        // Complete the swipe animation before changing image
+        imageRef.current.style.transform = `translateX(100%) rotate(${Math.abs(swipeRotation)}deg)`;
+        imageRef.current.style.opacity = '0';
+        
+        // Delay the image change to allow animation to complete
+        setTimeout(() => handlePrevious(), 250);
+      } else {
+        // Return to center with elastic animation if not enough distance
+        imageRef.current.style.transform = 'translateX(0) rotate(0deg)';
+        imageRef.current.style.opacity = '1';
+      }
+    }
+    
+    // Reset states
+    resetSwipeState();
   }
 
   // Gestion du glissement du panneau d'information (mobile)
   const handlePanelTouchStart = (e: React.TouchEvent) => {
-    setDragStartY(e.touches[0].clientY)
-  }
-  const handlePanelTouchMove = (e: React.TouchEvent) => {
-    if (dragStartY === null) return
-    setDragCurrentY(e.touches[0].clientY)
-    const deltaY = e.touches[0].clientY - dragStartY
-    if (deltaY > 0 && panelRef.current) { // Drag vers le bas
-      panelRef.current.style.transform = `translateY(${deltaY}px)`
-      panelRef.current.style.transition = 'none'; // Pas de transition pendant le drag
-    }
-  }
-  const handlePanelTouchEnd = () => {
-    if (dragStartY === null || dragCurrentY === null) return
-    const deltaY = dragCurrentY - dragStartY
-    if (deltaY > 70) { // Fermer si glissé assez bas
-      setIsInfoVisible(false)
-    }
-    // Remettre en place avec animation (ou laisser fermé si isInfoVisible est false)
+    e.stopPropagation(); // Empêcher la propagation pour éviter le swipe d'image
+    setDragStartY(e.touches[0].clientY);
+    
     if (panelRef.current) {
-      panelRef.current.style.transition = 'transform 0.3s ease-out';
-      panelRef.current.style.transform = '';
+      panelRef.current.style.transition = 'none';
     }
-    // Réinitialiser les états
-    setDragStartY(null)
-    setDragCurrentY(null)
   }
-
+  
+  const handlePanelTouchMove = (e: React.TouchEvent) => {
+    if (dragStartY === null || !panelRef.current) return;
+    
+    const currentY = e.touches[0].clientY;
+    setDragCurrentY(currentY);
+    
+    const deltaY = currentY - dragStartY;
+    
+    // Limiter le déplacement différemment selon l'état
+    if (isInfoVisible) {
+      // Panel ouvert - permettre uniquement de glisser vers le bas
+      if (deltaY > 0) {
+        panelRef.current.style.transform = `translateY(${deltaY}px)`;
+      }
+    } else {
+      // Panel fermé - permettre uniquement de glisser vers le haut
+      if (deltaY < 0) {
+        const maxUpwardMovement = -40; // Limiter le mouvement vers le haut à 40px
+        const limitedDeltaY = Math.max(deltaY, maxUpwardMovement);
+        panelRef.current.style.transform = `translateY(${limitedDeltaY}px)`;
+      }
+    }
+  }
+  
+  const handlePanelTouchEnd = () => {
+    if (dragStartY === null || dragCurrentY === null || !panelRef.current) return;
+    
+    const deltaY = dragCurrentY - dragStartY;
+    const threshold = 60; // Seuil pour décider si on ouvre/ferme
+    
+    panelRef.current.style.transition = 'transform 0.3s ease-out';
+    
+    if (isInfoVisible) {
+      // Si panel ouvert et glissé assez vers le bas
+      if (deltaY > threshold) {
+        setIsInfoVisible(false);
+      } else {
+        // Pas assez glissé, retour à la position ouverte
+        panelRef.current.style.transform = '';
+      }
+    } else {
+      // Si panel fermé et glissé assez vers le haut
+      if (deltaY < -threshold) {
+        setIsInfoVisible(true);
+      } else {
+        // Pas assez glissé, retour à la position fermée
+        panelRef.current.style.transform = '';
+      }
+    }
+    
+    // Réinitialiser les états
+    setDragStartY(null);
+    setDragCurrentY(null);
+  }
 
   if (!isOpen) return null
 
-  // --- VERSION MOBILE (GARDÉE INCHANGÉE PAR RAPPORT À LA VERSION PRÉCÉDENTE) ---
+  // --- VERSION MOBILE (MODIFIÉE) ---
   if (isMobile) {
-     // Le code de la version mobile reste identique à celui de votre dernier fichier fonctionnel
     return (
       <div className="fixed inset-0 bg-black z-50 overflow-hidden"
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={`modal-title-${project.id}`}>
         {/* Barre de navigation supérieure */}
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 to-transparent">
-          <button onClick={onClose} className="text-white rounded-full p-2" aria-label="Fermer"><X size={24} /></button>
-          <h3 id={`modal-title-${project.id}`} className="text-white text-lg font-medium truncate mx-4 flex-1 text-center">{project.title}</h3>
-          <button className={`text-white rounded-full py-2 px-3 flex items-center gap-1 text-sm ${ isInfoVisible ? 'bg-white/30' : 'bg-black/40 backdrop-blur-sm'}`} onClick={toggleInfo} aria-label={isInfoVisible ? "Masquer la description" : "Afficher la description"} aria-expanded={isInfoVisible}><Info size={18} /><span>Infos</span></button>
+          <button onClick={onClose} className="text-white rounded-full p-2" aria-label="Fermer">
+            <X size={24} />
+          </button>
+          <h3 id={`modal-title-${project.id}`} className="text-white text-lg font-medium truncate mx-4 flex-1 text-center">
+            {project.title}
+          </h3>
+          <div className="w-8 h-8"></div> {/* Spacer pour équilibrer */}
         </div>
-        {/* Contenu principal (image) */}
-        <div className="h-full w-full transition-all duration-300" style={{ filter: isInfoVisible ? 'blur(2px)' : 'none', transform: isInfoVisible ? 'scale(0.98)' : 'scale(1)'}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-          <Image src={allVisuals[currentImageIndex]} alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} fill className="object-contain" sizes="100vw" priority={currentImageIndex === 0} key={allVisuals[currentImageIndex]}/>
+        
+        {/* Contenu principal (image avec animation Tinder) */}
+        <div 
+          className="h-full w-full transition-all duration-300" 
+          style={{ 
+            filter: isInfoVisible ? 'blur(2px)' : 'none', 
+            transform: isInfoVisible ? 'scale(0.98)' : 'scale(1)'
+          }}
+          onTouchStart={onTouchStart} 
+          onTouchMove={onTouchMove} 
+          onTouchEnd={onTouchEnd}
+        >
+          <div 
+            ref={imageRef}
+            className="relative h-full w-full transition-transform"
+            style={{ transformOrigin: 'center' }}
+          >
+            <Image 
+              src={allVisuals[currentImageIndex]} 
+              alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} 
+              fill 
+              className="object-contain" 
+              sizes="100vw" 
+              priority={currentImageIndex === 0} 
+              key={allVisuals[currentImageIndex]}
+            />
+          </div>
         </div>
+        
         {/* Boutons de navigation */}
-        {allVisuals.length > 1 && (<>
-            <button onClick={handlePrevious} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white active:bg-black/50" aria-label="Image précédente"><ChevronLeft size={24} /></button>
-            <button onClick={handleNext} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white active:bg-black/50" aria-label="Image suivante"><ChevronRight size={24} /></button>
-        </>)}
-        {/* Indicateurs de pagination */}
-        {allVisuals.length > 1 && (<div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-2" aria-label="Indicateurs d'images">
-            {allVisuals.map((_, idx) => (<button key={idx} onClick={() => setCurrentImageIndex(idx)} className={`w-2 h-2 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`} aria-label={`Aller à l'image ${idx + 1}`} aria-current={currentImageIndex === idx ? "step" : undefined}/>))}
-        </div>)}
-        {/* Panneau d'information */}
-        <div ref={panelRef} className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-lg transition-transform duration-300 ease-out transform ${ isInfoVisible ? 'translate-y-0' : 'translate-y-full'}`} style={{ maxHeight: '60vh' }} onTouchStart={handlePanelTouchStart} onTouchMove={handlePanelTouchMove} onTouchEnd={handlePanelTouchEnd} aria-hidden={!isInfoVisible}>
-          <div className="w-full flex justify-center pt-3 pb-2 cursor-grab" aria-hidden="true"><div className="w-10 h-1.5 bg-gray-300 rounded-full"></div></div>
-          <div className="p-4 pt-0 border-b"><h2 id="panel-title" className="font-great-vibes text-2xl text-center">{project.title}</h2></div>
-          <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(60vh - 70px)' }}>
+        {allVisuals.length > 1 && !isSwiping && (
+          <>
+            <button 
+              onClick={handlePrevious} 
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white active:bg-black/50" 
+              aria-label="Image précédente"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button 
+              onClick={handleNext} 
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white active:bg-black/50" 
+              aria-label="Image suivante"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </>
+        )}
+        
+        {/* Indicateurs de pagination - Repositionnés au-dessus du grip */}
+        {allVisuals.length > 1 && (
+          <div 
+            className={`absolute left-0 right-0 flex justify-center space-x-2 transition-opacity duration-300 ${isInfoVisible ? 'opacity-0' : 'opacity-100'}`} 
+            style={{ bottom: isInfoVisible ? '20px' : '80px' }} // Positionnement dynamique
+            aria-label="Indicateurs d'images"
+            aria-hidden={isInfoVisible}
+          >
+            {allVisuals.map((_, idx) => (
+              <button 
+                key={idx} 
+                onClick={() => setCurrentImageIndex(idx)} 
+                className={`w-2 h-2 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`} 
+                aria-label={`Aller à l'image ${idx + 1}`} 
+                aria-current={currentImageIndex === idx ? "step" : undefined}
+              />
+            ))}
+          </div>
+        )}
+        
+        {/* Nouveau panneau d'information avec grip toujours visible */}
+        <div 
+          ref={panelRef} 
+          className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-lg transition-transform duration-300 ease-out transform ${isInfoVisible ? 'translate-y-0' : 'translate-y-calc'}`} 
+          style={{ 
+            maxHeight: '70vh',
+            transform: isInfoVisible ? 'translateY(0)' : `translateY(calc(100% - 40px))` // Grip toujours visible (40px)
+          }}
+          aria-hidden={!isInfoVisible}
+        >
+          {/* Grip avec titre visible */}
+          <div 
+            ref={gripRef}
+            className="w-full flex flex-col items-center pt-2 pb-2 cursor-grab active:cursor-grabbing"
+            onTouchStart={handlePanelTouchStart}
+            onTouchMove={handlePanelTouchMove}
+            onTouchEnd={handlePanelTouchEnd}
+          >
+            <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-1"></div>
+            <h2 className="font-great-vibes text-xl text-center truncate max-w-[90%]">{project.title}</h2>
+          </div>
+          
+          {/* Contenu du panneau */}
+          <div className={`p-4 overflow-y-auto transition-opacity duration-300 ${isInfoVisible ? 'opacity-100' : 'opacity-0'}`} 
+               style={{ maxHeight: 'calc(70vh - 40px)' }}>
             <div className="space-y-4">
-              {Array.isArray(project.description) ? (project.description.map((paragraph, idx) => (<p key={idx} className="font-poppins text-gray-700 text-sm leading-relaxed">{paragraph}</p>))) : (<p className="font-poppins text-gray-700 text-sm leading-relaxed">{project.description}</p>)}
+              {Array.isArray(project.description) ? (
+                project.description.map((paragraph, idx) => (
+                  <p key={idx} className="font-poppins text-gray-700 text-sm leading-relaxed">{paragraph}</p>
+                ))
+              ) : (
+                <p className="font-poppins text-gray-700 text-sm leading-relaxed">{project.description}</p>
+              )}
             </div>
-            {project.link && (<a href={project.link} target="_blank" rel="noopener noreferrer" className="font-poppins block mt-5 text-primary-blue hover:underline text-sm font-medium">Visiter le site du projet</a>)}
+            {project.link && (
+              <a 
+                href={project.link} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-poppins block mt-5 text-primary-blue hover:underline text-sm font-medium"
+              >
+                Visiter le site du projet
+              </a>
+            )}
           </div>
         </div>
       </div>
     )
   } else {
-    // --- VERSION DESKTOP (RESTAURÉE AVEC STYLES CONTRÔLES MIS À JOUR) ---
+    // --- VERSION DESKTOP (INCHANGÉE) ---
     return (
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300"
@@ -278,7 +526,6 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
                 alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
                 fill
                  // Utiliser object-contain ou object-cover selon préférence
-                 // object-contain est sûr si les images sont exactement 4:5
                 className="object-contain"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority={currentImageIndex === 0}
