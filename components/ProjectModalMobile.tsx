@@ -808,4 +808,3 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
    </div>
  );
 }
-"
