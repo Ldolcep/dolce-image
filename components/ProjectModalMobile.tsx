@@ -264,11 +264,42 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const handlePanelTouchEnd = useCallback(() => { /* (Logic as before) */ }, [dragStartY, isDraggingPanel, panelTranslateY, isInfoVisible]);
 
   // --- EFFECTS ---
-  useEffect(() => { /* Effect to set initial panel state when opening */ }, [isOpen, isMobile, isMounted, initialCollapsedY]);
-  useEffect(() => { /* Reset on project change */ }, [project, isOpen, isMobile, isMounted, initialCollapsedY, allVisuals.length, resetSwipeState]);
-  useEffect(() => { /* Modal Open/Close Animation */ }, [isOpen, isMounted]);
-  useEffect(() => { /* Image Preloading */ }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
-  useEffect(() => { /* Prevent Background Scroll */ }, [isOpen, isInfoVisible, isMounted]); // isMobile implicite car ce comp. est mobile
+  useEffect(() => { // Initial panel state
+    if (isOpen && isMounted && initialCollapsedY !== null) { // isMobile retiré
+        setPanelTranslateY(initialCollapsedY);
+        requestAnimationFrame(() => {
+            if (panelRef.current) panelRef.current.style.transition = `transform ${PANEL_ANIMATION_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1)`;
+        });
+    } else if (!isOpen) {
+        setPanelTranslateY(null); setIsInfoVisible(false);
+        if (panelRef.current) panelRef.current.style.transition = 'none';
+    }
+  }, [isOpen, isMounted, initialCollapsedY]); // isMobile retiré
+
+  useEffect(() => { // Reset on project change
+    if (isOpen) { // isMobile retiré
+        const newNextIndexState = allVisuals.length > 1 ? 1 : 0;
+        setCurrentImageIndex(0); setNextImageStateIndex(newNextIndexState);
+        resetSwipeState(); setImagesLoaded({}); setIsInfoVisible(false);
+        if(isMounted && initialCollapsedY !== null) { setPanelTranslateY(initialCollapsedY); }
+    }
+  }, [project, isOpen, isMounted, initialCollapsedY, allVisuals.length, resetSwipeState]); // isMobile retiré
+
+  // Cet effet ne dépendait pas de isMobile, il est correct
+  useEffect(() => { /* Image Preloading */
+    if (!isMounted || !isOpen || !allVisuals?.length) return;
+    const preloadImage = (src: string): Promise<void> => { /*...*/ };
+    const preloadAllImages = async () => { /*...*/ };
+    preloadAllImages();
+  }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
+
+  // Cet effet ne dépendait pas de isMobile, il est correct (il est pour MOBILE UNIQUEMENT)
+  useEffect(() => { /* Prevent Background Scroll */
+    if (!isMounted || !isOpen) return; // isMobile implicite
+    const preventDocumentScroll = (e: TouchEvent) => { /*...*/ };
+    document.addEventListener('touchmove', preventDocumentScroll, { passive: false });
+    return () => document.removeEventListener('touchmove', preventDocumentScroll);
+  }, [isOpen, isInfoVisible, isMounted]);
 
    // --- RENDER FALLBACK ---
    if (!isMounted) {
