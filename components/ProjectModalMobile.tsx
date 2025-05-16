@@ -15,7 +15,7 @@ export interface Project {
 }
 
 // Constants
-const GRIP_HEIGHT_COLLAPSED = '5vh';
+const GRIP_HEIGHT_COLLAPSED = '3vh';
 const GRIP_HEIGHT_EXPANDED = '75vh';
 const PANEL_ANIMATION_DURATION = 400;
 const CONTENT_FADE_DURATION = 300;
