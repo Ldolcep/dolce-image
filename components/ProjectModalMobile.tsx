@@ -42,6 +42,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const [panelTranslateY, setPanelTranslateY] = useState<number | null>(null);
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -81,33 +82,35 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     setNextImageStateIndex(nextIndex);
   }, [nextIndex]);
 
-  const resetSwipeState = useCallback(() => {
-    setTouchStart(null);
-    setTouchEnd(null);
-    setCurrentTouchX(null);
-    setSwipeRotation(0);
-    setIsSwiping(false);
-    
-    requestAnimationFrame(() => {
-      try {
-        if (imageRef.current) {
-          imageRef.current.style.transform = 'translateX(0px) rotate(0deg)';
-          imageRef.current.style.opacity = '1';
-          imageRef.current.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
-          imageRef.current.style.transformOrigin = 'center center';
-          imageRef.current.style.zIndex = '10';
-        }
-        if (nextImageRef.current) {
-          nextImageRef.current.style.transform = 'scale(0.95) translateY(8px)';
-          nextImageRef.current.style.opacity = '0.7';
-          nextImageRef.current.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
-          nextImageRef.current.style.zIndex = '5';
-        }
-      } catch (error) { 
-        console.error("Swipe reset style error:", error); 
+const resetSwipeState = useCallback(() => {
+  if (isTransitioning) return; // Ne pas réinitialiser pendant une transition
+  
+  setTouchStart(null);
+  setTouchEnd(null);
+  setCurrentTouchX(null);
+  setSwipeRotation(0);
+  setIsSwiping(false);
+  
+  requestAnimationFrame(() => {
+    try {
+      if (imageRef.current) {
+        imageRef.current.style.transform = 'translateX(0px) rotate(0deg)';
+        imageRef.current.style.opacity = '1';
+        imageRef.current.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+        imageRef.current.style.transformOrigin = 'center center';
+        imageRef.current.style.zIndex = '10';
       }
-    });
-  }, []);
+      if (nextImageRef.current) {
+        nextImageRef.current.style.transform = 'scale(0.95) translateY(8px)';
+        nextImageRef.current.style.opacity = '0.7';
+        nextImageRef.current.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+        nextImageRef.current.style.zIndex = '5';
+      }
+    } catch (error) { 
+      console.error("Swipe reset style error:", error); 
+    }
+  });
+}, [isTransitioning]); // Ajouter isTransitioning comme dépendance
 
   const handleNext = useCallback(() => {
     if (allVisuals.length <= 1 || isSwiping) return;
@@ -120,6 +123,16 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     const newIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
     setCurrentImageIndex(newIndex);
   }, [currentImageIndex, allVisuals.length, isSwiping]);
+  
+  const handleSwipedNext = useCallback(() => {
+    const newIndex = (currentImageIndex + 1) % allVisuals.length;
+    setCurrentImageIndex(newIndex);
+}, [currentImageIndex, allVisuals.length]);
+
+  const handleSwipedPrevious = useCallback(() => {
+    const newIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
+    setCurrentImageIndex(newIndex);
+}, [currentImageIndex, allVisuals.length]);
 
   const calculateSwipeAnimation = useCallback((currentX: number, startX: number) => {
     if (!isMounted || !isSwiping) return;
@@ -224,42 +237,52 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         if (nextImageRef.current) nextImageRef.current.style.transition = transitionStyle;
       }
       
-      if (isLeftSwipe) {
-        if (imageRef.current) { 
-          const finalRotation = -Math.max(15, Math.abs(swipeRotation * 1.2)); 
-          imageRef.current.style.transform = `translateX(-120%) rotate(${finalRotation}deg) scale(0.9)`; 
-          imageRef.current.style.opacity = '0'; 
-        }
-        
-        if (nextImageRef.current) { 
-          nextImageRef.current.style.transform = 'scale(1) translateY(0px)'; 
-          nextImageRef.current.style.opacity = '1'; 
-          nextImageRef.current.style.zIndex = '15'; 
-        }
-        
-        setTimeout(() => { 
-          handleNext(); 
-          resetSwipeState(); 
-        }, swipeAnimDuration);
-      } else if (isRightSwipe) {
-        if (imageRef.current) { 
-          const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.2)); 
-          imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.9)`; 
-          imageRef.current.style.opacity = '0'; 
-        }
-        
-        if (nextImageRef.current) { 
-          nextImageRef.current.style.transform = 'scale(0.95) translateY(8px)'; 
-          nextImageRef.current.style.opacity = '0.7'; 
-        }
-        
-        setTimeout(() => { 
-          handlePrevious(); 
-          resetSwipeState(); 
-        }, swipeAnimDuration);
-      } else { 
-        resetSwipeState(); 
-      }
+if (isLeftSwipe) {
+  if (imageRef.current) { 
+    const finalRotation = -Math.max(15, Math.abs(swipeRotation * 1.2)); 
+    imageRef.current.style.transform = `translateX(-120%) rotate(${finalRotation}deg) scale(0.9)`; 
+    imageRef.current.style.opacity = '0'; 
+  }
+  
+  if (nextImageRef.current) { 
+    nextImageRef.current.style.transform = 'scale(1) translateY(0px)'; 
+    nextImageRef.current.style.opacity = '1'; 
+    nextImageRef.current.style.zIndex = '15'; 
+  }
+  
+  setIsTransitioning(true);
+  setTimeout(() => { 
+    setIsSwiping(false);
+    handleSwipedNext(); 
+    setTimeout(() => {
+      setIsTransitioning(false);
+      resetSwipeState();
+    }, 50);
+  }, swipeAnimDuration);
+} else if (isRightSwipe) {
+  if (imageRef.current) { 
+    const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.2)); 
+    imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.9)`; 
+    imageRef.current.style.opacity = '0'; 
+  }
+  
+  if (nextImageRef.current) { 
+    nextImageRef.current.style.transform = 'scale(0.95) translateY(8px)'; 
+    nextImageRef.current.style.opacity = '0.7'; 
+  }
+  
+  setIsTransitioning(true);
+  setTimeout(() => { 
+    setIsSwiping(false);
+    handleSwipedPrevious(); 
+    setTimeout(() => {
+      setIsTransitioning(false);
+      resetSwipeState();
+    }, 50);
+  }, swipeAnimDuration);
+} else { 
+  resetSwipeState(); 
+}
     } catch (error) { 
       console.error("TouchEnd error:", error); 
       resetSwipeState(); 
@@ -511,6 +534,17 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
       });
     };
     
+  // Réinitialiser l'état après un changement d'image
+useEffect(() => {
+  if (!isTransitioning) return;
+  
+  const timer = setTimeout(() => {
+    setIsTransitioning(false);
+  }, 100);
+  
+  return () => clearTimeout(timer);
+}, [currentImageIndex, isTransitioning]);
+
     const preloadAllImages = async () => {
       try {
         // Utilise prevIndex et nextIndex pour le preloading
