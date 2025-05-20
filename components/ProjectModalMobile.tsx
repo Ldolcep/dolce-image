@@ -1,4 +1,6 @@
-// ProjectModalMobile.tsx - AVEC CORRECTIONS ET LOGS DE DÉBOGAGE
+// ========================================================================
+// === ProjectModalMobile.tsx - VERSION VRAIMENT COMPLÈTE ET CORRIGÉE ===
+// ========================================================================
 "use client"
 
 import type React from "react"
@@ -95,16 +97,18 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   }, []);
 
   const handleNext = useCallback(() => {
-    if (allVisuals.length <= 1 || isSwiping) return;
+    if (allVisuals.length <= 1) return; // isSwiping n'est plus nécessaire ici car on le gère dans onTouchEnd
     const newIndex = (currentImageIndex + 1) % allVisuals.length;
+    console.log("handleNext: newIndex", newIndex);
     setCurrentImageIndex(newIndex);
-  }, [currentImageIndex, allVisuals.length, isSwiping]);
+  }, [currentImageIndex, allVisuals.length]);
 
   const handlePrevious = useCallback(() => {
-    if (allVisuals.length <= 1 || isSwiping) return;
+    if (allVisuals.length <= 1) return;
     const newIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
+    console.log("handlePrevious: newIndex", newIndex);
     setCurrentImageIndex(newIndex);
-  }, [currentImageIndex, allVisuals.length, isSwiping]);
+  }, [currentImageIndex, allVisuals.length]);
 
   const calculateSwipeAnimation = useCallback((currentX: number, startX: number) => {
       if (!isMounted || !isSwiping || !imageRef.current || !backgroundImageRef.current) return;
@@ -152,25 +156,20 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     console.log("ProjectModalMobile: ImageSwipe onTouchStart triggered - Current isSwiping:", isSwiping, "isDraggingPanel:", isDraggingPanel);
     const targetNode = e.target as Node;
     const panelContentEl = panelRef.current?.querySelector('.panel-content');
-
     if (panelContentEl?.contains(targetNode) && panelContentEl.scrollHeight > panelContentEl.clientHeight && isInfoVisible) {
-        console.log("ImageSwipe onTouchStart: Blocked by scrollable panel content touch");
-        return;
+        console.log("ImageSwipe onTouchStart: Blocked by scrollable panel content touch"); return;
     }
     if (panelRef.current?.contains(targetNode) && !gripRef.current?.contains(targetNode) && isInfoVisible) {
-        console.log("ImageSwipe onTouchStart: Blocked by panel (not grip/content) touch while info visible");
-        return;
+        console.log("ImageSwipe onTouchStart: Blocked by panel (not grip/content) touch while info visible"); return;
     }
     if (gripRef.current?.contains(targetNode)) {
-        console.log("ImageSwipe onTouchStart: Blocked by grip touch");
-        return;
+        console.log("ImageSwipe onTouchStart: Blocked by grip touch"); return;
     }
     if (allVisuals.length <= 1 || isDraggingPanel || isSwiping) {
-        console.log("ImageSwipe onTouchStart: Blocked - visuals:", allVisuals.length, "draggingPanel:", isDraggingPanel, "isSwiping:", isSwiping);
-        return;
+        console.log("ImageSwipe onTouchStart: Blocked - visuals:", allVisuals.length, "draggingPanel:", isDraggingPanel, "isSwiping:", isSwiping); return;
     }
-    console.log("ImageSwipe onTouchStart: PROCEEDING WITH SWIPE INIT");
     setIsSwiping(true);
+    console.log("ImageSwipe onTouchStart: PROCEEDING WITH SWIPE INIT, isSwiping set to true");
     try {
         setTouchEnd(null); const startX = e.targetTouches[0].clientX;
         setTouchStart(startX); setCurrentTouchX(startX);
@@ -200,87 +199,64 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     } catch (error) { console.error("ImageSwipe TouchMove error:", error); resetSwipeState(); }
   }, [touchStart, isSwiping, currentTouchX, calculateSwipeAnimation, resetSwipeState, isDraggingPanel]);
 
-  const onTouchEnd = useCallback(() => {
+ const onTouchEnd = useCallback(() => {
     console.log("ProjectModalMobile: ImageSwipe onTouchEnd triggered. touchStart:", touchStart, "isSwiping (at start of onTouchEnd):", isSwiping);
-  
-    // Si isSwiping est déjà false ici, cela peut signifier que resetSwipeState a été appelé prématurément par une autre logique
-    // ou que onTouchStart n'a pas correctement défini isSwiping.
-    // Si touchStart est null, le swipe n'a jamais vraiment commencé.
     if (!touchStart || !isSwiping) {
-        console.log("ImageSwipe onTouchEnd: Aborting - no touchStart or not actively swiping.");
-        if (touchStart !== null) { // Si un toucher a commencé mais n'est pas devenu un swipe
-            resetSwipeState();
-        }
+        console.log("ImageSwipe onTouchEnd: Aborting - no touchStart or not actively swiping (isSwiping was already false).");
+        if (touchStart !== null) { resetSwipeState(); }
         return;
     }
-  
+
     const finalDistance = (touchEnd ?? touchStart) - touchStart;
-    const absFinalDistance = Math.abs(finalDistance);
-  
-    // Déterminer la direction principale du swipe basée sur la distance
-    let intendedDirection: 'left' | 'right' | null = null;
-    if (finalDistance < -MIN_SWIPE_DISTANCE) {
-        intendedDirection = 'left';
-    } else if (finalDistance > MIN_SWIPE_DISTANCE) {
-        intendedDirection = 'right';
+    setIsSwiping(false);
+    console.log("ImageSwipe onTouchEnd: isSwiping set to false. finalDistance:", finalDistance);
+
+    let action: 'next' | 'previous' | 'reset' = 'reset';
+    let targetBackgroundIndexForAnimation: number | null = null;
+
+    if (finalDistance < -MIN_SWIPE_DISTANCE && currentImageIndex < allVisuals.length - 1) {
+        action = 'next';
+        targetBackgroundIndexForAnimation = nextIndex;
+    } else if (finalDistance > MIN_SWIPE_DISTANCE && currentImageIndex > 0) {
+        action = 'previous';
+        targetBackgroundIndexForAnimation = prevIndex;
     }
-  
-    console.log("ImageSwipe onTouchEnd: finalDistance:", finalDistance, "intendedDirection:", intendedDirection, "swipeBackgroundInfo:", swipeBackgroundInfo);
-  
-    // Valider si le swipe est possible dans la direction voulue
-    const canSwipeLeft = intendedDirection === 'left' && currentImageIndex < allVisuals.length - 1;
-    const canSwipeRight = intendedDirection === 'right' && currentImageIndex > 0;
-  
-    // La validation finale dépend de la direction et de la possibilité de swiper
-    const isValidLeftSwipe = canSwipeLeft;
-    const isValidRightSwipe = canSwipeRight;
-  
-    setIsSwiping(false); // Le geste utilisateur est terminé, maintenant on anime ou on reset.
-    console.log("ImageSwipe onTouchEnd: isSwiping set to false. isValidLeft:", isValidLeftSwipe, "isValidRight:", isValidRightSwipe);
-  
-  
+    console.log("ImageSwipe onTouchEnd: Determined action:", action, "targetBackgroundIndexForAnimation:", targetBackgroundIndexForAnimation);
+
     try {
         const swipeAnimDuration = 350;
         const transitionCurve = 'cubic-bezier(0.175, 0.885, 0.32, 1.175)';
         const transitionStyle = `transform ${swipeAnimDuration}ms ${transitionCurve}, opacity ${swipeAnimDuration}ms ease-out`;
-  
-        // Appliquer la transition pour l'animation de sortie/entrée
-        if (isValidLeftSwipe || isValidRightSwipe) {
+
+        if (action === 'next' || action === 'previous') {
             if (imageRef.current) imageRef.current.style.transition = transitionStyle;
-            // L'image de fond aura besoin d'une transition si elle prend la place
-            if (backgroundImageRef.current) {
+            if (backgroundImageRef.current && targetBackgroundIndexForAnimation !== null && swipeBackgroundInfo.index === targetBackgroundIndexForAnimation) {
                 backgroundImageRef.current.style.transition = transitionStyle;
             }
         }
-  
-        if (isValidLeftSwipe) {
-            console.log("ImageSwipe onTouchEnd: Executing left swipe animation for index:", nextIndex);
+
+        if (action === 'next') {
+            console.log("ImageSwipe onTouchEnd: Executing left swipe animation for index:", targetBackgroundIndexForAnimation);
             if(imageRef.current) { const finalRotation = -Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(-120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
-            // S'assurer que l'image de fond (qui est nextIndex) prend la place
-            if(backgroundImageRef.current && swipeBackgroundInfo.index === nextIndex) {
+            if(backgroundImageRef.current && swipeBackgroundInfo.index === targetBackgroundIndexForAnimation) {
                 backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)';
                 backgroundImageRef.current.style.opacity = '1';
                 backgroundImageRef.current.style.zIndex = '15';
+            } else if (backgroundImageRef.current) {
+                 backgroundImageRef.current.style.opacity = '0'; // Fallback if wrong bg image was shown
             }
-            setTimeout(() => {
-                console.log("ImageSwipe onTouchEnd: Left swipe timeout - calling handleNext & resetSwipeState");
-                handleNext();
-                resetSwipeState();
-            }, swipeAnimDuration);
-        } else if (isValidRightSwipe) {
-            console.log("ImageSwipe onTouchEnd: Executing right swipe animation for index:", prevIndex);
+            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Left swipe timeout - calling handleNext & resetSwipeState"); handleNext(); resetSwipeState(); }, swipeAnimDuration);
+        } else if (action === 'previous') {
+            console.log("ImageSwipe onTouchEnd: Executing right swipe animation for index:", targetBackgroundIndexForAnimation);
             if(imageRef.current) { const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
-            // S'assurer que l'image de fond (qui est prevIndex) prend la place
-            if(backgroundImageRef.current && swipeBackgroundInfo.index === prevIndex) {
+            if(backgroundImageRef.current && swipeBackgroundInfo.index === targetBackgroundIndexForAnimation) {
                 backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)';
                 backgroundImageRef.current.style.opacity = '1';
                 backgroundImageRef.current.style.zIndex = '15';
+            } else if (backgroundImageRef.current) {
+                 backgroundImageRef.current.style.opacity = '0';
             }
-            setTimeout(() => {
-                console.log("ImageSwipe onTouchEnd: Right swipe timeout - calling handlePrevious & resetSwipeState");
-                handlePrevious();
-                resetSwipeState();
-            }, swipeAnimDuration);
+            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Right swipe timeout - calling handlePrevious & resetSwipeState"); handlePrevious(); resetSwipeState(); }, swipeAnimDuration);
         } else {
             console.log("ImageSwipe onTouchEnd: No valid swipe or at edge, resetting state.");
             resetSwipeState();
@@ -288,14 +264,12 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     } catch (error) { console.error("ImageSwipe TouchEnd error:", error); resetSwipeState(); }
     finally {
         setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null);
-        // swipeBackgroundInfo est déjà réinitialisé par resetSwipeState si le swipe n'est pas valide
-        // ou si l'animation de fin est terminée.
     }
   }, [
-      touchStart, touchEnd, isSwiping, swipeRotation, MIN_SWIPE_DISTANCE,
+      touchStart, touchEnd, swipeRotation, MIN_SWIPE_DISTANCE, // isSwiping a été retiré car lu directement
       handleNext, handlePrevious, resetSwipeState,
-      swipeBackgroundInfo, currentImageIndex, allVisuals.length, // Ajout des dépendances pour les conditions de bord
-      prevIndex, nextIndex // Ajout pour la comparaison
+      swipeBackgroundInfo, currentImageIndex, allVisuals.length,
+      prevIndex, nextIndex
   ]);
 
   const calculatePanelY = useCallback((deltaY: number): number => {
@@ -434,14 +408,37 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
 
   useEffect(() => {
     if (!isMounted || !isOpen || !allVisuals?.length) return;
-    const preloadImage = (src: string): Promise<void> => { /*...*/ };
-    const preloadAllImages = async () => { /*...*/ };
+    const preloadImage = (src: string): Promise<void> => {
+        if (imagesLoaded[src]) return Promise.resolve();
+        return new Promise((resolve) => {
+            if (typeof window === 'undefined' || typeof window.Image === 'undefined') { resolve(); return; }
+            const img = new window.Image();
+            img.onload = () => { setImagesLoaded(prev => ({ ...prev, [src]: true })); resolve(); };
+            img.onerror = () => { console.error(`Preload error: ${src}`); resolve(); };
+            img.src = src;
+        });
+    };
+    const preloadAllImages = async () => {
+        try {
+            const priorityIndices = [...new Set([currentImageIndex, nextIndex, prevIndex])];
+            await Promise.all(priorityIndices.map(idx => allVisuals[idx] ? preloadImage(allVisuals[idx]) : Promise.resolve()));
+            const otherImages = allVisuals.filter((_, i) => !priorityIndices.includes(i));
+            Promise.all(otherImages.map(src => src ? preloadImage(src) : Promise.resolve()));
+        } catch (error) { console.error("Preload error:", error); }
+    };
     preloadAllImages();
   }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
 
   useEffect(() => {
     if (!isMounted || !isOpen) return;
-    const preventDocumentScroll = (e: TouchEvent) => { /*...*/ };
+    const preventDocumentScroll = (e: TouchEvent) => {
+        try {
+            const target = e.target as Node;
+            const panelContent = panelRef.current?.querySelector('.panel-content');
+            if (isInfoVisible && panelContent?.contains(target) && panelContent.scrollHeight > panelContent.clientHeight) { return true; }
+            if (e.cancelable) e.preventDefault();
+        } catch (error) { console.error("Scroll prevention error:", error); }
+    };
     document.addEventListener('touchmove', preventDocumentScroll, { passive: false });
     return () => document.removeEventListener('touchmove', preventDocumentScroll);
   }, [isOpen, isInfoVisible, isMounted]);
@@ -504,7 +501,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             </div>
             <div className="panel-content px-5 pb-5 overflow-y-auto pointer-events-auto touch-auto"
                  style={{
-                     height: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`,
+                     height: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`, // 44px approx pour le grip visuel
                      maxHeight: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`,
                      display: 'block',
                      opacity: isInfoVisible ? 1 : 0,
