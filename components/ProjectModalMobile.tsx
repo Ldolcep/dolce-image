@@ -200,49 +200,103 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     } catch (error) { console.error("ImageSwipe TouchMove error:", error); resetSwipeState(); }
   }, [touchStart, isSwiping, currentTouchX, calculateSwipeAnimation, resetSwipeState, isDraggingPanel]);
 
- const onTouchEnd = useCallback(() => {
-    console.log("ProjectModalMobile: ImageSwipe onTouchEnd triggered - isSwiping (before set false):", isSwiping, "touchStart:", touchStart);
+  const onTouchEnd = useCallback(() => {
+    console.log("ProjectModalMobile: ImageSwipe onTouchEnd triggered. touchStart:", touchStart, "isSwiping (at start of onTouchEnd):", isSwiping);
+  
+    // Si isSwiping est déjà false ici, cela peut signifier que resetSwipeState a été appelé prématurément par une autre logique
+    // ou que onTouchStart n'a pas correctement défini isSwiping.
+    // Si touchStart est null, le swipe n'a jamais vraiment commencé.
     if (!touchStart || !isSwiping) {
-        if (!isSwiping && touchStart !== null ) { // Si un toucher a commencé mais pas de swipe validé par isSwiping
-            console.log("ImageSwipe onTouchEnd: Not a valid swipe, resetting.");
+        console.log("ImageSwipe onTouchEnd: Aborting - no touchStart or not actively swiping.");
+        if (touchStart !== null) { // Si un toucher a commencé mais n'est pas devenu un swipe
             resetSwipeState();
-        } else {
-            console.log("ImageSwipe onTouchEnd: No swipe to end (no touchStart or already not swiping).");
         }
         return;
     }
+  
     const finalDistance = (touchEnd ?? touchStart) - touchStart;
-    const isValidLeftSwipe = swipeBackgroundInfo.direction === 'left' && finalDistance < -MIN_SWIPE_DISTANCE && swipeBackgroundInfo.index !== null;
-    const isValidRightSwipe = swipeBackgroundInfo.direction === 'right' && finalDistance > MIN_SWIPE_DISTANCE && swipeBackgroundInfo.index !== null;
-
-    setIsSwiping(false); // Action de swipe utilisateur terminée
-    console.log("ImageSwipe onTouchEnd: isSwiping set to false. LeftSwipe:", isValidLeftSwipe, "RightSwipe:", isValidRightSwipe);
-
+    const absFinalDistance = Math.abs(finalDistance);
+  
+    // Déterminer la direction principale du swipe basée sur la distance
+    let intendedDirection: 'left' | 'right' | null = null;
+    if (finalDistance < -MIN_SWIPE_DISTANCE) {
+        intendedDirection = 'left';
+    } else if (finalDistance > MIN_SWIPE_DISTANCE) {
+        intendedDirection = 'right';
+    }
+  
+    console.log("ImageSwipe onTouchEnd: finalDistance:", finalDistance, "intendedDirection:", intendedDirection, "swipeBackgroundInfo:", swipeBackgroundInfo);
+  
+    // Valider si le swipe est possible dans la direction voulue
+    const canSwipeLeft = intendedDirection === 'left' && currentImageIndex < allVisuals.length - 1;
+    const canSwipeRight = intendedDirection === 'right' && currentImageIndex > 0;
+  
+    // La validation finale dépend de la direction et de la possibilité de swiper
+    const isValidLeftSwipe = canSwipeLeft;
+    const isValidRightSwipe = canSwipeRight;
+  
+    setIsSwiping(false); // Le geste utilisateur est terminé, maintenant on anime ou on reset.
+    console.log("ImageSwipe onTouchEnd: isSwiping set to false. isValidLeft:", isValidLeftSwipe, "isValidRight:", isValidRightSwipe);
+  
+  
     try {
         const swipeAnimDuration = 350;
         const transitionCurve = 'cubic-bezier(0.175, 0.885, 0.32, 1.175)';
         const transitionStyle = `transform ${swipeAnimDuration}ms ${transitionCurve}, opacity ${swipeAnimDuration}ms ease-out`;
+  
+        // Appliquer la transition pour l'animation de sortie/entrée
         if (isValidLeftSwipe || isValidRightSwipe) {
             if (imageRef.current) imageRef.current.style.transition = transitionStyle;
-            if (backgroundImageRef.current && swipeBackgroundInfo.index !== null) { backgroundImageRef.current.style.transition = transitionStyle; }
+            // L'image de fond aura besoin d'une transition si elle prend la place
+            if (backgroundImageRef.current) {
+                backgroundImageRef.current.style.transition = transitionStyle;
+            }
         }
+  
         if (isValidLeftSwipe) {
-            console.log("ImageSwipe onTouchEnd: Executing left swipe animation.");
+            console.log("ImageSwipe onTouchEnd: Executing left swipe animation for index:", nextIndex);
             if(imageRef.current) { const finalRotation = -Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(-120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
-            if(backgroundImageRef.current) { backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)'; backgroundImageRef.current.style.opacity = '1'; backgroundImageRef.current.style.zIndex = '15'; }
-            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Left swipe timeout - calling handleNext & resetSwipeState"); handleNext(); resetSwipeState(); }, swipeAnimDuration);
+            // S'assurer que l'image de fond (qui est nextIndex) prend la place
+            if(backgroundImageRef.current && swipeBackgroundInfo.index === nextIndex) {
+                backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)';
+                backgroundImageRef.current.style.opacity = '1';
+                backgroundImageRef.current.style.zIndex = '15';
+            }
+            setTimeout(() => {
+                console.log("ImageSwipe onTouchEnd: Left swipe timeout - calling handleNext & resetSwipeState");
+                handleNext();
+                resetSwipeState();
+            }, swipeAnimDuration);
         } else if (isValidRightSwipe) {
-            console.log("ImageSwipe onTouchEnd: Executing right swipe animation.");
+            console.log("ImageSwipe onTouchEnd: Executing right swipe animation for index:", prevIndex);
             if(imageRef.current) { const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
-            if(backgroundImageRef.current) { backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)'; backgroundImageRef.current.style.opacity = '1'; backgroundImageRef.current.style.zIndex = '15'; }
-            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Right swipe timeout - calling handlePrevious & resetSwipeState"); handlePrevious(); resetSwipeState(); }, swipeAnimDuration);
+            // S'assurer que l'image de fond (qui est prevIndex) prend la place
+            if(backgroundImageRef.current && swipeBackgroundInfo.index === prevIndex) {
+                backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)';
+                backgroundImageRef.current.style.opacity = '1';
+                backgroundImageRef.current.style.zIndex = '15';
+            }
+            setTimeout(() => {
+                console.log("ImageSwipe onTouchEnd: Right swipe timeout - calling handlePrevious & resetSwipeState");
+                handlePrevious();
+                resetSwipeState();
+            }, swipeAnimDuration);
         } else {
-            console.log("ImageSwipe onTouchEnd: No valid swipe, resetting state.");
+            console.log("ImageSwipe onTouchEnd: No valid swipe or at edge, resetting state.");
             resetSwipeState();
         }
     } catch (error) { console.error("ImageSwipe TouchEnd error:", error); resetSwipeState(); }
-    finally { setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null); }
-  }, [ touchStart, touchEnd, isSwiping, swipeRotation, MIN_SWIPE_DISTANCE, handleNext, handlePrevious, resetSwipeState, swipeBackgroundInfo ]);
+    finally {
+        setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null);
+        // swipeBackgroundInfo est déjà réinitialisé par resetSwipeState si le swipe n'est pas valide
+        // ou si l'animation de fin est terminée.
+    }
+  }, [
+      touchStart, touchEnd, isSwiping, swipeRotation, MIN_SWIPE_DISTANCE,
+      handleNext, handlePrevious, resetSwipeState,
+      swipeBackgroundInfo, currentImageIndex, allVisuals.length, // Ajout des dépendances pour les conditions de bord
+      prevIndex, nextIndex // Ajout pour la comparaison
+  ]);
 
   const calculatePanelY = useCallback((deltaY: number): number => {
       if(!isMounted) return 0;
