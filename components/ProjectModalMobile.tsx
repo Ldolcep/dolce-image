@@ -1,4 +1,4 @@
-// ProjectModalMobile.tsx - Correction Swipe et Visibilité Grip
+// ProjectModalMobile.tsx - AVEC CORRECTIONS ET LOGS DE DÉBOGAGE
 "use client"
 
 import type React from "react"
@@ -32,10 +32,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const allVisuals = useMemo(() => [project.mainVisual, ...project.additionalVisuals].filter(Boolean), [project]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInfoVisible, setIsInfoVisible] = useState(false);
-
-  // État pour l'image d'arrière-plan pendant le swipe
   const [swipeBackgroundInfo, setSwipeBackgroundInfo] = useState<{ index: number | null; direction: 'left' | 'right' | null }>({ index: null, direction: null });
-
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [currentTouchX, setCurrentTouchX] = useState<number | null>(null);
@@ -46,16 +43,15 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const [panelTranslateY, setPanelTranslateY] = useState<number | null>(null);
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  // isTransitioning est retiré, géré par les timeouts
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
-  const backgroundImageRef = useRef<HTMLDivElement>(null); // Unifié (était nextImageRef)
+  const backgroundImageRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const gripRef = useRef<HTMLDivElement>(null);
   const panelInitialY = useRef<number>(0);
 
-  useEffect(() => { setIsMounted(true); }, []);
+  useEffect(() => { setIsMounted(true); console.log("ProjectModalMobile: MOUNTED"); }, []);
 
   const initialCollapsedY = useMemo(() => {
     if (typeof window !== 'undefined' && isMounted) {
@@ -63,21 +59,22 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         const vh = window.innerHeight;
         const gripHeightPx = vh * parseFloat(GRIP_HEIGHT_COLLAPSED) / 100;
         const expandedHeightPx = vh * parseFloat(GRIP_HEIGHT_EXPANDED) / 100;
-        return expandedHeightPx - gripHeightPx;
+        const calculatedY = expandedHeightPx - gripHeightPx;
+        console.log("ProjectModalMobile: initialCollapsedY calculated =", calculatedY, {vh, gripHeightPx, expandedHeightPx});
+        return calculatedY;
       } catch (e) { console.error("Error calculating initialCollapsedY", e); return null; }
-    } return null;
+    }
+    console.log("ProjectModalMobile: initialCollapsedY not calculated (not mounted or no window)");
+    return null;
   }, [isMounted]);
 
   const prevIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
   const nextIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
 
-  // Supprimé : useEffect pour nextImageStateIndex et l'état nextImageStateIndex lui-même
-
   const resetSwipeState = useCallback(() => {
     setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null);
     setSwipeRotation(0); setIsSwiping(false);
     setSwipeBackgroundInfo({ index: null, direction: null });
-
     requestAnimationFrame(() => {
         try {
             if (imageRef.current) {
@@ -90,21 +87,21 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             if (backgroundImageRef.current) {
                 backgroundImageRef.current.style.opacity = '0';
                 backgroundImageRef.current.style.transform = 'scale(0.85) translateY(10px)';
-                backgroundImageRef.current.style.transition = 'none'; // Reset immédiat, l'animation est sur onTouchEnd
+                backgroundImageRef.current.style.transition = 'none';
                 backgroundImageRef.current.style.zIndex = '5';
             }
         } catch (error) { console.error("Swipe reset style error:", error); }
     });
-  }, []); // isTransitioning retiré
+  }, []);
 
-  const handleNext = useCallback(() => { // Renommé de handleSwipedNext
-    if (allVisuals.length <= 1 || isSwiping) return; // isSwiping check
+  const handleNext = useCallback(() => {
+    if (allVisuals.length <= 1 || isSwiping) return;
     const newIndex = (currentImageIndex + 1) % allVisuals.length;
     setCurrentImageIndex(newIndex);
   }, [currentImageIndex, allVisuals.length, isSwiping]);
 
-  const handlePrevious = useCallback(() => { // Renommé de handleSwipedPrevious
-    if (allVisuals.length <= 1 || isSwiping) return; // isSwiping check
+  const handlePrevious = useCallback(() => {
+    if (allVisuals.length <= 1 || isSwiping) return;
     const newIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
     setCurrentImageIndex(newIndex);
   }, [currentImageIndex, allVisuals.length, isSwiping]);
@@ -118,10 +115,8 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         const clampedRotation = Math.max(-maxRotation, Math.min(maxRotation, rotationFactor * distance));
         const currentImageOpacity = 1 - Math.min(0.5, Math.abs(distance) / (screenWidth * 0.6));
         setSwipeRotation(clampedRotation);
-
         let bgIndexToShow: number | null = null;
         let currentSwipeDirection: 'left' | 'right' | null = null;
-
         if (distance < -10) {
             currentSwipeDirection = 'left';
             if (currentImageIndex < allVisuals.length - 1) bgIndexToShow = nextIndex;
@@ -130,7 +125,6 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             if (currentImageIndex > 0) bgIndexToShow = prevIndex;
         }
         setSwipeBackgroundInfo({ index: bgIndexToShow, direction: currentSwipeDirection });
-
         requestAnimationFrame(() => {
             if (!imageRef.current || !backgroundImageRef.current) return;
             imageRef.current.style.transform = `translateX(${distance}px) rotate(${clampedRotation}deg)`;
@@ -138,7 +132,6 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             imageRef.current.style.transition = 'none';
             imageRef.current.style.transformOrigin = distance > 0 ? 'bottom left' : 'bottom right';
             imageRef.current.style.zIndex = '10';
-
             if (bgIndexToShow !== null && backgroundImageRef.current) {
                 const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.35));
                 const scale = 0.85 + (0.10 * progress);
@@ -156,23 +149,44 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   }, [isSwiping, isMounted, currentImageIndex, allVisuals.length, nextIndex, prevIndex]);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    console.log("ProjectModalMobile: ImageSwipe onTouchStart triggered - Current isSwiping:", isSwiping, "isDraggingPanel:", isDraggingPanel);
     const targetNode = e.target as Node;
     const panelContentEl = panelRef.current?.querySelector('.panel-content');
-    if (panelContentEl?.contains(targetNode) && panelContentEl.scrollHeight > panelContentEl.clientHeight && isInfoVisible) { return; }
-    if (panelRef.current?.contains(targetNode) && !gripRef.current?.contains(targetNode) && isInfoVisible) { return; }
-    if (allVisuals.length <= 1 || isDraggingPanel || isSwiping) return;
 
-    setIsSwiping(true); // Mettre à true avant le try/catch
+    if (panelContentEl?.contains(targetNode) && panelContentEl.scrollHeight > panelContentEl.clientHeight && isInfoVisible) {
+        console.log("ImageSwipe onTouchStart: Blocked by scrollable panel content touch");
+        return;
+    }
+    if (panelRef.current?.contains(targetNode) && !gripRef.current?.contains(targetNode) && isInfoVisible) {
+        console.log("ImageSwipe onTouchStart: Blocked by panel (not grip/content) touch while info visible");
+        return;
+    }
+    if (gripRef.current?.contains(targetNode)) {
+        console.log("ImageSwipe onTouchStart: Blocked by grip touch");
+        return;
+    }
+    if (allVisuals.length <= 1 || isDraggingPanel || isSwiping) {
+        console.log("ImageSwipe onTouchStart: Blocked - visuals:", allVisuals.length, "draggingPanel:", isDraggingPanel, "isSwiping:", isSwiping);
+        return;
+    }
+    console.log("ImageSwipe onTouchStart: PROCEEDING WITH SWIPE INIT");
+    setIsSwiping(true);
     try {
         setTouchEnd(null); const startX = e.targetTouches[0].clientX;
         setTouchStart(startX); setCurrentTouchX(startX);
         if (imageRef.current) imageRef.current.style.transition = 'none';
         if (backgroundImageRef.current) backgroundImageRef.current.style.transition = 'none';
-    } catch (error) { console.error("TouchStart error:", error); setIsSwiping(false); }
+    } catch (error) { console.error("ImageSwipe TouchStart error:", error); setIsSwiping(false); }
   }, [allVisuals.length, isDraggingPanel, isInfoVisible, isSwiping]);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
-    if (touchStart === null || !isSwiping || isDraggingPanel) return;
+    console.log("ProjectModalMobile: ImageSwipe onTouchMove triggered - isSwiping:", isSwiping, "touchStart:", touchStart);
+    if (touchStart === null || !isSwiping || isDraggingPanel) {
+        if(touchStart === null) console.log("ImageSwipe onTouchMove: Blocked - touchStart is null");
+        if(!isSwiping) console.log("ImageSwipe onTouchMove: Blocked - !isSwiping");
+        if(isDraggingPanel) console.log("ImageSwipe onTouchMove: Blocked - isDraggingPanel");
+        return;
+    }
     try {
         const currentX = e.targetTouches[0].clientX;
         const currentY = e.targetTouches[0].clientY;
@@ -183,58 +197,156 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         if (deltaX > deltaY && deltaX > 5 && e.cancelable) { e.preventDefault(); }
         setTouchEnd(currentX);
         calculateSwipeAnimation(currentX, touchStart);
-    } catch (error) { console.error("TouchMove error:", error); resetSwipeState(); }
+    } catch (error) { console.error("ImageSwipe TouchMove error:", error); resetSwipeState(); }
   }, [touchStart, isSwiping, currentTouchX, calculateSwipeAnimation, resetSwipeState, isDraggingPanel]);
 
  const onTouchEnd = useCallback(() => {
-    if (!touchStart || !isSwiping) { if (!isSwiping && touchStart !== null ) resetSwipeState(); return; }
-
+    console.log("ProjectModalMobile: ImageSwipe onTouchEnd triggered - isSwiping (before set false):", isSwiping, "touchStart:", touchStart);
+    if (!touchStart || !isSwiping) {
+        if (!isSwiping && touchStart !== null ) { // Si un toucher a commencé mais pas de swipe validé par isSwiping
+            console.log("ImageSwipe onTouchEnd: Not a valid swipe, resetting.");
+            resetSwipeState();
+        } else {
+            console.log("ImageSwipe onTouchEnd: No swipe to end (no touchStart or already not swiping).");
+        }
+        return;
+    }
     const finalDistance = (touchEnd ?? touchStart) - touchStart;
     const isValidLeftSwipe = swipeBackgroundInfo.direction === 'left' && finalDistance < -MIN_SWIPE_DISTANCE && swipeBackgroundInfo.index !== null;
     const isValidRightSwipe = swipeBackgroundInfo.direction === 'right' && finalDistance > MIN_SWIPE_DISTANCE && swipeBackgroundInfo.index !== null;
 
     setIsSwiping(false); // Action de swipe utilisateur terminée
+    console.log("ImageSwipe onTouchEnd: isSwiping set to false. LeftSwipe:", isValidLeftSwipe, "RightSwipe:", isValidRightSwipe);
 
     try {
         const swipeAnimDuration = 350;
         const transitionCurve = 'cubic-bezier(0.175, 0.885, 0.32, 1.175)';
         const transitionStyle = `transform ${swipeAnimDuration}ms ${transitionCurve}, opacity ${swipeAnimDuration}ms ease-out`;
-
         if (isValidLeftSwipe || isValidRightSwipe) {
             if (imageRef.current) imageRef.current.style.transition = transitionStyle;
             if (backgroundImageRef.current && swipeBackgroundInfo.index !== null) { backgroundImageRef.current.style.transition = transitionStyle; }
         }
-
         if (isValidLeftSwipe) {
+            console.log("ImageSwipe onTouchEnd: Executing left swipe animation.");
             if(imageRef.current) { const finalRotation = -Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(-120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
             if(backgroundImageRef.current) { backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)'; backgroundImageRef.current.style.opacity = '1'; backgroundImageRef.current.style.zIndex = '15'; }
-            setTimeout(() => {
-                handleNext(); // Utilise handleNext
-                resetSwipeState();
-            }, swipeAnimDuration);
+            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Left swipe timeout - calling handleNext & resetSwipeState"); handleNext(); resetSwipeState(); }, swipeAnimDuration);
         } else if (isValidRightSwipe) {
+            console.log("ImageSwipe onTouchEnd: Executing right swipe animation.");
             if(imageRef.current) { const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
             if(backgroundImageRef.current) { backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)'; backgroundImageRef.current.style.opacity = '1'; backgroundImageRef.current.style.zIndex = '15'; }
-            setTimeout(() => {
-                handlePrevious(); // Utilise handlePrevious
-                resetSwipeState();
-            }, swipeAnimDuration);
+            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Right swipe timeout - calling handlePrevious & resetSwipeState"); handlePrevious(); resetSwipeState(); }, swipeAnimDuration);
         } else {
+            console.log("ImageSwipe onTouchEnd: No valid swipe, resetting state.");
             resetSwipeState();
         }
-    } catch (error) { console.error("TouchEnd error:", error); resetSwipeState(); }
+    } catch (error) { console.error("ImageSwipe TouchEnd error:", error); resetSwipeState(); }
     finally { setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null); }
   }, [ touchStart, touchEnd, isSwiping, swipeRotation, MIN_SWIPE_DISTANCE, handleNext, handlePrevious, resetSwipeState, swipeBackgroundInfo ]);
 
-  const calculatePanelY = useCallback((deltaY: number): number => { /* (Logic as before) */ }, [isMounted]);
-  const updateContentVisibility = useCallback((currentY: number | null) => { /* (Logic as before) */ }, []);
-  const handlePanelTouchStart = useCallback((e: React.TouchEvent) => { /* (Logic as before) */ }, [isInfoVisible, isSwiping]);
-  const handlePanelTouchMove = useCallback((e: React.TouchEvent) => { /* (Logic as before) */ }, [dragStartY, isDraggingPanel, calculatePanelY, updateContentVisibility]);
-  const handlePanelTouchEnd = useCallback(() => { /* (Logic as before) */ }, [dragStartY, isDraggingPanel, panelTranslateY, isInfoVisible]);
+  const calculatePanelY = useCallback((deltaY: number): number => {
+      if(!isMounted) return 0;
+      try {
+        const initialPos = panelInitialY.current; let newY = initialPos + deltaY;
+        const vh = window.innerHeight; const gripH = vh * parseFloat(GRIP_HEIGHT_COLLAPSED) / 100;
+        const expandedH = vh * parseFloat(GRIP_HEIGHT_EXPANDED) / 100;
+        const collapsedY = expandedH - gripH; const expandedY = 0;
+        const minY = expandedY - 50; const maxY = collapsedY + 50;
+        return Math.max(minY, Math.min(maxY, newY));
+      } catch (error) { console.error("Panel Y calc error:", error); return panelInitialY.current; }
+  }, [isMounted]);
+
+  const updateContentVisibility = useCallback((currentY: number | null) => {
+    if (currentY === null || !panelRef.current) return;
+     try {
+        const contentElement = panelRef.current.querySelector('.panel-content') as HTMLElement; if (!contentElement) return;
+        const vh = window.innerHeight; const gripH = vh * parseFloat(GRIP_HEIGHT_COLLAPSED) / 100;
+        const expandedH = vh * parseFloat(GRIP_HEIGHT_EXPANDED) / 100;
+        const collapsedY = expandedH - gripH; const expandedY = 0;
+        const totalTravel = collapsedY - expandedY; if (totalTravel <= 0) return;
+        const progress = Math.max(0, Math.min(1, (currentY - expandedY) / totalTravel));
+        const opacity = 1 - progress;
+        contentElement.style.opacity = Math.max(0, Math.min(1, opacity)).toString();
+        if (opacity > 0) contentElement.style.display = 'block';
+     } catch(error) { console.error("Content visibility error", error)}
+  }, []);
+
+  const handlePanelTouchStart = useCallback((e: React.TouchEvent) => {
+    console.log("ProjectModalMobile: PanelTouchStart triggered - Current isSwiping:", isSwiping);
+    if (isSwiping) {
+        console.log("PanelTouchStart: Blocked by active image swipe");
+        return;
+    }
+    const target = e.target as Node;
+    const panelContent = panelRef.current?.querySelector('.panel-content');
+    const isTouchingScrollableContent = panelContent?.contains(target) && isInfoVisible && panelContent.scrollHeight > panelContent.clientHeight;
+    if (isTouchingScrollableContent) {
+      console.log("PanelTouchStart: Allowing default for scrollable content, not dragging panel.");
+      setIsDraggingPanel(false);
+      return;
+    }
+    console.log("PanelTouchStart: PROCEEDING WITH PANEL DRAG INIT");
+    try {
+        e.stopPropagation();
+        setDragStartY(e.touches[0].clientY);
+        setIsDraggingPanel(true);
+        if (panelRef.current) {
+            panelRef.current.style.transition = 'none';
+            const style = window.getComputedStyle(panelRef.current);
+            const matrix = new DOMMatrix(style.transform === 'none' ? '' : style.transform);
+            panelInitialY.current = matrix.m42; setPanelTranslateY(panelInitialY.current);
+            if (!isInfoVisible && panelContent) { (panelContent as HTMLElement).style.display = 'block'; }
+        }
+    } catch (error) { console.error("PanelTouchStart error:", error); setIsDraggingPanel(false); }
+  }, [isInfoVisible, isSwiping]);
+
+  const handlePanelTouchMove = useCallback((e: React.TouchEvent) => {
+    console.log("ProjectModalMobile: PanelTouchMove triggered - isDraggingPanel:", isDraggingPanel);
+    if (dragStartY === null || !isDraggingPanel || !panelRef.current) return;
+    try {
+        e.stopPropagation(); if (e.cancelable) e.preventDefault();
+        const targetY = calculatePanelY(e.touches[0].clientY - dragStartY);
+        requestAnimationFrame(() => {
+             if (!panelRef.current) return;
+             panelRef.current.style.transform = `translateY(${targetY}px)`;
+             updateContentVisibility(targetY);
+         });
+        setPanelTranslateY(targetY);
+    } catch (error) { console.error("PanelTouchMove error:", error); setIsDraggingPanel(false); }
+  }, [dragStartY, isDraggingPanel, calculatePanelY, updateContentVisibility]);
+
+  const handlePanelTouchEnd = useCallback(() => {
+    console.log("ProjectModalMobile: PanelTouchEnd triggered - isDraggingPanel:", isDraggingPanel);
+    if (dragStartY === null || !isDraggingPanel || panelTranslateY === null || !panelRef.current) return;
+    setIsDraggingPanel(false); const deltaY = panelTranslateY - panelInitialY.current; const threshold = 60;
+    try {
+        const vh = window.innerHeight; const gripH = vh * parseFloat(GRIP_HEIGHT_COLLAPSED) / 100;
+        const expandedH = vh * parseFloat(GRIP_HEIGHT_EXPANDED) / 100;
+        const collapsedY = expandedH - gripH; const expandedY = 0;
+        let targetY: number; let shouldBeVisible: boolean;
+        if (isInfoVisible) shouldBeVisible = deltaY <= threshold; else shouldBeVisible = deltaY < -threshold;
+        targetY = shouldBeVisible ? expandedY : collapsedY;
+        panelRef.current.style.transition = `transform ${PANEL_ANIMATION_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1)`;
+        panelRef.current.style.transform = `translateY(${targetY}px)`;
+        setPanelTranslateY(targetY); setIsInfoVisible(shouldBeVisible);
+        const contentElement = panelRef.current.querySelector('.panel-content') as HTMLElement;
+        if (contentElement) {
+            contentElement.style.transition = `opacity ${CONTENT_FADE_DURATION}ms ease-out`;
+            if (shouldBeVisible) {
+                contentElement.style.display = 'block'; requestAnimationFrame(() => { contentElement.style.opacity = '1'; });
+            } else {
+                contentElement.style.opacity = '0';
+                setTimeout(() => { if (!isInfoVisible) contentElement.style.display = 'none'; }, CONTENT_FADE_DURATION + 50);
+            }
+        }
+    } catch (error) { console.error("PanelTouchEnd error:", error); }
+    finally { setDragStartY(null); }
+  }, [dragStartY, isDraggingPanel, panelTranslateY, isInfoVisible]);
 
   // --- EFFECTS ---
   useEffect(() => {
     if (isOpen && isMounted && initialCollapsedY !== null) {
+        console.log("ProjectModalMobile EFFECT[isOpen, initialCollapsedY]: Setting panelTranslateY to initialCollapsedY:", initialCollapsedY);
         setPanelTranslateY(initialCollapsedY);
         if (panelRef.current) {
             panelRef.current.style.transform = `translateY(${initialCollapsedY}px)`;
@@ -244,6 +356,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             });
         }
     } else if (!isOpen) {
+        console.log("ProjectModalMobile EFFECT[isOpen]: Resetting panelTranslateY (isOpen false or other conditions not met)");
         setPanelTranslateY(null); setIsInfoVisible(false);
         if (panelRef.current) panelRef.current.style.transition = 'none';
     }
@@ -251,11 +364,12 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
 
   useEffect(() => {
     if (isOpen) {
+        console.log("ProjectModalMobile EFFECT[project, isOpen]: Resetting for new project or open");
         setCurrentImageIndex(0);
-        // nextImageStateIndex et son setter sont supprimés
         resetSwipeState(); setImagesLoaded({}); setIsInfoVisible(false);
         if(isMounted && initialCollapsedY !== null) {
-             setPanelTranslateY(initialCollapsedY);
+            console.log("ProjectModalMobile EFFECT[project, isOpen]: Resetting panelTranslateY to initialCollapsedY:", initialCollapsedY);
+            setPanelTranslateY(initialCollapsedY);
              if(panelRef.current) {
                  panelRef.current.style.transform = `translateY(${initialCollapsedY}px)`;
                  panelRef.current.style.visibility = 'visible';
@@ -263,8 +377,6 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         }
     }
   }, [project, isOpen, isMounted, initialCollapsedY, allVisuals.length, resetSwipeState]);
-
-  // useEffect pour isTransitioning supprimé
 
   useEffect(() => {
     if (!isMounted || !isOpen || !allVisuals?.length) return;
@@ -283,12 +395,18 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   // --- RENDER FALLBACK ---
   if (!isMounted) {
     if (!isOpen) return null;
+    console.log("ProjectModalMobile RENDER: Not mounted, showing fallback for open modal");
     return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>;
   }
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log("ProjectModalMobile RENDER: Not open, returning null");
+    return null;
+   }
 
   const collapsedGripVisibleHeight = `calc(${GRIP_HEIGHT_COLLAPSED} + 0px)`;
-  const panelTransform = panelTranslateY !== null ? `translateY(${panelTranslateY}px)` : (initialCollapsedY !== null ? `translateY(${initialCollapsedY}px)` : `translateY(calc(100% - ${GRIP_HEIGHT_COLLAPSED}))`);
+  const panelTransformValue = panelTranslateY !== null ? panelTranslateY : (initialCollapsedY !== null ? initialCollapsedY : `calc(100vh - ${GRIP_HEIGHT_COLLAPSED} - 100px)`);
+  const panelTransform = typeof panelTransformValue === 'number' ? `translateY(${panelTransformValue}px)` : `translateY(${panelTransformValue})`;
+  console.log("ProjectModalMobile RENDER: panelTranslateY =", panelTranslateY, "initialCollapsedY =", initialCollapsedY, "panelTransform =", panelTransform);
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby={isInfoVisible ? undefined : `modal-title-${project.id}`}>
@@ -298,7 +416,6 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             <div className="w-8 h-8 shrink-0"></div>
         </div>
         <div className="absolute inset-0 pt-16 pb-[--grip-visible-height] overflow-hidden" style={{ '--grip-visible-height': collapsedGripVisibleHeight } as React.CSSProperties} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-            {/* Background Image utilise swipeBackgroundInfo.index et backgroundImageRef */}
             {allVisuals.length > 1 && swipeBackgroundInfo.index !== null && allVisuals[swipeBackgroundInfo.index] && (
                  <div ref={backgroundImageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ opacity: 0, transform: 'scale(0.85) translateY(10px)', zIndex: 5 }}>
                      <Image key={`bg-${allVisuals[swipeBackgroundInfo.index]}`} src={allVisuals[swipeBackgroundInfo.index]} alt={`Arrière-plan`} fill className="object-contain" sizes="100vw" loading="lazy" />
@@ -313,10 +430,11 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         <div ref={panelRef}
              className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-2xl transform will-change-transform cursor-grab active:cursor-grabbing touch-none`}
              style={{
-                 height: GRIP_HEIGHT_EXPANDED, // Garder height ici pour que le panneau ait une taille définie
+                 height: GRIP_HEIGHT_EXPANDED,
                  maxHeight: GRIP_HEIGHT_EXPANDED,
                  transform: panelTransform,
                  zIndex: 30,
+                 border: "2px solid red", // DEBUG BORDER
                  visibility: isMounted && initialCollapsedY !== null ? 'visible' : 'hidden',
              }}
              aria-hidden={!isInfoVisible}
@@ -326,19 +444,19 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         >
             <div ref={gripRef} className="w-full flex flex-col items-center pt-3 pb-2 pointer-events-none">
                 <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-3 shrink-0"></div>
-                {/* La zone pour le texte "DESCRIPTION" doit avoir une hauteur pour être visible */}
-                <div className="flex items-center justify-center w-full px-4 overflow-hidden h-8"> {/* Hauteur fixe ex: h-8 */}
+                <div className="flex items-center justify-center w-full px-4 overflow-hidden h-8"> {/* Hauteur fixe pour le texte */}
                     {!isInfoVisible && ( <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider">Description</span> )}
                 </div>
             </div>
             <div className="panel-content px-5 pb-5 overflow-y-auto pointer-events-auto touch-auto"
                  style={{
-                     height: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`, // 44px approx pour le grip visuel (32px + padding)
-                     maxHeight: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`, // Ajuster la hauteur du contenu
+                     height: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`,
+                     maxHeight: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`,
                      display: 'block',
                      opacity: isInfoVisible ? 1 : 0,
                      transition: `opacity ${CONTENT_FADE_DURATION}ms ease-out`,
                      WebkitOverflowScrolling: 'touch',
+                     border: "1px solid green" // DEBUG BORDER
                  }}
             >
                 <div className="space-y-4">
