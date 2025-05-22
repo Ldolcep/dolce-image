@@ -1,6 +1,4 @@
-// ========================================================================
-// === ProjectModalMobile.tsx - VERSION VRAIMENT COMPLÈTE ET CORRIGÉE ===
-// ========================================================================
+// ProjectModalMobile.tsx - Améliorations V0.23d
 "use client"
 
 import type React from "react"
@@ -22,7 +20,7 @@ export const GRIP_HEIGHT_COLLAPSED = '3vh'; // Votre valeur
 export const GRIP_HEIGHT_EXPANDED = '75vh';
 export const PANEL_ANIMATION_DURATION = 400;
 export const CONTENT_FADE_DURATION = 300;
-export const MIN_SWIPE_DISTANCE = 80;
+export const MIN_SWIPE_DISTANCE = 60; // SENSIBILITÉ AUGMENTÉE
 
 interface ProjectModalMobileProps {
   project: Project
@@ -50,7 +48,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const imageRef = useRef<HTMLDivElement>(null);
   const backgroundImageRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const gripRef = useRef<HTMLDivElement>(null);
+  const gripRef = useRef<HTMLDivElement>(null); // Gardé pour le style du grip visuel
   const panelInitialY = useRef<number>(0);
 
   useEffect(() => { setIsMounted(true); console.log("ProjectModalMobile: MOUNTED"); }, []);
@@ -97,7 +95,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   }, []);
 
   const handleNext = useCallback(() => {
-    if (allVisuals.length <= 1) return; // isSwiping n'est plus nécessaire ici car on le gère dans onTouchEnd
+    if (allVisuals.length <= 1) return;
     const newIndex = (currentImageIndex + 1) % allVisuals.length;
     console.log("handleNext: newIndex", newIndex);
     setCurrentImageIndex(newIndex);
@@ -121,14 +119,17 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         setSwipeRotation(clampedRotation);
         let bgIndexToShow: number | null = null;
         let currentSwipeDirection: 'left' | 'right' | null = null;
-        if (distance < -10) {
+
+        // Sensibilité accrue pour l'apparition de l'image de fond
+        if (distance < -5) { // Changé de -10 à -5
             currentSwipeDirection = 'left';
             if (currentImageIndex < allVisuals.length - 1) bgIndexToShow = nextIndex;
-        } else if (distance > 10) {
+        } else if (distance > 5) { // Changé de 10 à 5
             currentSwipeDirection = 'right';
             if (currentImageIndex > 0) bgIndexToShow = prevIndex;
         }
         setSwipeBackgroundInfo({ index: bgIndexToShow, direction: currentSwipeDirection });
+
         requestAnimationFrame(() => {
             if (!imageRef.current || !backgroundImageRef.current) return;
             imageRef.current.style.transform = `translateX(${distance}px) rotate(${clampedRotation}deg)`;
@@ -136,8 +137,9 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             imageRef.current.style.transition = 'none';
             imageRef.current.style.transformOrigin = distance > 0 ? 'bottom left' : 'bottom right';
             imageRef.current.style.zIndex = '10';
+
             if (bgIndexToShow !== null && backgroundImageRef.current) {
-                const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.35));
+                const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.30)); // Progression plus rapide
                 const scale = 0.85 + (0.10 * progress);
                 const translateY = 10 - (10 * progress);
                 const opacity = 0.1 + (0.6 * progress);
@@ -243,7 +245,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
                 backgroundImageRef.current.style.opacity = '1';
                 backgroundImageRef.current.style.zIndex = '15';
             } else if (backgroundImageRef.current) {
-                 backgroundImageRef.current.style.opacity = '0'; // Fallback if wrong bg image was shown
+                 backgroundImageRef.current.style.opacity = '0';
             }
             setTimeout(() => { console.log("ImageSwipe onTouchEnd: Left swipe timeout - calling handleNext & resetSwipeState"); handleNext(); resetSwipeState(); }, swipeAnimDuration);
         } else if (action === 'previous') {
@@ -266,7 +268,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null);
     }
   }, [
-      touchStart, touchEnd, swipeRotation, MIN_SWIPE_DISTANCE, // isSwiping a été retiré car lu directement
+      touchStart, touchEnd, swipeRotation, MIN_SWIPE_DISTANCE,
       handleNext, handlePrevious, resetSwipeState,
       swipeBackgroundInfo, currentImageIndex, allVisuals.length,
       prevIndex, nextIndex
@@ -477,15 +479,37 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             </div>
         </div>
         {allVisuals.length > 1 && !isSwiping && !isDraggingPanel && (<> <button onClick={() => { handlePrevious(); setTimeout(resetSwipeState,0); }} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Précédent" style={{ transform: 'translateY(-50%)' }}> <ChevronLeft size={24} /> </button> <button onClick={() => { handleNext(); setTimeout(resetSwipeState,0);}} className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Suivant" style={{ transform: 'translateY(-50%)' }}> <ChevronRight size={24} /> </button> </>)}
-        {allVisuals.length > 1 && (<div className={`absolute left-0 right-0 flex justify-center space-x-2 transition-opacity duration-300 z-10 ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} style={{ bottom: `calc(${GRIP_HEIGHT_COLLAPSED} + 15px)` }} aria-label="Indicateurs" aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}> <div className="px-3 py-1.5 bg-black/20 backdrop-blur-sm rounded-full"> {allVisuals.map((_, idx) => (<button key={idx} onClick={() => { setCurrentImageIndex(idx); setTimeout(resetSwipeState,0); }} className={`w-2 h-2 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`} aria-label={`Image ${idx + 1}`} aria-current={currentImageIndex === idx ? "step" : undefined} />))} </div> </div>)}
+        {/* NOUVELLE POSITION POUR LES DOTS */}
+        {allVisuals.length > 1 && (
+            <div
+                className={`absolute left-0 right-0 flex justify-center pointer-events-none transition-opacity duration-300 z-[12] ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`}
+                style={{
+                    bottom: `calc(var(--grip-visible-height, ${GRIP_HEIGHT_COLLAPSED}) + 1rem)`, // 1rem au-dessus de la zone du grip
+                }}
+                aria-label="Indicateurs d'image"
+                aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}
+            >
+                <div className="px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full pointer-events-auto"> {/* pointer-events-auto sur le conteneur interne */}
+                    {allVisuals.map((_, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => { setCurrentImageIndex(idx); setTimeout(resetSwipeState, 0); }}
+                            className={`w-2 h-2 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`}
+                            aria-label={`Aller à l'image ${idx + 1}`}
+                            aria-current={currentImageIndex === idx ? "step" : undefined}
+                        />
+                    ))}
+                </div>
+            </div>
+        )}
         <div ref={panelRef}
              className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-2xl transform will-change-transform cursor-grab active:cursor-grabbing touch-none`}
              style={{
-                 height: GRIP_HEIGHT_EXPANDED,
+                 // height: GRIP_HEIGHT_EXPANDED, // On va laisser la hauteur s'adapter
                  maxHeight: GRIP_HEIGHT_EXPANDED,
                  transform: panelTransform,
                  zIndex: 30,
-                 border: "2px solid red", // DEBUG BORDER
+                 // border: "2px solid red", // DEBUG BORDER (peut être retiré)
                  visibility: isMounted && initialCollapsedY !== null ? 'visible' : 'hidden',
              }}
              aria-hidden={!isInfoVisible}
@@ -493,21 +517,22 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
              onTouchMove={handlePanelTouchMove}
              onTouchEnd={handlePanelTouchEnd}
         >
-            <div ref={gripRef} className="w-full flex flex-col items-center pt-3 pb-2 pointer-events-none">
+            <div ref={gripRef} className="w-full flex flex-col items-center pt-3 pb-2 pointer-events-none"> {/* Ce div est juste pour le visuel du grip */}
                 <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-3 shrink-0"></div>
-                <div className="flex items-center justify-center w-full px-4 overflow-hidden h-8"> {/* Hauteur fixe pour le texte */}
+                {/* Hauteur fixe pour le texte pour garantir sa visibilité */}
+                <div className="flex items-center justify-center w-full px-4 overflow-hidden h-8">
                     {!isInfoVisible && ( <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider">Description</span> )}
                 </div>
             </div>
             <div className="panel-content px-5 pb-5 overflow-y-auto pointer-events-auto touch-auto"
                  style={{
-                     height: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`, // 44px approx pour le grip visuel
-                     maxHeight: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 44px)`,
+                     // La hauteur s'adaptera jusqu'à cette limite, permettant le scroll
+                     maxHeight: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 3rem)`, // 3rem est une estimation de la hauteur du grip visuel
                      display: 'block',
                      opacity: isInfoVisible ? 1 : 0,
                      transition: `opacity ${CONTENT_FADE_DURATION}ms ease-out`,
                      WebkitOverflowScrolling: 'touch',
-                     border: "1px solid green" // DEBUG BORDER
+                     // border: "1px solid green" // DEBUG BORDER (peut être retiré)
                  }}
             >
                 <div className="space-y-4">
