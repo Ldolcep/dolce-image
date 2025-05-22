@@ -1,6 +1,4 @@
-// ========================================================================
-// === ProjectModalMobile.tsx - VERSION FINALE COMPLÈTE ET CORRIGÉE ===
-// ========================================================================
+// ProjectModalMobile.tsx - Ajustements Layout Grip et Dots (Basé sur V0.23f)
 "use client"
 
 import type React from "react"
@@ -22,7 +20,7 @@ export const GRIP_HEIGHT_COLLAPSED = '3vh'; // Votre valeur
 export const GRIP_HEIGHT_EXPANDED = '75vh';
 export const PANEL_ANIMATION_DURATION = 400;
 export const CONTENT_FADE_DURATION = 300;
-export const MIN_SWIPE_DISTANCE = 50; // SENSIBILITÉ AUGMENTÉE
+export const MIN_SWIPE_DISTANCE = 50; // Sensibilité ajustée
 
 interface ProjectModalMobileProps {
   project: Project
@@ -121,10 +119,10 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         setSwipeRotation(clampedRotation);
         let bgIndexToShow: number | null = null;
         let currentSwipeDirection: 'left' | 'right' | null = null;
-        if (distance < -5) { // SEUIL DE DISTANCE RÉDUIT
+        if (distance < -5) {
             currentSwipeDirection = 'left';
             if (currentImageIndex < allVisuals.length - 1) bgIndexToShow = nextIndex;
-        } else if (distance > 5) { // SEUIL DE DISTANCE RÉDUIT
+        } else if (distance > 5) {
             currentSwipeDirection = 'right';
             if (currentImageIndex > 0) bgIndexToShow = prevIndex;
         }
@@ -137,10 +135,10 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             imageRef.current.style.transformOrigin = distance > 0 ? 'bottom left' : 'bottom right';
             imageRef.current.style.zIndex = '10';
             if (bgIndexToShow !== null && backgroundImageRef.current) {
-                const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.30)); // PROGRESSION ACCÉLÉRÉE
-                const scale = 0.9 + (0.05 * progress); // Moins de changement de taille
-                const translateY = 5 - (5 * progress);   // Moins de mouvement vertical
-                const opacity = 0.3 + (0.4 * progress); // Commence un peu plus visible
+                const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.30));
+                const scale = 0.9 + (0.05 * progress);
+                const translateY = 5 - (5 * progress);
+                const opacity = 0.3 + (0.4 * progress);
                 backgroundImageRef.current.style.transform = `scale(${scale}) translateY(${translateY}px)`;
                 backgroundImageRef.current.style.opacity = opacity.toString();
                 backgroundImageRef.current.style.transition = 'none';
@@ -493,7 +491,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             {/* Pagination indicators - Maintenant à l'intérieur du conteneur d'image */}
             {allVisuals.length > 1 && (
                 <div
-                    className={`absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-none transition-opacity duration-300 z-[15] ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`} // zIndex augmenté
+                    className={`absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-none transition-opacity duration-300 z-[15] ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`}
                     style={{ bottom: '1rem' }} // Positionné à 1rem du bas du conteneur d'images
                     aria-label="Indicateurs d'image"
                     aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}
@@ -525,7 +523,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
                  maxHeight: GRIP_HEIGHT_EXPANDED,
                  transform: panelTransform,
                  zIndex: 30,
-                 border: isMounted ? "2px dashed hotpink" : "none", // DEBUG BORDER (peut être retiré)
+                  border: isMounted ? "2px dashed hotpink" : "none", // DEBUG BORDER (peut être retiré)
                  visibility: isMounted && initialCollapsedY !== null ? 'visible' : 'hidden',
              }}
              aria-hidden={!isInfoVisible}
@@ -535,12 +533,12 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         >
             {/* Grip Handle Visuel */}
             <div ref={gripRef}
-                 className="w-full flex flex-col items-center justify-center pointer-events-none" // Centrage ajouté
+                 className="w-full flex flex-col items-center justify-center pointer-events-none px-4" // Centrage et padding
                  style={{ height: GRIP_HEIGHT_COLLAPSED }} // Le grip visuel prend la hauteur définie
             >
-                <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-2 shrink-0"></div>
+                <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-1 shrink-0"></div> {/* mb-1 ou mb-2 */}
                 {!isInfoVisible && (
-                    <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider">
+                    <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider leading-tight"> {/* leading-tight optionnel */}
                         Description
                     </span>
                 )}
