@@ -1,4 +1,6 @@
-// ProjectModalMobile.tsx - Améliorations V0.23d
+// ========================================================================
+// === ProjectModalMobile.tsx - VERSION FINALE COMPLÈTE ET CORRIGÉE ===
+// ========================================================================
 "use client"
 
 import type React from "react"
@@ -20,7 +22,7 @@ export const GRIP_HEIGHT_COLLAPSED = '3vh'; // Votre valeur
 export const GRIP_HEIGHT_EXPANDED = '75vh';
 export const PANEL_ANIMATION_DURATION = 400;
 export const CONTENT_FADE_DURATION = 300;
-export const MIN_SWIPE_DISTANCE = 60; // SENSIBILITÉ AUGMENTÉE
+export const MIN_SWIPE_DISTANCE = 50; // SENSIBILITÉ AUGMENTÉE
 
 interface ProjectModalMobileProps {
   project: Project
@@ -48,7 +50,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const imageRef = useRef<HTMLDivElement>(null);
   const backgroundImageRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const gripRef = useRef<HTMLDivElement>(null); // Gardé pour le style du grip visuel
+  const gripRef = useRef<HTMLDivElement>(null);
   const panelInitialY = useRef<number>(0);
 
   useEffect(() => { setIsMounted(true); console.log("ProjectModalMobile: MOUNTED"); }, []);
@@ -119,17 +121,14 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         setSwipeRotation(clampedRotation);
         let bgIndexToShow: number | null = null;
         let currentSwipeDirection: 'left' | 'right' | null = null;
-
-        // Sensibilité accrue pour l'apparition de l'image de fond
-        if (distance < -5) { // Changé de -10 à -5
+        if (distance < -5) { // SEUIL DE DISTANCE RÉDUIT
             currentSwipeDirection = 'left';
             if (currentImageIndex < allVisuals.length - 1) bgIndexToShow = nextIndex;
-        } else if (distance > 5) { // Changé de 10 à 5
+        } else if (distance > 5) { // SEUIL DE DISTANCE RÉDUIT
             currentSwipeDirection = 'right';
             if (currentImageIndex > 0) bgIndexToShow = prevIndex;
         }
         setSwipeBackgroundInfo({ index: bgIndexToShow, direction: currentSwipeDirection });
-
         requestAnimationFrame(() => {
             if (!imageRef.current || !backgroundImageRef.current) return;
             imageRef.current.style.transform = `translateX(${distance}px) rotate(${clampedRotation}deg)`;
@@ -137,12 +136,11 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             imageRef.current.style.transition = 'none';
             imageRef.current.style.transformOrigin = distance > 0 ? 'bottom left' : 'bottom right';
             imageRef.current.style.zIndex = '10';
-
             if (bgIndexToShow !== null && backgroundImageRef.current) {
-                const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.30)); // Progression plus rapide
-                const scale = 0.85 + (0.10 * progress);
-                const translateY = 10 - (10 * progress);
-                const opacity = 0.1 + (0.6 * progress);
+                const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.30)); // PROGRESSION ACCÉLÉRÉE
+                const scale = 0.9 + (0.05 * progress); // Moins de changement de taille
+                const translateY = 5 - (5 * progress);   // Moins de mouvement vertical
+                const opacity = 0.3 + (0.4 * progress); // Commence un peu plus visible
                 backgroundImageRef.current.style.transform = `scale(${scale}) translateY(${translateY}px)`;
                 backgroundImageRef.current.style.opacity = opacity.toString();
                 backgroundImageRef.current.style.transition = 'none';
@@ -463,53 +461,71 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby={isInfoVisible ? undefined : `modal-title-${project.id}`}>
+        {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm h-16">
             <button onClick={onClose} className="text-gray-700 rounded-full p-2 active:bg-gray-200 shrink-0" aria-label="Fermer"><X size={24} /></button>
             <h2 id={`modal-title-${project.id}`} className="flex-1 text-center text-black text-[1.6rem] font-poppins font-medium truncate mx-4">{project.title}</h2>
             <div className="w-8 h-8 shrink-0"></div>
         </div>
-        <div className="absolute inset-0 pt-16 pb-[--grip-visible-height] overflow-hidden" style={{ '--grip-visible-height': collapsedGripVisibleHeight } as React.CSSProperties} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-            {allVisuals.length > 1 && swipeBackgroundInfo.index !== null && allVisuals[swipeBackgroundInfo.index] && (
-                 <div ref={backgroundImageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ opacity: 0, transform: 'scale(0.85) translateY(10px)', zIndex: 5 }}>
-                     <Image key={`bg-${allVisuals[swipeBackgroundInfo.index]}`} src={allVisuals[swipeBackgroundInfo.index]} alt={`Arrière-plan`} fill className="object-contain" sizes="100vw" loading="lazy" />
-                 </div>
-             )}
-            <div ref={imageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ zIndex: 10 }}>
-                {allVisuals[currentImageIndex] && (<Image key={allVisuals[currentImageIndex]} src={allVisuals[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} fill className="object-contain" sizes="100vw" priority={true} />)}
-            </div>
-        </div>
-        {allVisuals.length > 1 && !isSwiping && !isDraggingPanel && (<> <button onClick={() => { handlePrevious(); setTimeout(resetSwipeState,0); }} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Précédent" style={{ transform: 'translateY(-50%)' }}> <ChevronLeft size={24} /> </button> <button onClick={() => { handleNext(); setTimeout(resetSwipeState,0);}} className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Suivant" style={{ transform: 'translateY(-50%)' }}> <ChevronRight size={24} /> </button> </>)}
-        {/* NOUVELLE POSITION POUR LES DOTS */}
-        {allVisuals.length > 1 && (
-            <div
-                className={`absolute left-0 right-0 flex justify-center pointer-events-none transition-opacity duration-300 z-[12] ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`}
-                style={{
-                    bottom: `calc(var(--grip-visible-height, ${GRIP_HEIGHT_COLLAPSED}) + 1rem)`, // 1rem au-dessus de la zone du grip
-                }}
-                aria-label="Indicateurs d'image"
-                aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}
+
+        {/* Conteneur principal pour images ET dots */}
+        <div className="absolute inset-0 pt-16 pb-[--grip-visible-height] overflow-hidden"
+             style={{ '--grip-visible-height': collapsedGripVisibleHeight } as React.CSSProperties}
+        >
+            {/* Image Stack (avec onTouch handlers sur un wrapper interne si besoin, ou sur ce div) */}
+            <div className="relative w-full h-full"
+                 onTouchStart={onTouchStart}
+                 onTouchMove={onTouchMove}
+                 onTouchEnd={onTouchEnd}
             >
-                <div className="px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full pointer-events-auto"> {/* pointer-events-auto sur le conteneur interne */}
-                    {allVisuals.map((_, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => { setCurrentImageIndex(idx); setTimeout(resetSwipeState, 0); }}
-                            className={`w-2 h-2 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`}
-                            aria-label={`Aller à l'image ${idx + 1}`}
-                            aria-current={currentImageIndex === idx ? "step" : undefined}
-                        />
-                    ))}
+                {/* Background Image */}
+                {allVisuals.length > 1 && swipeBackgroundInfo.index !== null && allVisuals[swipeBackgroundInfo.index] && (
+                     <div ref={backgroundImageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ opacity: 0, transform: 'scale(0.85) translateY(10px)', zIndex: 5 }}>
+                         <Image key={`bg-${allVisuals[swipeBackgroundInfo.index]}`} src={allVisuals[swipeBackgroundInfo.index]} alt={`Arrière-plan`} fill className="object-contain" sizes="100vw" loading="lazy" />
+                     </div>
+                 )}
+                {/* Current Image */}
+                <div ref={imageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ zIndex: 10 }}>
+                    {allVisuals[currentImageIndex] && (<Image key={allVisuals[currentImageIndex]} src={allVisuals[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} fill className="object-contain" sizes="100vw" priority={true} />)}
                 </div>
             </div>
-        )}
+
+            {/* Pagination indicators - Maintenant à l'intérieur du conteneur d'image */}
+            {allVisuals.length > 1 && (
+                <div
+                    className={`absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-none transition-opacity duration-300 z-[15] ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`} // zIndex augmenté
+                    style={{ bottom: '1rem' }} // Positionné à 1rem du bas du conteneur d'images
+                    aria-label="Indicateurs d'image"
+                    aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}
+                >
+                    <div className="px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full pointer-events-auto">
+                        {allVisuals.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => { setCurrentImageIndex(idx); setTimeout(resetSwipeState, 0); }}
+                                className={`w-2 h-2 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`}
+                                aria-label={`Aller à l'image ${idx + 1}`}
+                                aria-current={currentImageIndex === idx ? "step" : undefined}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+
+
+        {/* Nav Buttons */}
+        {allVisuals.length > 1 && !isSwiping && !isDraggingPanel && (<> <button onClick={() => { handlePrevious(); setTimeout(resetSwipeState,0); }} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Précédent" style={{ transform: 'translateY(-50%)' }}> <ChevronLeft size={24} /> </button> <button onClick={() => { handleNext(); setTimeout(resetSwipeState,0);}} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Suivant" style={{ transform: 'translateY(-50%)' }}> <ChevronRight size={24} /> </button> </>)}
+
+        {/* Info Panel */}
         <div ref={panelRef}
              className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-2xl transform will-change-transform cursor-grab active:cursor-grabbing touch-none`}
              style={{
-                 // height: GRIP_HEIGHT_EXPANDED, // On va laisser la hauteur s'adapter
+                 height: GRIP_HEIGHT_EXPANDED, // Maintenir pour le moment pour stabiliser
                  maxHeight: GRIP_HEIGHT_EXPANDED,
                  transform: panelTransform,
                  zIndex: 30,
-                 // border: "2px solid red", // DEBUG BORDER (peut être retiré)
+                 border: isMounted ? "2px dashed hotpink" : "none", // DEBUG BORDER (peut être retiré)
                  visibility: isMounted && initialCollapsedY !== null ? 'visible' : 'hidden',
              }}
              aria-hidden={!isInfoVisible}
@@ -517,22 +533,28 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
              onTouchMove={handlePanelTouchMove}
              onTouchEnd={handlePanelTouchEnd}
         >
-            <div ref={gripRef} className="w-full flex flex-col items-center pt-3 pb-2 pointer-events-none"> {/* Ce div est juste pour le visuel du grip */}
-                <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-3 shrink-0"></div>
-                {/* Hauteur fixe pour le texte pour garantir sa visibilité */}
-                <div className="flex items-center justify-center w-full px-4 overflow-hidden h-8">
-                    {!isInfoVisible && ( <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider">Description</span> )}
-                </div>
+            {/* Grip Handle Visuel */}
+            <div ref={gripRef}
+                 className="w-full flex flex-col items-center justify-center pointer-events-none" // Centrage ajouté
+                 style={{ height: GRIP_HEIGHT_COLLAPSED }} // Le grip visuel prend la hauteur définie
+            >
+                <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-2 shrink-0"></div>
+                {!isInfoVisible && (
+                    <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider">
+                        Description
+                    </span>
+                )}
             </div>
+            {/* Panel Content */}
             <div className="panel-content px-5 pb-5 overflow-y-auto pointer-events-auto touch-auto"
                  style={{
-                     // La hauteur s'adaptera jusqu'à cette limite, permettant le scroll
-                     maxHeight: `calc(${GRIP_HEIGHT_EXPANDED} - ${GRIP_HEIGHT_COLLAPSED} - 3rem)`, // 3rem est une estimation de la hauteur du grip visuel
+                     height: `calc(100% - ${GRIP_HEIGHT_COLLAPSED})`, // Prend la hauteur restante du panneau
+                     maxHeight: `calc(100% - ${GRIP_HEIGHT_COLLAPSED})`,
                      display: 'block',
                      opacity: isInfoVisible ? 1 : 0,
                      transition: `opacity ${CONTENT_FADE_DURATION}ms ease-out`,
                      WebkitOverflowScrolling: 'touch',
-                     // border: "1px solid green" // DEBUG BORDER (peut être retiré)
+                     border: "1px solid green" // DEBUG BORDER (peut être retiré)
                  }}
             >
                 <div className="space-y-4">
