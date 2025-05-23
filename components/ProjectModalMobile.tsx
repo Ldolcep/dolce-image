@@ -1,10 +1,14 @@
-// ProjectModalMobile.tsx - Ajustements Layout Grip et Dots (Basé sur V0.23f)
+// ========================================================================
+// === ProjectModalMobile.tsx - V0.24a - VERSION INTÉGRALE RESTAURÉE ===
+// ========================================================================
 "use client"
 
 import type React from "react"
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useSprings, animated, SpringConfig } from '@react-spring/web'
+import { useDrag } from '@use-gesture/react'
 
 export interface Project {
   id: string;
@@ -16,11 +20,11 @@ export interface Project {
 }
 
 // Constants
-export const GRIP_HEIGHT_COLLAPSED = '3vh'; // Votre valeur
+export const GRIP_HEIGHT_COLLAPSED = '3vh';
 export const GRIP_HEIGHT_EXPANDED = '75vh';
 export const PANEL_ANIMATION_DURATION = 400;
 export const CONTENT_FADE_DURATION = 300;
-export const MIN_SWIPE_DISTANCE = 50; // Sensibilité ajustée
+// MIN_SWIPE_DISTANCE sera géré par useDrag (threshold)
 
 interface ProjectModalMobileProps {
   project: Project
@@ -28,16 +32,26 @@ interface ProjectModalMobileProps {
   onClose: () => void
 }
 
+const springConfigBase: SpringConfig = {
+  tension: 300,
+  friction: 30,
+};
+const springConfigActive: SpringConfig = {
+  tension: 800,
+  friction: 40,
+  immediate: true, // Mouvement direct pendant le drag
+};
+const springConfigSwipeOut: SpringConfig = {
+    tension: 200,
+    friction: 22,
+    // clamp: true // Évite les oscillations excessives lors du swipe out
+};
+
+
 export default function ProjectModalMobile({ project, isOpen, onClose }: ProjectModalMobileProps) {
   const allVisuals = useMemo(() => [project.mainVisual, ...project.additionalVisuals].filter(Boolean), [project]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInfoVisible, setIsInfoVisible] = useState(false);
-  const [swipeBackgroundInfo, setSwipeBackgroundInfo] = useState<{ index: number | null; direction: 'left' | 'right' | null }>({ index: null, direction: null });
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [currentTouchX, setCurrentTouchX] = useState<number | null>(null);
-  const [swipeRotation, setSwipeRotation] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
   const [dragStartY, setDragStartY] = useState<number | null>(null);
   const [panelTranslateY, setPanelTranslateY] = useState<number | null>(null);
@@ -45,13 +59,30 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const [isMounted, setIsMounted] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const backgroundImageRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const gripRef = useRef<HTMLDivElement>(null);
   const panelInitialY = useRef<number>(0);
+  const windowWidth = useRef(typeof window !== 'undefined' ? window.innerWidth : 300);
+  const gone = useRef(new Set<number>()); // Garde une trace des cartes qui ont été swipées
 
-  useEffect(() => { setIsMounted(true); console.log("ProjectModalMobile: MOUNTED"); }, []);
+
+  useEffect(() => {
+    setIsMounted(true);
+    if (typeof window !== 'undefined') {
+        windowWidth.current = window.innerWidth;
+    }
+  }, []);
+
+  // Réinitialiser 'gone' lorsque le projet ou le nombre d'images change
+  useEffect(() => {
+    console.log("ProjectModalMobile: Resetting 'gone' set due to project/allVisuals change.");
+    gone.current = new Set();
+    // On réinitialise aussi les springs pour que toutes les cartes soient prêtes
+    if (api) { // api peut ne pas être défini au premier rendu si allVisuals est initialement vide
+        api.start(i => to(i, 0, true)); // Repositionne toutes les cartes à leur état initial pour le nouvel ensemble
+    }
+  }, [project, allVisuals.length]); // Ajouter api plus tard si nécessaire après sa définition
+
 
   const initialCollapsedY = useMemo(() => {
     if (typeof window !== 'undefined' && isMounted) {
@@ -59,217 +90,153 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         const vh = window.innerHeight;
         const gripHeightPx = vh * parseFloat(GRIP_HEIGHT_COLLAPSED) / 100;
         const expandedHeightPx = vh * parseFloat(GRIP_HEIGHT_EXPANDED) / 100;
-        const calculatedY = expandedHeightPx - gripHeightPx;
-        console.log("ProjectModalMobile: initialCollapsedY calculated =", calculatedY, {vh, gripHeightPx, expandedHeightPx});
-        return calculatedY;
+        return expandedHeightPx - gripHeightPx;
       } catch (e) { console.error("Error calculating initialCollapsedY", e); return null; }
-    }
-    console.log("ProjectModalMobile: initialCollapsedY not calculated (not mounted or no window)");
-    return null;
+    } return null;
   }, [isMounted]);
 
-  const prevIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
-  const nextIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
-
-  const resetSwipeState = useCallback(() => {
-    setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null);
-    setSwipeRotation(0); setIsSwiping(false);
-    setSwipeBackgroundInfo({ index: null, direction: null });
-    requestAnimationFrame(() => {
-        try {
-            if (imageRef.current) {
-                imageRef.current.style.transform = 'translateX(0px) rotate(0deg)';
-                imageRef.current.style.opacity = '1';
-                imageRef.current.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
-                imageRef.current.style.transformOrigin = 'center center';
-                imageRef.current.style.zIndex = '10';
-            }
-            if (backgroundImageRef.current) {
-                backgroundImageRef.current.style.opacity = '0';
-                backgroundImageRef.current.style.transform = 'scale(0.85) translateY(10px)';
-                backgroundImageRef.current.style.transition = 'none';
-                backgroundImageRef.current.style.zIndex = '5';
-            }
-        } catch (error) { console.error("Swipe reset style error:", error); }
-    });
-  }, []);
-
-  const handleNext = useCallback(() => {
-    if (allVisuals.length <= 1) return;
-    const newIndex = (currentImageIndex + 1) % allVisuals.length;
-    console.log("handleNext: newIndex", newIndex);
-    setCurrentImageIndex(newIndex);
-  }, [currentImageIndex, allVisuals.length]);
-
-  const handlePrevious = useCallback(() => {
-    if (allVisuals.length <= 1) return;
-    const newIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
-    console.log("handlePrevious: newIndex", newIndex);
-    setCurrentImageIndex(newIndex);
-  }, [currentImageIndex, allVisuals.length]);
-
-  const calculateSwipeAnimation = useCallback((currentX: number, startX: number) => {
-      if (!isMounted || !isSwiping || !imageRef.current || !backgroundImageRef.current) return;
-      try {
-        const distance = currentX - startX;
-        const screenWidth = window.innerWidth;
-        const rotationFactor = 0.08; const maxRotation = 20;
-        const clampedRotation = Math.max(-maxRotation, Math.min(maxRotation, rotationFactor * distance));
-        const currentImageOpacity = 1 - Math.min(0.5, Math.abs(distance) / (screenWidth * 0.6));
-        setSwipeRotation(clampedRotation);
-        let bgIndexToShow: number | null = null;
-        let currentSwipeDirection: 'left' | 'right' | null = null;
-        if (distance < -5) {
-            currentSwipeDirection = 'left';
-            if (currentImageIndex < allVisuals.length - 1) bgIndexToShow = nextIndex;
-        } else if (distance > 5) {
-            currentSwipeDirection = 'right';
-            if (currentImageIndex > 0) bgIndexToShow = prevIndex;
-        }
-        setSwipeBackgroundInfo({ index: bgIndexToShow, direction: currentSwipeDirection });
-        requestAnimationFrame(() => {
-            if (!imageRef.current || !backgroundImageRef.current) return;
-            imageRef.current.style.transform = `translateX(${distance}px) rotate(${clampedRotation}deg)`;
-            imageRef.current.style.opacity = currentImageOpacity.toString();
-            imageRef.current.style.transition = 'none';
-            imageRef.current.style.transformOrigin = distance > 0 ? 'bottom left' : 'bottom right';
-            imageRef.current.style.zIndex = '10';
-            if (bgIndexToShow !== null && backgroundImageRef.current) {
-                const progress = Math.min(1, Math.abs(distance) / (screenWidth * 0.30));
-                const scale = 0.9 + (0.05 * progress);
-                const translateY = 5 - (5 * progress);
-                const opacity = 0.3 + (0.4 * progress);
-                backgroundImageRef.current.style.transform = `scale(${scale}) translateY(${translateY}px)`;
-                backgroundImageRef.current.style.opacity = opacity.toString();
-                backgroundImageRef.current.style.transition = 'none';
-                backgroundImageRef.current.style.zIndex = '5';
-            } else if (backgroundImageRef.current) {
-                backgroundImageRef.current.style.opacity = '0';
-            }
-       });
-    } catch (error) { console.error("Swipe calc error:", error); }
-  }, [isSwiping, isMounted, currentImageIndex, allVisuals.length, nextIndex, prevIndex]);
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    console.log("ProjectModalMobile: ImageSwipe onTouchStart triggered - Current isSwiping:", isSwiping, "isDraggingPanel:", isDraggingPanel);
-    const targetNode = e.target as Node;
-    const panelContentEl = panelRef.current?.querySelector('.panel-content');
-    if (panelContentEl?.contains(targetNode) && panelContentEl.scrollHeight > panelContentEl.clientHeight && isInfoVisible) {
-        console.log("ImageSwipe onTouchStart: Blocked by scrollable panel content touch"); return;
+  // --- Logique des Springs pour les Cartes ---
+  // Fonction pour déterminer les props de style pour chaque carte
+  const to = (i: number, activeIndex: number = currentImageIndex, isReset: boolean = false) => {
+    if (gone.current.has(i) && !isReset) { // Si la carte est "partie" et qu'on ne fait pas un reset global
+        return { x: (allVisuals.length + 5) * windowWidth.current * (i < activeIndex ? -1 : 1), y:0, scale: 0.8, rotateZ: 0, opacity: 0, display: 'none', config: springConfigSwipeOut, immediate: true };
     }
-    if (panelRef.current?.contains(targetNode) && !gripRef.current?.contains(targetNode) && isInfoVisible) {
-        console.log("ImageSwipe onTouchStart: Blocked by panel (not grip/content) touch while info visible"); return;
-    }
-    if (gripRef.current?.contains(targetNode)) {
-        console.log("ImageSwipe onTouchStart: Blocked by grip touch"); return;
-    }
-    if (allVisuals.length <= 1 || isDraggingPanel || isSwiping) {
-        console.log("ImageSwipe onTouchStart: Blocked - visuals:", allVisuals.length, "draggingPanel:", isDraggingPanel, "isSwiping:", isSwiping); return;
-    }
-    setIsSwiping(true);
-    console.log("ImageSwipe onTouchStart: PROCEEDING WITH SWIPE INIT, isSwiping set to true");
-    try {
-        setTouchEnd(null); const startX = e.targetTouches[0].clientX;
-        setTouchStart(startX); setCurrentTouchX(startX);
-        if (imageRef.current) imageRef.current.style.transition = 'none';
-        if (backgroundImageRef.current) backgroundImageRef.current.style.transition = 'none';
-    } catch (error) { console.error("ImageSwipe TouchStart error:", error); setIsSwiping(false); }
-  }, [allVisuals.length, isDraggingPanel, isInfoVisible, isSwiping]);
+    const x = 0; // Les cartes sont superposées, x est contrôlé par le drag
+    const y = 0; // Peut être utilisé pour un effet de pile si désiré (ex: i * -4)
+    let scale = 1;
+    let opacity = 0;
+    let display = 'none';
+    let zIndex = 0;
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    console.log("ProjectModalMobile: ImageSwipe onTouchMove triggered - isSwiping:", isSwiping, "touchStart:", touchStart);
-    if (touchStart === null || !isSwiping || isDraggingPanel) {
-        if(touchStart === null) console.log("ImageSwipe onTouchMove: Blocked - touchStart is null");
-        if(!isSwiping) console.log("ImageSwipe onTouchMove: Blocked - !isSwiping");
-        if(isDraggingPanel) console.log("ImageSwipe onTouchMove: Blocked - isDraggingPanel");
-        return;
+    if (i === activeIndex) { // Carte actuelle
+      scale = 1;
+      opacity = 1;
+      display = 'block';
+      zIndex = allVisuals.length;
+    } else if (i === activeIndex + 1) { // Prochaine carte (effet de pile)
+      scale = 0.95;
+      opacity = 0.7;
+      display = 'block';
+      zIndex = allVisuals.length - 1;
+    } else if (i === activeIndex -1 && activeIndex > 0) { // Carte précédente (si on voulait un effet de pile arrière)
+        // Pour l'instant, on ne la montre pas activement en pile arrière
+        scale = 0.85;
+        opacity = 0;
+        display = 'none';
+        zIndex = allVisuals.length -2;
     }
-    try {
-        const currentX = e.targetTouches[0].clientX;
-        const currentY = e.targetTouches[0].clientY;
-        const deltaX = Math.abs(currentX - (currentTouchX ?? currentX));
-        const startY = (e.targetTouches[0] as any).startY ?? currentY;
-        const deltaY = Math.abs(currentY - startY);
-        setCurrentTouchX(currentX);
-        if (deltaX > deltaY && deltaX > 5 && e.cancelable) { e.preventDefault(); }
-        setTouchEnd(currentX);
-        calculateSwipeAnimation(currentX, touchStart);
-    } catch (error) { console.error("ImageSwipe TouchMove error:", error); resetSwipeState(); }
-  }, [touchStart, isSwiping, currentTouchX, calculateSwipeAnimation, resetSwipeState, isDraggingPanel]);
+    else { // Autres cartes
+        scale = 0.85;
+        opacity = 0;
+        display = 'none';
+        zIndex = allVisuals.length - Math.abs(i - activeIndex);
+    }
+    return { x, y, scale, rotateZ: 0, opacity, display, zIndex, config: springConfigBase, delay: isReset ? 0 : (i === activeIndex ? 100: 0) };
+  };
 
- const onTouchEnd = useCallback(() => {
-    console.log("ProjectModalMobile: ImageSwipe onTouchEnd triggered. touchStart:", touchStart, "isSwiping (at start of onTouchEnd):", isSwiping);
-    if (!touchStart || !isSwiping) {
-        console.log("ImageSwipe onTouchEnd: Aborting - no touchStart or not actively swiping (isSwiping was already false).");
-        if (touchStart !== null) { resetSwipeState(); }
+  const [springProps, api] = useSprings(allVisuals.length, i => ({ ...to(i, currentImageIndex, true) }));
+
+  // Mettre à jour les springs quand currentImageIndex change
+  useEffect(() => {
+    if (isMounted && api) { // S'assurer que api est défini
+        api.start(i => to(i, currentImageIndex));
+    }
+  }, [currentImageIndex, api, isMounted]); // Retiré allVisuals.length car déjà géré par le reset de `gone`
+
+
+  // --- Gestion du Drag avec useDrag ---
+  const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx], down, distance, cancel }) => {
+    if (!isMounted || isDraggingPanel) {
+        if (cancel) cancel();
         return;
     }
 
-    const finalDistance = (touchEnd ?? touchStart) - touchStart;
-    setIsSwiping(false);
-    console.log("ImageSwipe onTouchEnd: isSwiping set to false. finalDistance:", finalDistance);
+    const triggerDistance = windowWidth.current / 3; // Seuil de distance pour valider le swipe
+    const triggerVelocity = 0.2; // Seuil de vélocité
 
-    let action: 'next' | 'previous' | 'reset' = 'reset';
-    let targetBackgroundIndexForAnimation: number | null = null;
+    // Si l'utilisateur relâche
+    if (!active) {
+        // Si le swipe est assez rapide OU a dépassé le seuil de distance
+        if (Math.abs(mx) > triggerDistance || vx > triggerVelocity) {
+            const dir = xDir < 0 ? -1 : 1; // -1 for left, 1 for right
 
-    if (finalDistance < -MIN_SWIPE_DISTANCE && currentImageIndex < allVisuals.length - 1) {
-        action = 'next';
-        targetBackgroundIndexForAnimation = nextIndex;
-    } else if (finalDistance > MIN_SWIPE_DISTANCE && currentImageIndex > 0) {
-        action = 'previous';
-        targetBackgroundIndexForAnimation = prevIndex;
-    }
-    console.log("ImageSwipe onTouchEnd: Determined action:", action, "targetBackgroundIndexForAnimation:", targetBackgroundIndexForAnimation);
-
-    try {
-        const swipeAnimDuration = 350;
-        const transitionCurve = 'cubic-bezier(0.175, 0.885, 0.32, 1.175)';
-        const transitionStyle = `transform ${swipeAnimDuration}ms ${transitionCurve}, opacity ${swipeAnimDuration}ms ease-out`;
-
-        if (action === 'next' || action === 'previous') {
-            if (imageRef.current) imageRef.current.style.transition = transitionStyle;
-            if (backgroundImageRef.current && targetBackgroundIndexForAnimation !== null && swipeBackgroundInfo.index === targetBackgroundIndexForAnimation) {
-                backgroundImageRef.current.style.transition = transitionStyle;
+            // Swipe vers la gauche (vers image suivante)
+            if (dir === -1 && currentImageIndex < allVisuals.length - 1) {
+                console.log("Swipe Left Validated for index:", index);
+                gone.current.add(index);
+                setCurrentImageIndex(i => i + 1);
             }
-        }
-
-        if (action === 'next') {
-            console.log("ImageSwipe onTouchEnd: Executing left swipe animation for index:", targetBackgroundIndexForAnimation);
-            if(imageRef.current) { const finalRotation = -Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(-120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
-            if(backgroundImageRef.current && swipeBackgroundInfo.index === targetBackgroundIndexForAnimation) {
-                backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)';
-                backgroundImageRef.current.style.opacity = '1';
-                backgroundImageRef.current.style.zIndex = '15';
-            } else if (backgroundImageRef.current) {
-                 backgroundImageRef.current.style.opacity = '0';
+            // Swipe vers la droite (vers image précédente)
+            else if (dir === 1 && currentImageIndex > 0) {
+                console.log("Swipe Right Validated for index:", index);
+                gone.current.add(index);
+                setCurrentImageIndex(i => i - 1);
             }
-            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Left swipe timeout - calling handleNext & resetSwipeState"); handleNext(); resetSwipeState(); }, swipeAnimDuration);
-        } else if (action === 'previous') {
-            console.log("ImageSwipe onTouchEnd: Executing right swipe animation for index:", targetBackgroundIndexForAnimation);
-            if(imageRef.current) { const finalRotation = Math.max(15, Math.abs(swipeRotation * 1.2)); imageRef.current.style.transform = `translateX(120%) rotate(${finalRotation}deg) scale(0.9)`; imageRef.current.style.opacity = '0'; }
-            if(backgroundImageRef.current && swipeBackgroundInfo.index === targetBackgroundIndexForAnimation) {
-                backgroundImageRef.current.style.transform = 'scale(1) translateY(0px)';
-                backgroundImageRef.current.style.opacity = '1';
-                backgroundImageRef.current.style.zIndex = '15';
-            } else if (backgroundImageRef.current) {
-                 backgroundImageRef.current.style.opacity = '0';
+            // Si swipe invalide (aux bords ou pas assez fort), la carte retourne à sa place
+            else {
+                console.log("Swipe Invalid or at edge, snapping back index:", index);
+                api.start(i => (i === index ? to(i, currentImageIndex) : undefined));
             }
-            setTimeout(() => { console.log("ImageSwipe onTouchEnd: Right swipe timeout - calling handlePrevious & resetSwipeState"); handlePrevious(); resetSwipeState(); }, swipeAnimDuration);
         } else {
-            console.log("ImageSwipe onTouchEnd: No valid swipe or at edge, resetting state.");
-            resetSwipeState();
+            // Pas assez de mouvement/vélocité, snap back
+            console.log("Swipe not triggered (thresholds), snapping back index:", index);
+            api.start(i => (i === index ? to(i, currentImageIndex) : undefined));
         }
-    } catch (error) { console.error("ImageSwipe TouchEnd error:", error); resetSwipeState(); }
-    finally {
-        setTouchStart(null); setTouchEnd(null); setCurrentTouchX(null);
+        return; // Fin de la logique pour !active
     }
-  }, [
-      touchStart, touchEnd, swipeRotation, MIN_SWIPE_DISTANCE,
-      handleNext, handlePrevious, resetSwipeState,
-      swipeBackgroundInfo, currentImageIndex, allVisuals.length,
-      prevIndex, nextIndex
-  ]);
 
+    // Pendant le drag (active est true)
+    // Seule la carte actuelle (currentImageIndex) peut être draguée
+    if (index !== currentImageIndex) {
+        if (cancel) cancel(); // Empêche le drag des cartes en arrière-plan
+        return;
+    }
+
+    const x = mx;
+    const rotateZ = mx / 10; // Rotation proportionnelle au mouvement
+    const scale = 1.05; // Agrandir légèrement la carte draguée
+    const config = springConfigActive;
+
+    // Animer la carte suivante pour qu'elle se prépare
+    if (index + 1 < allVisuals.length) {
+        const nextCardIndex = index + 1;
+        const progress = Math.min(1, Math.abs(mx) / (windowWidth.current * 0.5)); // Plus sensible
+        const nextScale = 0.95 + (0.05 * progress);
+        const nextOpacity = 0.7 + (0.3 * progress);
+        api.start(i => (i === nextCardIndex ? { scale: nextScale, opacity: nextOpacity, display: 'block', config } : undefined));
+    }
+
+
+    api.start(i => {
+      if (i === index) { // Carte en cours de drag
+        return { x, rotateZ, scale, opacity: 1, display: 'block', config, immediate: down };
+      }
+      return undefined; // Ne pas toucher aux autres cartes pendant le drag de l'actuelle (sauf la suivante gérée au-dessus)
+    });
+  });
+
+  const handleNavNext = useCallback(() => {
+    if (currentImageIndex < allVisuals.length - 1) {
+        gone.current.add(currentImageIndex);
+        setCurrentImageIndex(i => i + 1);
+    }
+  }, [currentImageIndex, allVisuals.length]);
+
+  const handleNavPrevious = useCallback(() => {
+    if (currentImageIndex > 0) {
+        // Pour la navigation par bouton, on peut simuler que la carte est partie
+        // en la déplaçant rapidement, ou juste la cacher.
+        // Ici, on change juste l'index, et le useEffect s'occupe du reste.
+        // Il faudra peut-être marquer l'ancienne carte comme "gone" pour la cohérence.
+        // Cependant, l'effet actuel ne regarde `gone` que pour celles < currentImageIndex.
+        // Pour la simplicité, on change juste l'index.
+        api.start(i => (i === currentImageIndex ? {x: windowWidth.current * 1.5, opacity: 0, display: 'none', config: springConfigSwipeOut, onRest: () => setCurrentImageIndex(prev => prev -1)} : undefined));
+        // Alternative plus simple: setCurrentImageIndex(i => i - 1); // Le useEffect fera le reste
+    }
+  }, [currentImageIndex, api, allVisuals.length]);
+
+
+  // --- Logique pour le panneau ---
   const calculatePanelY = useCallback((deltaY: number): number => {
       if(!isMounted) return 0;
       try {
@@ -293,29 +260,18 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         const progress = Math.max(0, Math.min(1, (currentY - expandedY) / totalTravel));
         const opacity = 1 - progress;
         contentElement.style.opacity = Math.max(0, Math.min(1, opacity)).toString();
-        if (opacity > 0) contentElement.style.display = 'block';
+        if (opacity > 0) contentElement.style.display = 'block'; else contentElement.style.display = 'none';
      } catch(error) { console.error("Content visibility error", error)}
   }, []);
 
   const handlePanelTouchStart = useCallback((e: React.TouchEvent) => {
-    console.log("ProjectModalMobile: PanelTouchStart triggered - Current isSwiping:", isSwiping);
-    if (isSwiping) {
-        console.log("PanelTouchStart: Blocked by active image swipe");
-        return;
-    }
+    if (isSwiping) return;
     const target = e.target as Node;
     const panelContent = panelRef.current?.querySelector('.panel-content');
     const isTouchingScrollableContent = panelContent?.contains(target) && isInfoVisible && panelContent.scrollHeight > panelContent.clientHeight;
-    if (isTouchingScrollableContent) {
-      console.log("PanelTouchStart: Allowing default for scrollable content, not dragging panel.");
-      setIsDraggingPanel(false);
-      return;
-    }
-    console.log("PanelTouchStart: PROCEEDING WITH PANEL DRAG INIT");
+    if (isTouchingScrollableContent) { setIsDraggingPanel(false); return; }
     try {
-        e.stopPropagation();
-        setDragStartY(e.touches[0].clientY);
-        setIsDraggingPanel(true);
+        e.stopPropagation(); setDragStartY(e.touches[0].clientY); setIsDraggingPanel(true);
         if (panelRef.current) {
             panelRef.current.style.transition = 'none';
             const style = window.getComputedStyle(panelRef.current);
@@ -327,7 +283,6 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   }, [isInfoVisible, isSwiping]);
 
   const handlePanelTouchMove = useCallback((e: React.TouchEvent) => {
-    console.log("ProjectModalMobile: PanelTouchMove triggered - isDraggingPanel:", isDraggingPanel);
     if (dragStartY === null || !isDraggingPanel || !panelRef.current) return;
     try {
         e.stopPropagation(); if (e.cancelable) e.preventDefault();
@@ -342,7 +297,6 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   }, [dragStartY, isDraggingPanel, calculatePanelY, updateContentVisibility]);
 
   const handlePanelTouchEnd = useCallback(() => {
-    console.log("ProjectModalMobile: PanelTouchEnd triggered - isDraggingPanel:", isDraggingPanel);
     if (dragStartY === null || !isDraggingPanel || panelTranslateY === null || !panelRef.current) return;
     setIsDraggingPanel(false); const deltaY = panelTranslateY - panelInitialY.current; const threshold = 60;
     try {
@@ -369,10 +323,10 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     finally { setDragStartY(null); }
   }, [dragStartY, isDraggingPanel, panelTranslateY, isInfoVisible]);
 
+
   // --- EFFECTS ---
-  useEffect(() => {
+  useEffect(() => { // Init panel on open
     if (isOpen && isMounted && initialCollapsedY !== null) {
-        console.log("ProjectModalMobile EFFECT[isOpen, initialCollapsedY]: Setting panelTranslateY to initialCollapsedY:", initialCollapsedY);
         setPanelTranslateY(initialCollapsedY);
         if (panelRef.current) {
             panelRef.current.style.transform = `translateY(${initialCollapsedY}px)`;
@@ -382,29 +336,27 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             });
         }
     } else if (!isOpen) {
-        console.log("ProjectModalMobile EFFECT[isOpen]: Resetting panelTranslateY (isOpen false or other conditions not met)");
         setPanelTranslateY(null); setIsInfoVisible(false);
         if (panelRef.current) panelRef.current.style.transition = 'none';
     }
   }, [isOpen, isMounted, initialCollapsedY]);
 
-  useEffect(() => {
+  useEffect(() => { // Reset on project change
     if (isOpen) {
-        console.log("ProjectModalMobile EFFECT[project, isOpen]: Resetting for new project or open");
-        setCurrentImageIndex(0);
-        resetSwipeState(); setImagesLoaded({}); setIsInfoVisible(false);
+        setCurrentImageIndex(0); // Déclenchera le useEffect de useSprings
+        gone.current = new Set(); // Important de reset 'gone' aussi
+        setImagesLoaded({}); setIsInfoVisible(false);
         if(isMounted && initialCollapsedY !== null) {
-            console.log("ProjectModalMobile EFFECT[project, isOpen]: Resetting panelTranslateY to initialCollapsedY:", initialCollapsedY);
-            setPanelTranslateY(initialCollapsedY);
+             setPanelTranslateY(initialCollapsedY);
              if(panelRef.current) {
                  panelRef.current.style.transform = `translateY(${initialCollapsedY}px)`;
                  panelRef.current.style.visibility = 'visible';
              }
         }
     }
-  }, [project, isOpen, isMounted, initialCollapsedY, allVisuals.length, resetSwipeState]);
+  }, [project, isOpen, isMounted, initialCollapsedY]); // allVisuals.length et resetSwipeState retirés car gérés par le spring
 
-  useEffect(() => {
+  useEffect(() => { // Image Preloading
     if (!isMounted || !isOpen || !allVisuals?.length) return;
     const preloadImage = (src: string): Promise<void> => {
         if (imagesLoaded[src]) return Promise.resolve();
@@ -427,7 +379,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     preloadAllImages();
   }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
 
-  useEffect(() => {
+  useEffect(() => { // Prevent Background Scroll
     if (!isMounted || !isOpen) return;
     const preventDocumentScroll = (e: TouchEvent) => {
         try {
@@ -441,21 +393,16 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     return () => document.removeEventListener('touchmove', preventDocumentScroll);
   }, [isOpen, isInfoVisible, isMounted]);
 
-  // --- RENDER FALLBACK ---
-  if (!isMounted) {
-    if (!isOpen) return null;
-    console.log("ProjectModalMobile RENDER: Not mounted, showing fallback for open modal");
-    return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>;
-  }
-  if (!isOpen) {
-    console.log("ProjectModalMobile RENDER: Not open, returning null");
-    return null;
+
+   // --- RENDER FALLBACK ---
+   if (!isMounted) {
+     if (!isOpen) return null;
+     return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>;
    }
+   if (!isOpen) return null;
 
   const collapsedGripVisibleHeight = `calc(${GRIP_HEIGHT_COLLAPSED} + 0px)`;
-  const panelTransformValue = panelTranslateY !== null ? panelTranslateY : (initialCollapsedY !== null ? initialCollapsedY : `calc(100vh - ${GRIP_HEIGHT_COLLAPSED} - 100px)`);
-  const panelTransform = typeof panelTransformValue === 'number' ? `translateY(${panelTransformValue}px)` : `translateY(${panelTransformValue})`;
-  console.log("ProjectModalMobile RENDER: panelTranslateY =", panelTranslateY, "initialCollapsedY =", initialCollapsedY, "panelTransform =", panelTransform);
+  const panelTransform = panelTranslateY !== null ? `translateY(${panelTranslateY}px)` : (initialCollapsedY !== null ? `translateY(${initialCollapsedY}px)` : `translateY(calc(100% - ${GRIP_HEIGHT_COLLAPSED}))`);
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby={isInfoVisible ? undefined : `modal-title-${project.id}`}>
@@ -467,40 +414,58 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
         </div>
 
         {/* Conteneur principal pour images ET dots */}
-        <div className="absolute inset-0 pt-16 pb-[--grip-visible-height] overflow-hidden"
+        <div className="absolute inset-0 pt-16 pb-[--grip-visible-height] overflow-hidden flex items-center justify-center"
              style={{ '--grip-visible-height': collapsedGripVisibleHeight } as React.CSSProperties}
         >
-            {/* Image Stack (avec onTouch handlers sur un wrapper interne si besoin, ou sur ce div) */}
-            <div className="relative w-full h-full"
-                 onTouchStart={onTouchStart}
-                 onTouchMove={onTouchMove}
-                 onTouchEnd={onTouchEnd}
-            >
-                {/* Background Image */}
-                {allVisuals.length > 1 && swipeBackgroundInfo.index !== null && allVisuals[swipeBackgroundInfo.index] && (
-                     <div ref={backgroundImageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ opacity: 0, transform: 'scale(0.85) translateY(10px)', zIndex: 5 }}>
-                         <Image key={`bg-${allVisuals[swipeBackgroundInfo.index]}`} src={allVisuals[swipeBackgroundInfo.index]} alt={`Arrière-plan`} fill className="object-contain" sizes="100vw" loading="lazy" />
-                     </div>
-                 )}
-                {/* Current Image */}
-                <div ref={imageRef} className="absolute inset-0 flex items-center justify-center will-change-transform" style={{ zIndex: 10 }}>
-                    {allVisuals[currentImageIndex] && (<Image key={allVisuals[currentImageIndex]} src={allVisuals[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} fill className="object-contain" sizes="100vw" priority={true} />)}
-                </div>
+            {/* Image Stack avec react-spring */}
+            <div className="relative w-full h-full max-w-md aspect-[3/4]"> {/* Ajustez max-w et aspect-ratio si besoin */}
+                {springProps.map(({ x, y, rotateZ, scale, opacity, display, zIndex }, i) => (
+                    <animated.div
+                        key={allVisuals[i] ? allVisuals[i] : i}
+                        className="absolute w-full h-full cursor-grab active:cursor-grabbing"
+                        style={{
+                            display,
+                            opacity,
+                            transform: x.to((val) => `perspective(1500px) translateX(${val}px) translateY(${y.get()}px) rotateZ(${rotateZ.get()}deg) scale(${scale.get()})`),
+                            touchAction: 'none', // Important pour use-gesture
+                            zIndex,
+                        }}
+                        {...bind(i)}
+                    >
+                        {allVisuals[i] && (
+                            <Image
+                                src={allVisuals[i]}
+                                alt={`Image ${i + 1} du projet ${project.title}`}
+                                fill
+                                className="object-contain rounded-lg shadow-md pointer-events-none" // pointer-events-none sur l'image pour que le drag soit sur le div
+                                sizes="100vw"
+                                priority={i === currentImageIndex} // Priorité pour l'image visible
+                                draggable="false"
+                            />
+                        )}
+                    </animated.div>
+                ))}
             </div>
 
-            {/* Pagination indicators - Maintenant à l'intérieur du conteneur d'image */}
+            {/* Pagination indicators */}
             {allVisuals.length > 1 && (
                 <div
-                    className={`absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-none transition-opacity duration-300 z-[15] ${isInfoVisible || isSwiping || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`}
-                    style={{ bottom: '1rem' }} // Positionné à 1rem du bas du conteneur d'images
+                    className={`absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-none transition-opacity duration-300 z-[35] ${isInfoVisible || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`} // isSwiping est géré par useDrag (active)
+                    style={{ bottom: '1rem' }}
                     aria-label="Indicateurs d'image"
-                    aria-hidden={isInfoVisible || isSwiping || isDraggingPanel}
+                    aria-hidden={isInfoVisible || isDraggingPanel}
                 >
                     <div className="px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full pointer-events-auto">
                         {allVisuals.map((_, idx) => (
                             <button
                                 key={idx}
-                                onClick={() => { setCurrentImageIndex(idx); setTimeout(resetSwipeState, 0); }}
+                                onClick={() => {
+                                    if (idx !== currentImageIndex) {
+                                        for (let k = 0; k < idx; k++) { if (k !== currentImageIndex) gone.current.add(k); } // Marque celles avant la cible comme parties
+                                        if (idx < currentImageIndex) { gone.current.delete(idx); } // Si on revient en arrière, la rendre non-gone
+                                        setCurrentImageIndex(idx);
+                                    }
+                                }}
                                 className={`w-2 h-2 mx-1 rounded-full transition-colors ${currentImageIndex === idx ? 'bg-white' : 'bg-white/40 hover:bg-white/70'}`}
                                 aria-label={`Aller à l'image ${idx + 1}`}
                                 aria-current={currentImageIndex === idx ? "step" : undefined}
@@ -513,17 +478,21 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
 
 
         {/* Nav Buttons */}
-        {allVisuals.length > 1 && !isSwiping && !isDraggingPanel && (<> <button onClick={() => { handlePrevious(); setTimeout(resetSwipeState,0); }} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Précédent" style={{ transform: 'translateY(-50%)' }}> <ChevronLeft size={24} /> </button> <button onClick={() => { handleNext(); setTimeout(resetSwipeState,0);}} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Suivant" style={{ transform: 'translateY(-50%)' }}> <ChevronRight size={24} /> </button> </>)}
+        {allVisuals.length > 1 && !isDraggingPanel && ( // Condition !isSwiping retirée car gérée par useDrag
+            <>
+                <button onClick={handleNavPrevious} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Précédent" style={{ transform: 'translateY(-50%)' }}> <ChevronLeft size={24} /> </button>
+                <button onClick={handleNavNext} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Suivant" style={{ transform: 'translateY(-50%)' }}> <ChevronRight size={24} /> </button>
+            </>
+        )}
 
         {/* Info Panel */}
         <div ref={panelRef}
              className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-lg shadow-2xl transform will-change-transform cursor-grab active:cursor-grabbing touch-none`}
              style={{
-                 height: GRIP_HEIGHT_EXPANDED, // Maintenir pour le moment pour stabiliser
+                 height: GRIP_HEIGHT_EXPANDED,
                  maxHeight: GRIP_HEIGHT_EXPANDED,
                  transform: panelTransform,
                  zIndex: 30,
-                  border: isMounted ? "2px dashed hotpink" : "none", // DEBUG BORDER (peut être retiré)
                  visibility: isMounted && initialCollapsedY !== null ? 'visible' : 'hidden',
              }}
              aria-hidden={!isInfoVisible}
@@ -531,28 +500,25 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
              onTouchMove={handlePanelTouchMove}
              onTouchEnd={handlePanelTouchEnd}
         >
-            {/* Grip Handle Visuel */}
             <div ref={gripRef}
-                 className="w-full flex flex-col items-center justify-center pointer-events-none px-4" // Centrage et padding
-                 style={{ height: GRIP_HEIGHT_COLLAPSED }} // Le grip visuel prend la hauteur définie
+                 className="w-full flex flex-col items-center justify-center pointer-events-none px-4"
+                 style={{ height: GRIP_HEIGHT_COLLAPSED }}
             >
-                <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-1 shrink-0"></div> {/* mb-1 ou mb-2 */}
+                <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-2 shrink-0"></div>
                 {!isInfoVisible && (
-                    <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider leading-tight"> {/* leading-tight optionnel */}
+                    <span className="font-poppins text-[1.5rem] font-semibold text-gray-500 uppercase tracking-wider leading-tight">
                         Description
                     </span>
                 )}
             </div>
-            {/* Panel Content */}
             <div className="panel-content px-5 pb-5 overflow-y-auto pointer-events-auto touch-auto"
                  style={{
-                     height: `calc(100% - ${GRIP_HEIGHT_COLLAPSED})`, // Prend la hauteur restante du panneau
+                     height: `calc(100% - ${GRIP_HEIGHT_COLLAPSED})`,
                      maxHeight: `calc(100% - ${GRIP_HEIGHT_COLLAPSED})`,
                      display: 'block',
                      opacity: isInfoVisible ? 1 : 0,
                      transition: `opacity ${CONTENT_FADE_DURATION}ms ease-out`,
                      WebkitOverflowScrolling: 'touch',
-                     border: "1px solid green" // DEBUG BORDER (peut être retiré)
                  }}
             >
                 <div className="space-y-4">
