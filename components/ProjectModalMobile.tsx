@@ -1,5 +1,5 @@
 // ========================================================================
-// === ProjectModalMobile.tsx - V0.24a - VERSION INTÉGRALE RESTAURÉE ===
+// === ProjectModalMobile.tsx - V0.24a - VERSION INTÉGRALE (CORRECTIF FINAL OMISSIONS) ===
 // ========================================================================
 "use client"
 
@@ -7,8 +7,8 @@ import type React from "react"
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useSprings, animated, SpringConfig } from '@react-spring/web'
-import { useDrag } from '@use-gesture/react'
+import { useSprings, animated, SpringConfig, SpringValues, Interpolation } from '@react-spring/web' // Interpolation ajouté
+import { useDrag, UserDragConfig } from '@use-gesture/react' // UserDragConfig ajouté
 
 export interface Project {
   id: string;
@@ -24,7 +24,6 @@ export const GRIP_HEIGHT_COLLAPSED = '3vh';
 export const GRIP_HEIGHT_EXPANDED = '75vh';
 export const PANEL_ANIMATION_DURATION = 400;
 export const CONTENT_FADE_DURATION = 300;
-// MIN_SWIPE_DISTANCE sera géré par useDrag (threshold)
 
 interface ProjectModalMobileProps {
   project: Project
@@ -32,20 +31,14 @@ interface ProjectModalMobileProps {
   onClose: () => void
 }
 
-const springConfigBase: SpringConfig = {
-  tension: 300,
-  friction: 30,
-};
-const springConfigActive: SpringConfig = {
-  tension: 800,
-  friction: 40,
-  immediate: true, // Mouvement direct pendant le drag
-};
-const springConfigSwipeOut: SpringConfig = {
-    tension: 200,
-    friction: 22,
-    // clamp: true // Évite les oscillations excessives lors du swipe out
-};
+// Configurations pour react-spring
+const springConfigBase: SpringConfig = { tension: 400, friction: 40 };
+const springConfigActive: SpringConfig = { tension: 800, friction: 50, immediate: true };
+const springConfigSwipeOut: SpringConfig = { tension: 300, friction: 30, mass: 0.8 };
+
+// Fonction pour interpoler les transformations des cartes
+const interp = (r: number, s: number) => `perspective(1500px) rotateY(${r / 10}deg) rotateZ(${r}deg) scale(${s})`;
+const interpXY = (x: number, y: number, rz: number, s: number) => `perspective(1500px) translateX(${x}px) translateY(${y}px) rotateZ(${rz}deg) scale(${s})`;
 
 
 export default function ProjectModalMobile({ project, isOpen, onClose }: ProjectModalMobileProps) {
@@ -56,6 +49,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const [dragStartY, setDragStartY] = useState<number | null>(null);
   const [panelTranslateY, setPanelTranslateY] = useState<number | null>(null);
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
+  const [isImageDragging, setIsImageDragging] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -64,25 +58,33 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   const panelInitialY = useRef<number>(0);
   const windowWidth = useRef(typeof window !== 'undefined' ? window.innerWidth : 300);
   const gone = useRef(new Set<number>()); // Garde une trace des cartes qui ont été swipées
-
+  const indexBeingDragged = useRef<number | null>(null); // Pour savoir quelle carte est draguée
 
   useEffect(() => {
     setIsMounted(true);
-    if (typeof window !== 'undefined') {
-        windowWidth.current = window.innerWidth;
-    }
+    if (typeof window !== 'undefined') { windowWidth.current = window.innerWidth; }
   }, []);
 
-  // Réinitialiser 'gone' lorsque le projet ou le nombre d'images change
   useEffect(() => {
-    console.log("ProjectModalMobile: Resetting 'gone' set due to project/allVisuals change.");
-    gone.current = new Set();
-    // On réinitialise aussi les springs pour que toutes les cartes soient prêtes
-    if (api) { // api peut ne pas être défini au premier rendu si allVisuals est initialement vide
-        api.start(i => to(i, 0, true)); // Repositionne toutes les cartes à leur état initial pour le nouvel ensemble
+    if (isOpen) {
+      console.log("ProjectModalMobile: Resetting for new project or open - project ID:", project.id);
+      gone.current = new Set();
+      setCurrentImageIndex(0);
+      setImagesLoaded({});
+      setIsInfoVisible(false);
+      if(isMounted && initialCollapsedY !== null) {
+          setPanelTranslateY(initialCollapsedY);
+          if(panelRef.current) {
+               panelRef.current.style.transform = `translateY(${initialCollapsedY}px)`;
+               panelRef.current.style.visibility = 'visible';
+          }
+      }
+      // Réinitialiser l'état des springs pour le nouveau jeu d'images
+      if (api && allVisuals.length > 0) {
+        api.start(i => to(i, 0, true)); // Forcer le reset des positions
+      }
     }
-  }, [project, allVisuals.length]); // Ajouter api plus tard si nécessaire après sa définition
-
+  }, [project, isOpen, isMounted, initialCollapsedY]); // allVisuals.length est implicitement géré par le changement de project
 
   const initialCollapsedY = useMemo(() => {
     if (typeof window !== 'undefined' && isMounted) {
@@ -95,148 +97,162 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     } return null;
   }, [isMounted]);
 
-  // --- Logique des Springs pour les Cartes ---
-  // Fonction pour déterminer les props de style pour chaque carte
-  const to = (i: number, activeIndex: number = currentImageIndex, isReset: boolean = false) => {
-    if (gone.current.has(i) && !isReset) { // Si la carte est "partie" et qu'on ne fait pas un reset global
-        return { x: (allVisuals.length + 5) * windowWidth.current * (i < activeIndex ? -1 : 1), y:0, scale: 0.8, rotateZ: 0, opacity: 0, display: 'none', config: springConfigSwipeOut, immediate: true };
+
+  const to = useCallback((i: number, activeIndex: number = currentImageIndex, forSwipeOut: boolean = false, swipeDir: number = 0) => {
+    if (gone.current.has(i) && !forSwipeOut) { // Si la carte est "partie" et qu'on ne la swipe pas activement
+        const xDir = i < activeIndex ? -1 : 1;
+        return { x: xDir * (windowWidth.current + 200) , y:0, scale: 0.8, rotateZ: 0, opacity: 0, display: 'none', config: springConfigSwipeOut, immediate: true};
     }
-    const x = 0; // Les cartes sont superposées, x est contrôlé par le drag
-    const y = 0; // Peut être utilisé pour un effet de pile si désiré (ex: i * -4)
+
+    const x = 0;
+    const y = i === activeIndex + 1 ? 8 : 0; // Légèrement en dessous pour la carte suivante
     let scale = 1;
     let opacity = 0;
     let display = 'none';
     let zIndex = 0;
+    let rotateZ = 0;
 
     if (i === activeIndex) { // Carte actuelle
-      scale = 1;
-      opacity = 1;
-      display = 'block';
-      zIndex = allVisuals.length;
-    } else if (i === activeIndex + 1) { // Prochaine carte (effet de pile)
-      scale = 0.95;
-      opacity = 0.7;
-      display = 'block';
-      zIndex = allVisuals.length - 1;
-    } else if (i === activeIndex -1 && activeIndex > 0) { // Carte précédente (si on voulait un effet de pile arrière)
-        // Pour l'instant, on ne la montre pas activement en pile arrière
-        scale = 0.85;
-        opacity = 0;
-        display = 'none';
-        zIndex = allVisuals.length -2;
+      scale = 1; opacity = 1; display = 'block'; zIndex = allVisuals.length;
+    } else if (i === activeIndex + 1 && allVisuals.length > 1) { // Prochaine carte visible derrière
+      scale = 0.95; opacity = 0.7; display = 'block'; zIndex = allVisuals.length - 1;
+    } else { // Autres cartes (plus loin derrière)
+      scale = 0.85; opacity = 0; display = 'none'; zIndex = allVisuals.length - Math.abs(i - activeIndex);
     }
-    else { // Autres cartes
-        scale = 0.85;
-        opacity = 0;
-        display = 'none';
-        zIndex = allVisuals.length - Math.abs(i - activeIndex);
+
+    // Si c'est un swipe out, on applique les transformations de sortie
+    if (forSwipeOut) {
+        return {
+            x: swipeDir * (windowWidth.current + 200), // Sort de l'écran
+            rotateZ: swipeDir * 30, // Rotation lors du swipe out
+            scale: 0.8,
+            opacity: 0,
+            display: 'block', // Garder 'block' pendant l'animation de sortie
+            config: springConfigSwipeOut,
+            onRest: ({finished}: any) => { // Utiliser any pour simplifier, type plus précis possible
+                if (finished && gone.current.has(i) && api) { // S'assurer que la carte est toujours marquée comme "gone"
+                    api.start(j => (j === i ? { display: 'none', immediate: true } : undefined)); // Cacher après animation
+                }
+            }
+        };
     }
-    return { x, y, scale, rotateZ: 0, opacity, display, zIndex, config: springConfigBase, delay: isReset ? 0 : (i === activeIndex ? 100: 0) };
-  };
 
-  const [springProps, api] = useSprings(allVisuals.length, i => ({ ...to(i, currentImageIndex, true) }));
+    return { x, y, scale, rotateZ, opacity, display, zIndex, config: springConfigBase, delay: i === activeIndex ? 50 : 0 };
+  }, [currentImageIndex, allVisuals.length]);
 
-  // Mettre à jour les springs quand currentImageIndex change
+  const [springProps, api] = useSprings(allVisuals.length, i => ({ ...to(i, currentImageIndex, false) }), [allVisuals.length, currentImageIndex, to]); // to est maintenant une dépendance
+
   useEffect(() => {
-    if (isMounted && api) { // S'assurer que api est défini
+    if (isMounted && api && allVisuals.length > 0) { // Vérifier si allVisuals a des items
         api.start(i => to(i, currentImageIndex));
     }
-  }, [currentImageIndex, api, isMounted]); // Retiré allVisuals.length car déjà géré par le reset de `gone`
+  }, [currentImageIndex, api, isMounted, to, allVisuals.length]);
 
 
-  // --- Gestion du Drag avec useDrag ---
-  const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx], down, distance, cancel }) => {
-    if (!isMounted || isDraggingPanel) {
+  const bind = useDrag(({ args: [index], active, movement: [mx], direction: [xDir], velocity: [vx], down, first, last, cancel }) => {
+    if(first) setIsImageDragging(true);
+    if(last) setTimeout(() => setIsImageDragging(false), 50); // Léger délai pour éviter les conflits
+
+    if (!isMounted || isDraggingPanel) { if (cancel && active) cancel(); return; }
+
+    // On ne peut dragger que la carte actuellement visible (currentImageIndex)
+    if (index !== currentImageIndex && active) {
         if (cancel) cancel();
         return;
     }
+    indexBeingDragged.current = active ? index : null;
 
-    const triggerDistance = windowWidth.current / 3; // Seuil de distance pour valider le swipe
-    const triggerVelocity = 0.2; // Seuil de vélocité
+    const triggerDistance = windowWidth.current / 3.5; // Seuil de distance
+    const triggerVelocity = 0.18; // Seuil de vélocité
 
-    // Si l'utilisateur relâche
-    if (!active) {
-        // Si le swipe est assez rapide OU a dépassé le seuil de distance
-        if (Math.abs(mx) > triggerDistance || vx > triggerVelocity) {
-            const dir = xDir < 0 ? -1 : 1; // -1 for left, 1 for right
+    if (!active) { // Au relâchement
+        const shouldSwipe = Math.abs(mx) > triggerDistance || Math.abs(vx) > triggerVelocity;
+        const dir = xDir < 0 ? -1 : 1;
 
-            // Swipe vers la gauche (vers image suivante)
-            if (dir === -1 && currentImageIndex < allVisuals.length - 1) {
+        if (shouldSwipe) {
+            if (dir === -1 && currentImageIndex < allVisuals.length - 1) { // Swipe Gauche (Next)
                 console.log("Swipe Left Validated for index:", index);
                 gone.current.add(index);
-                setCurrentImageIndex(i => i + 1);
-            }
-            // Swipe vers la droite (vers image précédente)
-            else if (dir === 1 && currentImageIndex > 0) {
+                api.start(i => (i === index ? to(i, currentImageIndex, true, dir) : undefined)); // Anime la sortie
+                setTimeout(() => setCurrentImageIndex(curr => curr + 1), 50); // Changer d'index après le début de l'anim
+            } else if (dir === 1 && currentImageIndex > 0) { // Swipe Droite (Previous)
                 console.log("Swipe Right Validated for index:", index);
                 gone.current.add(index);
-                setCurrentImageIndex(i => i - 1);
-            }
-            // Si swipe invalide (aux bords ou pas assez fort), la carte retourne à sa place
-            else {
+                api.start(i => (i === index ? to(i, currentImageIndex, true, dir) : undefined)); // Anime la sortie
+                setTimeout(() => setCurrentImageIndex(curr => curr - 1), 50);
+            } else { // Swipe invalide (aux bords) ou pas assez fort
                 console.log("Swipe Invalid or at edge, snapping back index:", index);
                 api.start(i => (i === index ? to(i, currentImageIndex) : undefined));
             }
-        } else {
-            // Pas assez de mouvement/vélocité, snap back
+        } else { // Pas assez de mouvement/vélocité, snap back
             console.log("Swipe not triggered (thresholds), snapping back index:", index);
             api.start(i => (i === index ? to(i, currentImageIndex) : undefined));
         }
-        return; // Fin de la logique pour !active
-    }
-
-    // Pendant le drag (active est true)
-    // Seule la carte actuelle (currentImageIndex) peut être draguée
-    if (index !== currentImageIndex) {
-        if (cancel) cancel(); // Empêche le drag des cartes en arrière-plan
+        indexBeingDragged.current = null;
         return;
     }
 
+    // Pendant le drag (active est true)
     const x = mx;
-    const rotateZ = mx / 10; // Rotation proportionnelle au mouvement
-    const scale = 1.05; // Agrandir légèrement la carte draguée
+    const rotateZ = mx / 12; // Rotation
+    const scale = 1.05; // Agrandir
     const config = springConfigActive;
 
     // Animer la carte suivante pour qu'elle se prépare
     if (index + 1 < allVisuals.length) {
         const nextCardIndex = index + 1;
-        const progress = Math.min(1, Math.abs(mx) / (windowWidth.current * 0.5)); // Plus sensible
+        const progress = Math.min(1, Math.abs(mx) / (windowWidth.current * 0.45));
         const nextScale = 0.95 + (0.05 * progress);
         const nextOpacity = 0.7 + (0.3 * progress);
-        api.start(i => (i === nextCardIndex ? { scale: nextScale, opacity: nextOpacity, display: 'block', config } : undefined));
+        const nextY = 8 - (8 * progress);
+        api.start(i => (i === nextCardIndex ? { scale: nextScale, opacity: nextOpacity, y:nextY, display: 'block', config } : undefined));
+    }
+    // Animer la carte précédente pour qu'elle se prépare si on swipe vers la droite
+    if (index - 1 >= 0 && mx > 10) { // Si on commence à swiper vers la droite
+        const prevCardIndex = index -1;
+        const progress = Math.min(1, mx / (windowWidth.current * 0.45));
+        const prevScale = 0.95 + (0.05 * progress);
+        const prevOpacity = 0.7 + (0.3 * progress);
+        const prevY = 8 - (8 * progress);
+        api.start(i => (i === prevCardIndex ? {scale: prevScale, opacity: prevOpacity, y: prevY, display: 'block', config} : undefined))
+
     }
 
 
     api.start(i => {
-      if (i === index) { // Carte en cours de drag
+      if (i === index) {
         return { x, rotateZ, scale, opacity: 1, display: 'block', config, immediate: down };
+      } else if (i === index + 1 || i === index -1) {
+          // Laisser les cartes adjacentes être gérées par la logique ci-dessus
+          return undefined;
       }
-      return undefined; // Ne pas toucher aux autres cartes pendant le drag de l'actuelle (sauf la suivante gérée au-dessus)
+      // Les autres cartes restent selon 'to' pour être cachées ou en pile
+      return to(i, currentImageIndex);
     });
   });
 
   const handleNavNext = useCallback(() => {
-    if (currentImageIndex < allVisuals.length - 1) {
+    if (currentImageIndex < allVisuals.length - 1 && api) {
         gone.current.add(currentImageIndex);
-        setCurrentImageIndex(i => i + 1);
+        api.start(i => (i === currentImageIndex ? to(i, currentImageIndex, true, -1) : undefined));
+        setTimeout(() => setCurrentImageIndex(curr => curr + 1), 50);
     }
-  }, [currentImageIndex, allVisuals.length]);
+  }, [currentImageIndex, allVisuals.length, api, to]);
 
   const handleNavPrevious = useCallback(() => {
-    if (currentImageIndex > 0) {
-        // Pour la navigation par bouton, on peut simuler que la carte est partie
-        // en la déplaçant rapidement, ou juste la cacher.
-        // Ici, on change juste l'index, et le useEffect s'occupe du reste.
-        // Il faudra peut-être marquer l'ancienne carte comme "gone" pour la cohérence.
-        // Cependant, l'effet actuel ne regarde `gone` que pour celles < currentImageIndex.
-        // Pour la simplicité, on change juste l'index.
-        api.start(i => (i === currentImageIndex ? {x: windowWidth.current * 1.5, opacity: 0, display: 'none', config: springConfigSwipeOut, onRest: () => setCurrentImageIndex(prev => prev -1)} : undefined));
-        // Alternative plus simple: setCurrentImageIndex(i => i - 1); // Le useEffect fera le reste
+    if (currentImageIndex > 0 && api) {
+        const targetPrevIndex = currentImageIndex - 1;
+        gone.current.delete(targetPrevIndex); // La rendre non-gone pour qu'elle puisse revenir
+        // D'abord, faire "partir" la carte actuelle
+        api.start(i => (i === currentImageIndex ? { ...to(i, currentImageIndex, true, 1), onRest: () => {
+            // Ensuite, mettre à jour l'index
+            setCurrentImageIndex(targetPrevIndex);
+            // Le useEffect[currentImageIndex] ramènera la carte targetPrevIndex
+        }} : undefined));
     }
-  }, [currentImageIndex, api, allVisuals.length]);
+  }, [currentImageIndex, api, to]);
 
 
-  // --- Logique pour le panneau ---
   const calculatePanelY = useCallback((deltaY: number): number => {
       if(!isMounted) return 0;
       try {
@@ -265,13 +281,23 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
   }, []);
 
   const handlePanelTouchStart = useCallback((e: React.TouchEvent) => {
-    if (isSwiping) return;
+    if (isImageDragging) {
+        console.log("PanelTouchStart: Blocked by active image drag/swipe");
+        return;
+    }
     const target = e.target as Node;
     const panelContent = panelRef.current?.querySelector('.panel-content');
     const isTouchingScrollableContent = panelContent?.contains(target) && isInfoVisible && panelContent.scrollHeight > panelContent.clientHeight;
-    if (isTouchingScrollableContent) { setIsDraggingPanel(false); return; }
+    if (isTouchingScrollableContent) {
+      console.log("PanelTouchStart: Allowing default for scrollable content, not dragging panel.");
+      setIsDraggingPanel(false);
+      return;
+    }
+    console.log("PanelTouchStart: PROCEEDING WITH PANEL DRAG INIT");
     try {
-        e.stopPropagation(); setDragStartY(e.touches[0].clientY); setIsDraggingPanel(true);
+        e.stopPropagation();
+        setDragStartY(e.touches[0].clientY);
+        setIsDraggingPanel(true);
         if (panelRef.current) {
             panelRef.current.style.transition = 'none';
             const style = window.getComputedStyle(panelRef.current);
@@ -280,7 +306,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             if (!isInfoVisible && panelContent) { (panelContent as HTMLElement).style.display = 'block'; }
         }
     } catch (error) { console.error("PanelTouchStart error:", error); setIsDraggingPanel(false); }
-  }, [isInfoVisible, isSwiping]);
+  }, [isInfoVisible, isImageDragging]);
 
   const handlePanelTouchMove = useCallback((e: React.TouchEvent) => {
     if (dragStartY === null || !isDraggingPanel || !panelRef.current) return;
@@ -323,9 +349,8 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     finally { setDragStartY(null); }
   }, [dragStartY, isDraggingPanel, panelTranslateY, isInfoVisible]);
 
-
   // --- EFFECTS ---
-  useEffect(() => { // Init panel on open
+  useEffect(() => {
     if (isOpen && isMounted && initialCollapsedY !== null) {
         setPanelTranslateY(initialCollapsedY);
         if (panelRef.current) {
@@ -341,23 +366,12 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     }
   }, [isOpen, isMounted, initialCollapsedY]);
 
-  useEffect(() => { // Reset on project change
-    if (isOpen) {
-        setCurrentImageIndex(0); // Déclenchera le useEffect de useSprings
-        gone.current = new Set(); // Important de reset 'gone' aussi
-        setImagesLoaded({}); setIsInfoVisible(false);
-        if(isMounted && initialCollapsedY !== null) {
-             setPanelTranslateY(initialCollapsedY);
-             if(panelRef.current) {
-                 panelRef.current.style.transform = `translateY(${initialCollapsedY}px)`;
-                 panelRef.current.style.visibility = 'visible';
-             }
-        }
-    }
-  }, [project, isOpen, isMounted, initialCollapsedY]); // allVisuals.length et resetSwipeState retirés car gérés par le spring
-
-  useEffect(() => { // Image Preloading
+  // Cet effet gère le préchargement des images
+  useEffect(() => {
     if (!isMounted || !isOpen || !allVisuals?.length) return;
+    const currentNextForPreload = allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0;
+    const currentPrevForPreload = allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0;
+
     const preloadImage = (src: string): Promise<void> => {
         if (imagesLoaded[src]) return Promise.resolve();
         return new Promise((resolve) => {
@@ -370,14 +384,15 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
     };
     const preloadAllImages = async () => {
         try {
-            const priorityIndices = [...new Set([currentImageIndex, nextIndex, prevIndex])];
+            const priorityIndices = [...new Set([currentImageIndex, currentNextForPreload, currentPrevForPreload])];
             await Promise.all(priorityIndices.map(idx => allVisuals[idx] ? preloadImage(allVisuals[idx]) : Promise.resolve()));
             const otherImages = allVisuals.filter((_, i) => !priorityIndices.includes(i));
             Promise.all(otherImages.map(src => src ? preloadImage(src) : Promise.resolve()));
         } catch (error) { console.error("Preload error:", error); }
     };
     preloadAllImages();
-  }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
+  }, [isOpen, allVisuals, currentImageIndex, isMounted, imagesLoaded]); // nextIndex et prevIndex (constantes useMemo) ne sont plus nécessaires ici car on calcule localement
+
 
   useEffect(() => { // Prevent Background Scroll
     if (!isMounted || !isOpen) return;
@@ -418,28 +433,29 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
              style={{ '--grip-visible-height': collapsedGripVisibleHeight } as React.CSSProperties}
         >
             {/* Image Stack avec react-spring */}
-            <div className="relative w-full h-full max-w-md aspect-[3/4]"> {/* Ajustez max-w et aspect-ratio si besoin */}
+            <div className="relative w-full h-full max-w-md aspect-[3/4]">
                 {springProps.map(({ x, y, rotateZ, scale, opacity, display, zIndex }, i) => (
                     <animated.div
-                        key={allVisuals[i] ? allVisuals[i] : i}
+                        key={allVisuals[i] ? allVisuals[i] : `card-${i}`}
                         className="absolute w-full h-full cursor-grab active:cursor-grabbing"
                         style={{
                             display,
                             opacity,
-                            transform: x.to((val) => `perspective(1500px) translateX(${val}px) translateY(${y.get()}px) rotateZ(${rotateZ.get()}deg) scale(${scale.get()})`),
-                            touchAction: 'none', // Important pour use-gesture
+                            // Utiliser l'interpolation correcte pour toutes les transformations
+                            transform: Interpolation. meerdere waarden([x, y, rotateZ, scale], interpXY),
+                            touchAction: 'none',
                             zIndex,
                         }}
-                        {...bind(i)}
+                        {...bind(i)} // Attache les gestionnaires de useDrag
                     >
                         {allVisuals[i] && (
                             <Image
                                 src={allVisuals[i]}
                                 alt={`Image ${i + 1} du projet ${project.title}`}
                                 fill
-                                className="object-contain rounded-lg shadow-md pointer-events-none" // pointer-events-none sur l'image pour que le drag soit sur le div
+                                className="object-contain rounded-lg shadow-md pointer-events-none"
                                 sizes="100vw"
-                                priority={i === currentImageIndex} // Priorité pour l'image visible
+                                priority={i === currentImageIndex}
                                 draggable="false"
                             />
                         )}
@@ -450,10 +466,10 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
             {/* Pagination indicators */}
             {allVisuals.length > 1 && (
                 <div
-                    className={`absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-none transition-opacity duration-300 z-[35] ${isInfoVisible || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`} // isSwiping est géré par useDrag (active)
+                    className={`absolute left-1/2 -translate-x-1/2 flex justify-center pointer-events-none transition-opacity duration-300 z-[35] ${isInfoVisible || isImageDragging || isDraggingPanel ? 'opacity-0' : 'opacity-100'}`}
                     style={{ bottom: '1rem' }}
                     aria-label="Indicateurs d'image"
-                    aria-hidden={isInfoVisible || isDraggingPanel}
+                    aria-hidden={isInfoVisible || isImageDragging || isDraggingPanel}
                 >
                     <div className="px-3 py-1.5 bg-black/30 backdrop-blur-sm rounded-full pointer-events-auto">
                         {allVisuals.map((_, idx) => (
@@ -461,8 +477,15 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
                                 key={idx}
                                 onClick={() => {
                                     if (idx !== currentImageIndex) {
-                                        for (let k = 0; k < idx; k++) { if (k !== currentImageIndex) gone.current.add(k); } // Marque celles avant la cible comme parties
-                                        if (idx < currentImageIndex) { gone.current.delete(idx); } // Si on revient en arrière, la rendre non-gone
+                                        // Logique pour marquer les cartes comme "gone" si on saute plusieurs images
+                                        if (idx > currentImageIndex) {
+                                            for (let k = currentImageIndex; k < idx; k++) { gone.current.add(k); }
+                                        } else { // idx < currentImageIndex
+                                            // Si on revient en arrière, il faut s'assurer que les cartes intermédiaires sont "gone"
+                                            // et que la cible n'est plus "gone".
+                                            for (let k = idx + 1; k <= currentImageIndex; k++) { gone.current.add(k); }
+                                            gone.current.delete(idx);
+                                        }
                                         setCurrentImageIndex(idx);
                                     }
                                 }}
@@ -478,7 +501,7 @@ export default function ProjectModalMobile({ project, isOpen, onClose }: Project
 
 
         {/* Nav Buttons */}
-        {allVisuals.length > 1 && !isDraggingPanel && ( // Condition !isSwiping retirée car gérée par useDrag
+        {allVisuals.length > 1 && !isImageDragging && !isDraggingPanel && (
             <>
                 <button onClick={handleNavPrevious} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Précédent" style={{ transform: 'translateY(-50%)' }}> <ChevronLeft size={24} /> </button>
                 <button onClick={handleNavNext} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/10 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 active:bg-black/20" aria-label="Suivant" style={{ transform: 'translateY(-50%)' }}> <ChevronRight size={24} /> </button>
