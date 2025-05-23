@@ -12,7 +12,7 @@ import { useSprings, SpringConfig } from '@react-spring/web';
 
 // Types & Config
 import { Project } from './types/modal';
-//import { MODAL_CONFIG } from './config/modal';
+import { MODAL_CONFIG } from './config/modal';
 import { calculateInitialCollapsedY } from './utils/modal';
 
 // Hooks

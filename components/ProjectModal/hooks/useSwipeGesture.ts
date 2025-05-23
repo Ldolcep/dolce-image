@@ -7,7 +7,8 @@
 // ===============================
 import { useCallback, useRef } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { MODAL_CONFIG, getSwipeTriggerDistance } from '../config/modal';
+import { MODAL_CONFIG } from '../config/modal';
+import { getSwipeTriggerDistance } from '../utils/modal';
 
 interface UseSwipeGestureProps {
   allVisuals: string[];
