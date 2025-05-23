@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Project } from '../../../types/modal';
-import { MODAL_CONFIG } from '../../../config/modal';
+import { MODAL_CONFIG } from '../config/modal';
 
 interface InfoPanelProps {
   project: Project;
