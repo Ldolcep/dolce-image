@@ -17,7 +17,7 @@ import { calculateInitialCollapsedY } from './utils/modal';
 
 // Hooks
 import { useModalReducer } from './hooks/useModalReducer';
-//import { useImagePreloader } from './hooks/useImagePreloader';
+import { useImagePreloader } from './hooks/useImagePreloader';
 import { usePanelDrag } from './hooks/usePanelDrag';
 import { useSwipeGesture } from './hooks/useSwipeGesture';
 
