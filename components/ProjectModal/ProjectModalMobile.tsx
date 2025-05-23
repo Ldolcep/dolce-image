@@ -1,9 +1,9 @@
 // ========================================================================
-// === COMPOSANT PRINCIPAL REFACTORISÉ ===
+// === COMPOSANT PRINCIPAL - CORRECTION NAVIGATION PHASE 2 ===
 // ========================================================================
 
 // ===============================
-// ProjectModalMobile.tsx (Refactorisé)
+// ProjectModalMobile.tsx - NAVIGATION CORRIGÉE
 // ===============================
 "use client";
 
@@ -57,6 +57,58 @@ export default function ProjectModalMobile({
     calculateInitialCollapsedY(state.isMounted), 
     [state.isMounted]
   );
+
+  // ===============================
+  // 🔧 CORRECTION: NAVIGATION HANDLERS
+  // ===============================
+  
+  // Navigation handlers avec debug et validation
+  const handleSwipeNext = useCallback(() => {
+    console.log('📞 ProjectModal: handleSwipeNext called', {
+      currentIndex: state.currentImageIndex,
+      nextIndex: state.currentImageIndex + 1,
+      maxIndex: allVisuals.length - 1
+    });
+
+    if (state.currentImageIndex < allVisuals.length - 1) {
+      const newIndex = state.currentImageIndex + 1;
+      console.log('✅ ProjectModal: Setting new index to', newIndex);
+      actions.setCurrentImage(newIndex);
+    } else {
+      console.log('🚫 ProjectModal: Cannot go next, at last image');
+    }
+  }, [state.currentImageIndex, allVisuals.length, actions]);
+
+  const handleSwipePrevious = useCallback(() => {
+    console.log('📞 ProjectModal: handleSwipePrevious called', {
+      currentIndex: state.currentImageIndex,
+      prevIndex: state.currentImageIndex - 1,
+      minIndex: 0
+    });
+
+    if (state.currentImageIndex > 0) {
+      const newIndex = state.currentImageIndex - 1;
+      console.log('✅ ProjectModal: Setting new index to', newIndex);
+      actions.setCurrentImage(newIndex);
+    } else {
+      console.log('🚫 ProjectModal: Cannot go previous, at first image');
+    }
+  }, [state.currentImageIndex, actions]);
+
+  const handleGoToImage = useCallback((targetIndex: number) => {
+    console.log('📞 ProjectModal: handleGoToImage called', {
+      currentIndex: state.currentImageIndex,
+      targetIndex,
+      isValid: targetIndex >= 0 && targetIndex < allVisuals.length && targetIndex !== state.currentImageIndex
+    });
+
+    if (targetIndex >= 0 && targetIndex < allVisuals.length && targetIndex !== state.currentImageIndex) {
+      console.log('✅ ProjectModal: Setting new index to', targetIndex);
+      actions.setCurrentImage(targetIndex);
+    } else {
+      console.log('🚫 ProjectModal: Invalid target index or same as current');
+    }
+  }, [state.currentImageIndex, allVisuals.length, actions]);
 
   // ===============================
   // SPRING ANIMATIONS
@@ -151,33 +203,54 @@ export default function ProjectModalMobile({
     actions.setImageLoaded
   );
 
-  // Swipe gesture handling
+  // 🔧 CORRECTION: Swipe gesture avec handlers corrigés
   const {
     bind,
     handleNavNext,
     handleNavPrevious,
-    handleGoToImage,
+    handleGoToImage: swipeHandleGoToImage,
     resetGoneSet
   } = useSwipeGesture({
     allVisuals,
     currentImageIndex: state.currentImageIndex,
     isDraggingPanel: state.isDraggingPanel,
     isMounted: state.isMounted,
-    onImageDragStart: () => actions.setImageDragging(true),
-    onImageDragEnd: () => setTimeout(() => actions.setImageDragging(false), 50),
-    onSwipeNext: () => actions.setCurrentImage(state.currentImageIndex + 1),
-    onSwipePrevious: () => actions.setCurrentImage(state.currentImageIndex - 1),
+    onImageDragStart: () => {
+      console.log('🎬 ProjectModal: Image drag start');
+      actions.setImageDragging(true);
+    },
+    onImageDragEnd: () => {
+      console.log('🎬 ProjectModal: Image drag end');
+      setTimeout(() => actions.setImageDragging(false), 50);
+    },
+    onSwipeNext: handleSwipeNext,     // 🔧 CORRECTION: Connecté au bon handler
+    onSwipePrevious: handleSwipePrevious, // 🔧 CORRECTION: Connecté au bon handler
     springApi: api,
     springTo
   });
 
   // ===============================
-  // NAVIGATION HANDLERS
+  // 🔧 CORRECTION: NAVIGATION UNIFIÉE
   // ===============================
-  const handleGoToImageWithUpdate = useCallback((targetIndex: number) => {
+  
+  // Unifier les handlers de navigation
+  const unifiedHandleNext = useCallback(() => {
+    console.log('🔄 ProjectModal: Unified handleNext called');
+    handleNavNext(); // Déclenche l'animation
+    // handleSwipeNext sera appelé par le hook useSwipeGesture
+  }, [handleNavNext]);
+
+  const unifiedHandlePrevious = useCallback(() => {
+    console.log('🔄 ProjectModal: Unified handlePrevious called');
+    handleNavPrevious(); // Déclenche l'animation
+    // handleSwipePrevious sera appelé par le hook useSwipeGesture
+  }, [handleNavPrevious]);
+
+  const unifiedHandleGoToImage = useCallback((targetIndex: number) => {
+    console.log('🔄 ProjectModal: Unified handleGoToImage called', { targetIndex });
+    // Mettre à jour l'état directement pour la navigation par dots
     handleGoToImage(targetIndex);
-    actions.setCurrentImage(targetIndex);
-  }, [handleGoToImage, actions]);
+  }, [handleGoToImage]);
 
   // ===============================
   // EFFECTS
@@ -209,7 +282,15 @@ export default function ProjectModalMobile({
 
   // Update spring animations when current image changes
   useEffect(() => {
+    console.log('🔄 ProjectModal: Current image changed', {
+      newIndex: state.currentImageIndex,
+      isMounted: state.isMounted,
+      hasApi: !!api,
+      totalImages: allVisuals.length
+    });
+
     if (state.isMounted && api && allVisuals.length > 0) {
+      console.log('✅ ProjectModal: Updating spring animations for index', state.currentImageIndex);
       api.start(i => springTo(i, state.currentImageIndex));
     }
   }, [state.currentImageIndex, api, state.isMounted, allVisuals.length, springTo]);
@@ -273,6 +354,14 @@ export default function ProjectModalMobile({
 
   const collapsedGripVisibleHeight = `calc(${MODAL_CONFIG.GRIP_HEIGHT_COLLAPSED} + 0px)`;
 
+  console.log('🎨 ProjectModal: Rendering with state', {
+    currentImageIndex: state.currentImageIndex,
+    totalImages: allVisuals.length,
+    isImageDragging: state.isImageDragging,
+    isDraggingPanel: state.isDraggingPanel,
+    isInfoVisible: state.isInfoVisible
+  });
+
   return (
     <div 
       className="fixed inset-0 bg-white z-50 overflow-hidden select-none" 
@@ -303,15 +392,15 @@ export default function ProjectModalMobile({
           bind={bind}
         />
 
-        {/* Navigation Controls */}
+        {/* 🔧 CORRECTION: Navigation Controls avec handlers unifiés */}
         <NavigationControls
           allVisuals={allVisuals}
           currentImageIndex={state.currentImageIndex}
           isImageDragging={state.isImageDragging}
           isDraggingPanel={state.isDraggingPanel}
-          onPrevious={handleNavPrevious}
-          onNext={handleNavNext}
-          onGoToImage={handleGoToImageWithUpdate}
+          onPrevious={unifiedHandlePrevious}
+          onNext={unifiedHandleNext}
+          onGoToImage={unifiedHandleGoToImage}
         />
       </div>
 
@@ -331,5 +420,6 @@ export default function ProjectModalMobile({
     </div>
   );
 }
+
 // ===============================
-// === FIN DU COMPOSANT REFACTORISÉ ===
+// === FIN DU COMPOSANT CORRIGÉ ===

@@ -1,14 +1,13 @@
 // ========================================================================
-// === HOOK SWIPE GESTURE ===
+// === HOOK SWIPE GESTURE - VERSION DEBUG PHASE 2 ===
 // ========================================================================
 
 // ===============================
-// hooks/useSwipeGesture.ts
+// hooks/useSwipeGesture.ts - AVEC LOGS DEBUG
 // ===============================
 import { useCallback, useRef } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { MODAL_CONFIG } from '../config/modal';
-import { getSwipeTriggerDistance } from '../utils/modal';
+import { MODAL_CONFIG, getSwipeTriggerDistance } from '../config/modal';
 
 interface UseSwipeGestureProps {
   allVisuals: string[];
@@ -56,15 +55,38 @@ export const useSwipeGesture = ({
     last,
     cancel 
   }) => {
+    // 🐛 DEBUG - Log de base
+    console.log('🔍 SwipeGesture Debug:', {
+      index,
+      currentImageIndex,
+      active,
+      mx,
+      xDir,
+      vx,
+      isDraggingPanel,
+      isMounted
+    });
+
     // Early returns for invalid states
     if (!isMounted || isDraggingPanel || index !== currentImageIndex) {
+      console.log('❌ SwipeGesture: Early return', { 
+        isMounted, 
+        isDraggingPanel, 
+        indexMatch: index === currentImageIndex 
+      });
       if (cancel && active) cancel();
       return;
     }
 
     // Handle drag start/end
-    if (first) onImageDragStart();
-    if (last) setTimeout(() => onImageDragEnd(), 50);
+    if (first) {
+      console.log('🎬 SwipeGesture: Drag START');
+      onImageDragStart();
+    }
+    if (last) {
+      console.log('🎬 SwipeGesture: Drag END');
+      setTimeout(() => onImageDragEnd(), 50);
+    }
 
     // Track currently dragged index
     indexBeingDragged.current = active ? index : null;
@@ -72,35 +94,78 @@ export const useSwipeGesture = ({
     const triggerDistance = getSwipeTriggerDistance();
     const triggerVelocity = MODAL_CONFIG.SWIPE_TRIGGER_VELOCITY;
 
+    console.log('📏 SwipeGesture: Thresholds', { triggerDistance, triggerVelocity });
+
     // Handle drag end - check for swipe
     if (!active) {
       let swiped = false;
       
+      console.log('🎯 SwipeGesture: Checking swipe conditions', {
+        absMovement: Math.abs(mx),
+        triggerDistance,
+        absVelocity: Math.abs(vx),
+        triggerVelocity,
+        direction: xDir
+      });
+
       if (Math.abs(mx) > triggerDistance || Math.abs(vx) > triggerVelocity) {
         const dir = xDir < 0 ? -1 : 1;
         
-        // Swipe left (next image)
+        console.log('✅ SwipeGesture: Swipe detected!', {
+          direction: dir,
+          xDir,
+          currentIndex: currentImageIndex,
+          totalImages: allVisuals.length
+        });
+        
+        // 🔄 CORRECTION: Swipe left (dir = -1) = NEXT image
         if (dir === -1 && currentImageIndex < allVisuals.length - 1) {
+          console.log('➡️ SwipeGesture: Going to NEXT image', {
+            from: currentImageIndex,
+            to: currentImageIndex + 1
+          });
+          
           gone.current.add(index);
           springApi.start(i => 
             i === index ? springTo(i, currentImageIndex, true, dir) : undefined
           );
-          setTimeout(() => onSwipeNext(), 50);
+          setTimeout(() => {
+            console.log('📞 SwipeGesture: Calling onSwipeNext');
+            onSwipeNext();
+          }, 50);
           swiped = true;
         } 
-        // Swipe right (previous image)
+        // 🔄 CORRECTION: Swipe right (dir = 1) = PREVIOUS image
         else if (dir === 1 && currentImageIndex > 0) {
+          console.log('⬅️ SwipeGesture: Going to PREVIOUS image', {
+            from: currentImageIndex,
+            to: currentImageIndex - 1
+          });
+          
           gone.current.add(index);
           springApi.start(i => 
             i === index ? springTo(i, currentImageIndex, true, dir) : undefined
           );
-          setTimeout(() => onSwipePrevious(), 50);
+          setTimeout(() => {
+            console.log('📞 SwipeGesture: Calling onSwipePrevious');
+            onSwipePrevious();
+          }, 50);
           swiped = true;
+        } else {
+          console.log('🚫 SwipeGesture: Swipe blocked by boundaries', {
+            direction: dir,
+            currentIndex: currentImageIndex,
+            canGoNext: currentImageIndex < allVisuals.length - 1,
+            canGoPrev: currentImageIndex > 0
+          });
         }
+      } else {
+        console.log('🚫 SwipeGesture: Movement below threshold');
       }
       
       // Reset if no swipe occurred
       if (!swiped) {
+        console.log('🔄 SwipeGesture: Resetting position');
         springApi.start(i => 
           i === index ? springTo(i, currentImageIndex) : undefined
         );
@@ -176,18 +241,35 @@ export const useSwipeGesture = ({
     threshold: 10 
   });
 
-  // Navigation handlers
+  // 🔧 CORRECTION: Navigation handlers améliorés
   const handleNavNext = useCallback(() => {
+    console.log('🔘 NavButton: NEXT clicked', {
+      currentIndex: currentImageIndex,
+      maxIndex: allVisuals.length - 1,
+      canGo: currentImageIndex < allVisuals.length - 1
+    });
+
     if (currentImageIndex < allVisuals.length - 1 && springApi) {
       gone.current.add(currentImageIndex);
       springApi.start(i => 
         i === currentImageIndex ? springTo(i, currentImageIndex, true, -1) : undefined
       );
-      setTimeout(() => onSwipeNext(), 50);
+      setTimeout(() => {
+        console.log('📞 NavButton: Calling onSwipeNext');
+        onSwipeNext();
+      }, 50);
+    } else {
+      console.log('🚫 NavButton: NEXT blocked');
     }
   }, [currentImageIndex, allVisuals.length, springApi, springTo, onSwipeNext]);
 
   const handleNavPrevious = useCallback(() => {
+    console.log('🔘 NavButton: PREVIOUS clicked', {
+      currentIndex: currentImageIndex,
+      minIndex: 0,
+      canGo: currentImageIndex > 0
+    });
+
     if (currentImageIndex > 0 && springApi) {
       const targetPrevIndex = currentImageIndex - 1;
       gone.current.delete(targetPrevIndex);
@@ -195,7 +277,10 @@ export const useSwipeGesture = ({
       springApi.start(i => 
         i === currentImageIndex ? { 
           ...springTo(i, currentImageIndex, true, 1), 
-          onRest: () => onSwipePrevious()
+          onRest: () => {
+            console.log('📞 NavButton: Calling onSwipePrevious');
+            onSwipePrevious();
+          }
         } : (i === targetPrevIndex ? { 
           ...springTo(i, targetPrevIndex), 
           x: 0, 
@@ -208,10 +293,18 @@ export const useSwipeGesture = ({
           config: MODAL_CONFIG.SPRING_CONFIG.BASE 
         } : undefined)
       );
+    } else {
+      console.log('🚫 NavButton: PREVIOUS blocked');
     }
   }, [currentImageIndex, springApi, springTo, onSwipePrevious]);
 
   const handleGoToImage = useCallback((targetIndex: number) => {
+    console.log('🎯 Pagination: Going to image', {
+      from: currentImageIndex,
+      to: targetIndex,
+      isValid: targetIndex !== currentImageIndex && springApi
+    });
+
     if (targetIndex === currentImageIndex || !springApi) return;
 
     if (targetIndex > currentImageIndex) {
@@ -227,11 +320,12 @@ export const useSwipeGesture = ({
       gone.current.delete(targetIndex);
     }
 
-    // Update the current image index through the parent callback
-    // This will be handled in the parent component
+    // Note: L'index sera mis à jour par le parent component
+    console.log('📞 Pagination: Target index set, parent should update state');
   }, [currentImageIndex, springApi]);
 
   const resetGoneSet = useCallback(() => {
+    console.log('🔄 SwipeGesture: Resetting gone set');
     gone.current = new Set();
   }, []);
 
@@ -245,5 +339,5 @@ export const useSwipeGesture = ({
     gone: gone.current
   };
 };
-// This hook handles swipe gestures for navigating through images in a gallery.
-// It uses the `useDrag` hook from `@use-gesture/react` to manage drag events and animations.
+// Note: Le hook utilise useCallback pour éviter de recréer les fonctions à chaque rendu.
+// Il est important de gérer les dépendances correctement pour éviter les boucles infinies.
