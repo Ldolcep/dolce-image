@@ -22,10 +22,10 @@ import { usePanelDrag } from './hooks/usePanelDrag';
 import { useSwipeGesture } from './hooks/useSwipeGesture';
 
 // Components
-import { ModalHeader } from './components/ProjectModal/Mobile/ModalHeader';
-import { ImageStack } from './components/ProjectModal/Mobile/ImageStack';
-import { NavigationControls } from './components/ProjectModal/Mobile/NavigationControls';
-import { InfoPanel } from './components/ProjectModal/Mobile/InfoPanel';
+import { ModalHeader } from './Mobile/ModalHeader';
+import { ImageStack } from './Mobile/ImageStack';
+import { NavigationControls } from './Mobile/NavigationControls';
+import { InfoPanel } from './Mobile/InfoPanel';
 
 interface ProjectModalMobileProps {
   project: Project;
