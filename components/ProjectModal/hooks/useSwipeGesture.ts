@@ -1,9 +1,9 @@
 // ========================================================================
-// === HOOK SWIPE GESTURE - VERSION DEBUG PHASE 2 ===
+// === HOOK SWIPE GESTURE - CORRECTIONS ANIMATIONS & LIMITES ===
 // ========================================================================
 
 // ===============================
-// hooks/useSwipeGesture.ts - AVEC LOGS DEBUG
+// hooks/useSwipeGesture.ts - VERSION CORRIGÉE
 // ===============================
 import { useCallback, useRef } from 'react';
 import { useDrag } from '@use-gesture/react';
@@ -55,25 +55,8 @@ export const useSwipeGesture = ({
     last,
     cancel 
   }) => {
-    // 🐛 DEBUG - Log de base
-    console.log('🔍 SwipeGesture Debug:', {
-      index,
-      currentImageIndex,
-      active,
-      mx,
-      xDir,
-      vx,
-      isDraggingPanel,
-      isMounted
-    });
-
     // Early returns for invalid states
     if (!isMounted || isDraggingPanel || index !== currentImageIndex) {
-      console.log('❌ SwipeGesture: Early return', { 
-        isMounted, 
-        isDraggingPanel, 
-        indexMatch: index === currentImageIndex 
-      });
       if (cancel && active) cancel();
       return;
     }
@@ -94,95 +77,71 @@ export const useSwipeGesture = ({
     const triggerDistance = getSwipeTriggerDistance();
     const triggerVelocity = MODAL_CONFIG.SWIPE_TRIGGER_VELOCITY;
 
-    console.log('📏 SwipeGesture: Thresholds', { triggerDistance, triggerVelocity });
+    // 🔧 CORRECTION: Vérifier les limites avant même de permettre le drag
+    const canGoNext = currentImageIndex < allVisuals.length - 1;
+    const canGoPrev = currentImageIndex > 0;
 
     // Handle drag end - check for swipe
     if (!active) {
       let swiped = false;
       
-      console.log('🎯 SwipeGesture: Checking swipe conditions', {
-        absMovement: Math.abs(mx),
-        triggerDistance,
-        absVelocity: Math.abs(vx),
-        triggerVelocity,
-        direction: xDir
-      });
-
       if (Math.abs(mx) > triggerDistance || Math.abs(vx) > triggerVelocity) {
         const dir = xDir < 0 ? -1 : 1;
         
-        console.log('✅ SwipeGesture: Swipe detected!', {
-          direction: dir,
-          xDir,
-          currentIndex: currentImageIndex,
-          totalImages: allVisuals.length
-        });
-        
-        // 🔄 CORRECTION: Swipe left (dir = -1) = NEXT image
-        if (dir === -1 && currentImageIndex < allVisuals.length - 1) {
-          console.log('➡️ SwipeGesture: Going to NEXT image', {
-            from: currentImageIndex,
-            to: currentImageIndex + 1
-          });
-          
+        // 🔧 CORRECTION: Swipe avec vérification stricte des limites
+        if (dir === -1 && canGoNext) {
+          console.log('➡️ SwipeGesture: Going to NEXT image');
           gone.current.add(index);
           springApi.start(i => 
             i === index ? springTo(i, currentImageIndex, true, dir) : undefined
           );
-          setTimeout(() => {
-            console.log('📞 SwipeGesture: Calling onSwipeNext');
-            onSwipeNext();
-          }, 50);
+          setTimeout(() => onSwipeNext(), 50);
           swiped = true;
         } 
-        // 🔄 CORRECTION: Swipe right (dir = 1) = PREVIOUS image
-        else if (dir === 1 && currentImageIndex > 0) {
-          console.log('⬅️ SwipeGesture: Going to PREVIOUS image', {
-            from: currentImageIndex,
-            to: currentImageIndex - 1
-          });
-          
+        else if (dir === 1 && canGoPrev) {
+          console.log('⬅️ SwipeGesture: Going to PREVIOUS image');
           gone.current.add(index);
           springApi.start(i => 
             i === index ? springTo(i, currentImageIndex, true, dir) : undefined
           );
-          setTimeout(() => {
-            console.log('📞 SwipeGesture: Calling onSwipePrevious');
-            onSwipePrevious();
-          }, 50);
+          setTimeout(() => onSwipePrevious(), 50);
           swiped = true;
         } else {
-          console.log('🚫 SwipeGesture: Swipe blocked by boundaries', {
-            direction: dir,
-            currentIndex: currentImageIndex,
-            canGoNext: currentImageIndex < allVisuals.length - 1,
-            canGoPrev: currentImageIndex > 0
-          });
+          console.log('🚫 SwipeGesture: Swipe blocked by boundaries');
         }
-      } else {
-        console.log('🚫 SwipeGesture: Movement below threshold');
       }
       
-      // Reset if no swipe occurred
+      // 🔧 CORRECTION: Reset toujours à la position correcte
       if (!swiped) {
-        console.log('🔄 SwipeGesture: Resetting position');
-        springApi.start(i => 
-          i === index ? springTo(i, currentImageIndex) : undefined
-        );
+        console.log('🔄 SwipeGesture: Resetting to current position');
+        springApi.start(i => springTo(i, currentImageIndex));
       }
       
       indexBeingDragged.current = null;
       return;
     }
 
-    // Handle active drag
-    const x = mx;
-    const rot = mx / 12;
+    // 🔧 CORRECTION: Limiter le mouvement selon les limites
+    let constrainedMx = mx;
+    
+    // Si on essaie d'aller à droite mais qu'on est à la première image
+    if (mx > 0 && !canGoPrev) {
+      constrainedMx = Math.max(0, mx * 0.1); // Résistance élastique
+    }
+    
+    // Si on essaie d'aller à gauche mais qu'on est à la dernière image
+    if (mx < 0 && !canGoNext) {
+      constrainedMx = Math.min(0, mx * 0.1); // Résistance élastique
+    }
+
+    // Handle active drag avec mouvement contraint
+    const x = constrainedMx;
+    const rot = constrainedMx / 12;
     const scale = 1.05;
     const config = MODAL_CONFIG.SPRING_CONFIG.ACTIVE;
 
-    // Update next card visibility during drag
-    if (currentImageIndex + 1 < allVisuals.length) {
+    // 🔧 CORRECTION: Afficher la carte suivante seulement si elle existe ET si le mouvement va dans le bon sens
+    if (currentImageIndex + 1 < allVisuals.length && mx < -20 && canGoNext) {
       const nextCardIndex = currentImageIndex + 1;
       const progress = Math.min(1, Math.abs(mx) / (windowWidth.current * 0.5));
       const nextScale = 0.95 + (0.05 * progress);
@@ -200,8 +159,8 @@ export const useSwipeGesture = ({
       );
     }
     
-    // Update previous card visibility during right swipe
-    if (currentImageIndex - 1 >= 0 && mx > 10) {
+    // 🔧 CORRECTION: Afficher la carte précédente seulement si elle existe ET si le mouvement va dans le bon sens
+    if (currentImageIndex - 1 >= 0 && mx > 20 && canGoPrev) {
       const prevCardIndex = currentImageIndex - 1;
       const progress = Math.min(1, mx / (windowWidth.current * 0.5));
       const prevScale = 0.95 + (0.05 * progress);
@@ -229,100 +188,118 @@ export const useSwipeGesture = ({
           opacity: 1, 
           display: 'block', 
           config, 
-          immediate: active 
+          immediate: false // 🔧 CORRECTION: Jamais immediate pour fluidité
         };
       } else if (i !== currentImageIndex + 1 && i !== currentImageIndex - 1) {
-        return springTo(i, currentImageIndex);
+        // 🔧 CORRECTION: Masquer complètement les autres cartes
+        return { 
+          display: 'none', 
+          opacity: 0, 
+          immediate: true 
+        };
       }
       return undefined;
     });
   }, { 
     filterTaps: true, 
-    threshold: 10 
+    threshold: 10,
+    // 🔧 AJOUT: Configuration pour limiter les faux positifs
+    axis: 'x', // Seulement horizontal
+    preventScroll: true
   });
 
-  // 🔧 CORRECTION: Navigation handlers améliorés
+  // Navigation handlers améliorés
   const handleNavNext = useCallback(() => {
-    console.log('🔘 NavButton: NEXT clicked', {
-      currentIndex: currentImageIndex,
-      maxIndex: allVisuals.length - 1,
-      canGo: currentImageIndex < allVisuals.length - 1
-    });
+    const canGoNext = currentImageIndex < allVisuals.length - 1;
+    console.log('🔘 NavButton: NEXT clicked', { canGoNext });
 
-    if (currentImageIndex < allVisuals.length - 1 && springApi) {
+    if (canGoNext && springApi) {
       gone.current.add(currentImageIndex);
-      springApi.start(i => 
-        i === currentImageIndex ? springTo(i, currentImageIndex, true, -1) : undefined
-      );
-      setTimeout(() => {
-        console.log('📞 NavButton: Calling onSwipeNext');
-        onSwipeNext();
-      }, 50);
-    } else {
-      console.log('🚫 NavButton: NEXT blocked');
+      
+      // 🔧 CORRECTION: Animation plus fluide
+      springApi.start(i => {
+        if (i === currentImageIndex) {
+          return springTo(i, currentImageIndex, true, -1);
+        } else {
+          // Masquer immédiatement les autres
+          return { display: 'none', opacity: 0, immediate: true };
+        }
+      });
+      
+      setTimeout(() => onSwipeNext(), 50);
     }
   }, [currentImageIndex, allVisuals.length, springApi, springTo, onSwipeNext]);
 
   const handleNavPrevious = useCallback(() => {
-    console.log('🔘 NavButton: PREVIOUS clicked', {
-      currentIndex: currentImageIndex,
-      minIndex: 0,
-      canGo: currentImageIndex > 0
-    });
+    const canGoPrev = currentImageIndex > 0;
+    console.log('🔘 NavButton: PREVIOUS clicked', { canGoPrev });
 
-    if (currentImageIndex > 0 && springApi) {
+    if (canGoPrev && springApi) {
       const targetPrevIndex = currentImageIndex - 1;
       gone.current.delete(targetPrevIndex);
       
-      springApi.start(i => 
-        i === currentImageIndex ? { 
-          ...springTo(i, currentImageIndex, true, 1), 
-          onRest: () => {
-            console.log('📞 NavButton: Calling onSwipePrevious');
-            onSwipePrevious();
-          }
-        } : (i === targetPrevIndex ? { 
-          ...springTo(i, targetPrevIndex), 
-          x: 0, 
-          y: 0, 
-          rot: 0, 
-          scale: 1, 
-          opacity: 1, 
-          display: 'block', 
-          delay: 50, 
-          config: MODAL_CONFIG.SPRING_CONFIG.BASE 
-        } : undefined)
-      );
-    } else {
-      console.log('🚫 NavButton: PREVIOUS blocked');
+      // 🔧 CORRECTION: Animation plus fluide pour le retour
+      springApi.start(i => {
+        if (i === currentImageIndex) {
+          return { 
+            ...springTo(i, currentImageIndex, true, 1), 
+            onRest: () => onSwipePrevious()
+          };
+        } else if (i === targetPrevIndex) {
+          return { 
+            ...springTo(i, targetPrevIndex), 
+            x: 0, 
+            y: 0, 
+            rot: 0, 
+            scale: 1, 
+            opacity: 1, 
+            display: 'block', 
+            delay: 50, 
+            config: MODAL_CONFIG.SPRING_CONFIG.BASE 
+          };
+        } else {
+          // Masquer toutes les autres
+          return { display: 'none', opacity: 0, immediate: true };
+        }
+      });
     }
   }, [currentImageIndex, springApi, springTo, onSwipePrevious]);
 
   const handleGoToImage = useCallback((targetIndex: number) => {
-    console.log('🎯 Pagination: Going to image', {
-      from: currentImageIndex,
-      to: targetIndex,
-      isValid: targetIndex !== currentImageIndex && springApi
-    });
-
     if (targetIndex === currentImageIndex || !springApi) return;
 
-    if (targetIndex > currentImageIndex) {
-      // Going forward - mark intermediate images as gone
-      for (let k = currentImageIndex; k < targetIndex; k++) {
-        if (k !== currentImageIndex) gone.current.add(k);
-      }
-    } else {
-      // Going backward - mark intermediate images as gone and restore target
-      for (let k = targetIndex + 1; k <= currentImageIndex; k++) {
-        gone.current.add(k);
-      }
-      gone.current.delete(targetIndex);
-    }
+    console.log('🎯 Pagination: Going to image', { from: currentImageIndex, to: targetIndex });
 
-    // Note: L'index sera mis à jour par le parent component
-    console.log('📞 Pagination: Target index set, parent should update state');
-  }, [currentImageIndex, springApi]);
+    // 🔧 CORRECTION: Reset complet avant navigation
+    gone.current.clear();
+    
+    // Masquer toutes les cartes d'abord
+    springApi.start(i => ({
+      display: 'none',
+      opacity: 0,
+      x: 0,
+      y: 0,
+      rot: 0,
+      scale: 0.95,
+      immediate: true
+    }));
+
+    // Puis afficher la carte cible avec délai
+    setTimeout(() => {
+      springApi.start(i => {
+        if (i === targetIndex) {
+          return {
+            ...springTo(i, targetIndex),
+            opacity: 1,
+            display: 'block',
+            config: MODAL_CONFIG.SPRING_CONFIG.BASE
+          };
+        }
+        return undefined;
+      });
+    }, 50);
+
+  }, [currentImageIndex, springApi, springTo]);
 
   const resetGoneSet = useCallback(() => {
     console.log('🔄 SwipeGesture: Resetting gone set');
@@ -339,5 +316,5 @@ export const useSwipeGesture = ({
     gone: gone.current
   };
 };
-// Note: Le hook utilise useCallback pour éviter de recréer les fonctions à chaque rendu.
-// Il est important de gérer les dépendances correctement pour éviter les boucles infinies.
+// ===============================
+// Fin du fichier useSwipeGesture.ts

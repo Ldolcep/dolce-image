@@ -1,14 +1,14 @@
 // ========================================================================
-// === COMPOSANT PRINCIPAL - CORRECTION NAVIGATION PHASE 2 ===
+// === COMPOSANT PRINCIPAL - ANIMATIONS FLUIDES ===
 // ========================================================================
 
 // ===============================
-// ProjectModalMobile.tsx - NAVIGATION CORRIGÉE
+// ProjectModalMobile.tsx - SPRINGTO OPTIMISÉ
 // ===============================
 "use client";
 
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { useSprings, SpringConfig } from '@react-spring/web';
+import { useSprings } from '@react-spring/web';
 
 // Types & Config
 import { Project } from './types/modal';
@@ -59,59 +59,7 @@ export default function ProjectModalMobile({
   );
 
   // ===============================
-  // 🔧 CORRECTION: NAVIGATION HANDLERS
-  // ===============================
-  
-  // Navigation handlers avec debug et validation
-  const handleSwipeNext = useCallback(() => {
-    console.log('📞 ProjectModal: handleSwipeNext called', {
-      currentIndex: state.currentImageIndex,
-      nextIndex: state.currentImageIndex + 1,
-      maxIndex: allVisuals.length - 1
-    });
-
-    if (state.currentImageIndex < allVisuals.length - 1) {
-      const newIndex = state.currentImageIndex + 1;
-      console.log('✅ ProjectModal: Setting new index to', newIndex);
-      actions.setCurrentImage(newIndex);
-    } else {
-      console.log('🚫 ProjectModal: Cannot go next, at last image');
-    }
-  }, [state.currentImageIndex, allVisuals.length, actions]);
-
-  const handleSwipePrevious = useCallback(() => {
-    console.log('📞 ProjectModal: handleSwipePrevious called', {
-      currentIndex: state.currentImageIndex,
-      prevIndex: state.currentImageIndex - 1,
-      minIndex: 0
-    });
-
-    if (state.currentImageIndex > 0) {
-      const newIndex = state.currentImageIndex - 1;
-      console.log('✅ ProjectModal: Setting new index to', newIndex);
-      actions.setCurrentImage(newIndex);
-    } else {
-      console.log('🚫 ProjectModal: Cannot go previous, at first image');
-    }
-  }, [state.currentImageIndex, actions]);
-
-  const handleGoToImage = useCallback((targetIndex: number) => {
-    console.log('📞 ProjectModal: handleGoToImage called', {
-      currentIndex: state.currentImageIndex,
-      targetIndex,
-      isValid: targetIndex >= 0 && targetIndex < allVisuals.length && targetIndex !== state.currentImageIndex
-    });
-
-    if (targetIndex >= 0 && targetIndex < allVisuals.length && targetIndex !== state.currentImageIndex) {
-      console.log('✅ ProjectModal: Setting new index to', targetIndex);
-      actions.setCurrentImage(targetIndex);
-    } else {
-      console.log('🚫 ProjectModal: Invalid target index or same as current');
-    }
-  }, [state.currentImageIndex, allVisuals.length, actions]);
-
-  // ===============================
-  // SPRING ANIMATIONS
+  // 🔧 CORRECTION: FONCTION SPRINGTO OPTIMISÉE
   // ===============================
   const springTo = useCallback((
     i: number, 
@@ -121,67 +69,129 @@ export default function ProjectModalMobile({
   ) => {
     const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 300;
 
+    // 🔧 CORRECTION: Animation de sortie plus fluide
     if (forSwipeOut) {
       return { 
-        x: swipeDir * (windowWidth + 200), 
-        rot: swipeDir * 30, 
-        scale: 0.8, 
+        x: swipeDir * (windowWidth + 100), // Réduction de la distance
+        rot: swipeDir * 20, // Réduction de la rotation
+        scale: 0.9, // Scale moins drastique
         opacity: 0, 
         display: 'block', 
-        config: MODAL_CONFIG.SPRING_CONFIG.SWIPE_OUT,
+        config: {
+          ...MODAL_CONFIG.SPRING_CONFIG.SWIPE_OUT,
+          tension: 250, // Plus doux
+          friction: 30   // Plus fluide
+        },
         onRest: ({ finished }: any) => {
           if (finished && api) {
-            api.start(j => (j === i ? { 
-              display: 'none', 
-              immediate: true 
-            } : undefined));
+            // Délai plus court pour masquer
+            setTimeout(() => {
+              api.start(j => (j === i ? { 
+                display: 'none', 
+                immediate: true 
+              } : undefined));
+            }, 100);
           }
         }
       };
     }
 
-    const x = 0;
-    const y = i === activeIndex + 1 ? 8 : 0;
-    let scale = 1;
-    let opacity = 0;
+    // 🔧 CORRECTION: Logique de visibilité stricte
+    const isActive = i === activeIndex;
+    const isNext = i === activeIndex + 1 && allVisuals.length > 1;
+    const isPrev = i === activeIndex - 1 && activeIndex > 0;
+
+    // Variables par défaut (carte masquée)
+    let config = MODAL_CONFIG.SPRING_CONFIG.BASE;
     let display = 'none';
+    let opacity = 0;
+    let scale = 0.85;
+    let x = 0;
+    let y = 0;
+    let rot = 0;
     let zIndex = 0;
 
-    if (i === activeIndex) {
-      scale = 1; 
-      opacity = 1; 
-      display = 'block'; 
-      zIndex = allVisuals.length;
-    } else if (i === activeIndex + 1 && allVisuals.length > 1) {
-      scale = 0.95; 
-      opacity = 0.7; 
-      display = 'block'; 
-      zIndex = allVisuals.length - 1;
-    } else {
-      scale = 0.85; 
-      opacity = 0; 
-      display = 'none'; 
-      zIndex = allVisuals.length - Math.abs(i - activeIndex);
-    }
+    if (isActive) {
+      // 🔧 CARTE ACTIVE: Pleinement visible
+      display = 'block';
+      opacity = 1;
+      scale = 1;
+      zIndex = allVisuals.length + 10; // Z-index le plus élevé
+      config = {
+        ...MODAL_CONFIG.SPRING_CONFIG.BASE,
+        tension: 300,
+        friction: 35
+      };
+    } else if (isNext && allVisuals.length > 1) {
+      // 🔧 CARTE SUIVANTE: Légèrement visible derrière (mais pas aux limites)
+      if (activeIndex < allVisuals.length - 1) {
+        display = 'block';
+        opacity = 0.3; // Moins visible
+        scale = 0.92;
+        y = 12;
+        zIndex = allVisuals.length - 1;
+      }
+    } 
+    // 🔧 CORRECTION CRITIQUE: Pas de carte précédente visible en permanence
+    // Elle ne sera visible que pendant le drag
 
     return { 
       x, 
       y, 
       scale, 
-      rot: 0, 
+      rot, 
       opacity, 
       display, 
       zIndex, 
-      config: MODAL_CONFIG.SPRING_CONFIG.BASE, 
-      delay: i === activeIndex ? 50 : 0 
+      config,
+      immediate: false // Toujours des transitions fluides
     };
   }, [state.currentImageIndex, allVisuals.length]);
 
+  // ===============================
+  // 🔧 CORRECTION: SPRINGS AVEC GESTION D'ERREUR
+  // ===============================
   const [springProps, api] = useSprings(
     allVisuals.length, 
-    i => ({ ...springTo(i) }), 
+    i => ({ 
+      ...springTo(i),
+      // 🔧 AJOUT: Valeurs par défaut sûres
+      x: 0,
+      y: 0,
+      rot: 0,
+      scale: i === 0 ? 1 : 0.85,
+      opacity: i === 0 ? 1 : 0,
+      display: i === 0 ? 'block' : 'none',
+      zIndex: i === 0 ? allVisuals.length : 0
+    }), 
     [allVisuals.length, springTo]
   );
+
+  // ===============================
+  // NAVIGATION HANDLERS
+  // ===============================
+  const handleSwipeNext = useCallback(() => {
+    if (state.currentImageIndex < allVisuals.length - 1) {
+      const newIndex = state.currentImageIndex + 1;
+      console.log('✅ ProjectModal: Setting new index to', newIndex);
+      actions.setCurrentImage(newIndex);
+    }
+  }, [state.currentImageIndex, allVisuals.length, actions]);
+
+  const handleSwipePrevious = useCallback(() => {
+    if (state.currentImageIndex > 0) {
+      const newIndex = state.currentImageIndex - 1;
+      console.log('✅ ProjectModal: Setting new index to', newIndex);
+      actions.setCurrentImage(newIndex);
+    }
+  }, [state.currentImageIndex, actions]);
+
+  const handleGoToImage = useCallback((targetIndex: number) => {
+    if (targetIndex >= 0 && targetIndex < allVisuals.length && targetIndex !== state.currentImageIndex) {
+      console.log('✅ ProjectModal: Setting new index to', targetIndex);
+      actions.setCurrentImage(targetIndex);
+    }
+  }, [state.currentImageIndex, allVisuals.length, actions]);
 
   // ===============================
   // CUSTOM HOOKS
@@ -203,7 +213,7 @@ export default function ProjectModalMobile({
     actions.setImageLoaded
   );
 
-  // 🔧 CORRECTION: Swipe gesture avec handlers corrigés
+  // Swipe gesture avec handlers corrigés
   const {
     bind,
     handleNavNext,
@@ -215,40 +225,27 @@ export default function ProjectModalMobile({
     currentImageIndex: state.currentImageIndex,
     isDraggingPanel: state.isDraggingPanel,
     isMounted: state.isMounted,
-    onImageDragStart: () => {
-      console.log('🎬 ProjectModal: Image drag start');
-      actions.setImageDragging(true);
-    },
-    onImageDragEnd: () => {
-      console.log('🎬 ProjectModal: Image drag end');
-      setTimeout(() => actions.setImageDragging(false), 50);
-    },
-    onSwipeNext: handleSwipeNext,     // 🔧 CORRECTION: Connecté au bon handler
-    onSwipePrevious: handleSwipePrevious, // 🔧 CORRECTION: Connecté au bon handler
+    onImageDragStart: () => actions.setImageDragging(true),
+    onImageDragEnd: () => setTimeout(() => actions.setImageDragging(false), 50),
+    onSwipeNext: handleSwipeNext,
+    onSwipePrevious: handleSwipePrevious,
     springApi: api,
     springTo
   });
 
-  // ===============================
-  // 🔧 CORRECTION: NAVIGATION UNIFIÉE
-  // ===============================
-  
-  // Unifier les handlers de navigation
+  // Navigation unifiée
   const unifiedHandleNext = useCallback(() => {
     console.log('🔄 ProjectModal: Unified handleNext called');
-    handleNavNext(); // Déclenche l'animation
-    // handleSwipeNext sera appelé par le hook useSwipeGesture
+    handleNavNext();
   }, [handleNavNext]);
 
   const unifiedHandlePrevious = useCallback(() => {
     console.log('🔄 ProjectModal: Unified handlePrevious called');
-    handleNavPrevious(); // Déclenche l'animation
-    // handleSwipePrevious sera appelé par le hook useSwipeGesture
+    handleNavPrevious();
   }, [handleNavPrevious]);
 
   const unifiedHandleGoToImage = useCallback((targetIndex: number) => {
     console.log('🔄 ProjectModal: Unified handleGoToImage called', { targetIndex });
-    // Mettre à jour l'état directement pour la navigation par dots
     handleGoToImage(targetIndex);
   }, [handleGoToImage]);
 
@@ -262,7 +259,7 @@ export default function ProjectModalMobile({
     return () => actions.setMounted(false);
   }, [actions]);
 
-  // Reset state when modal opens
+  // 🔧 CORRECTION: Reset state avec animations fluides
   useEffect(() => {
     if (isOpen && initialCollapsedY !== null) {
       console.log("ProjectModalMobile: Resetting for new project - ID:", project.id);
@@ -274,24 +271,35 @@ export default function ProjectModalMobile({
         panelRef.current.style.visibility = 'visible';
       }
       
+      // 🔧 CORRECTION: Reset springs avec animation douce
       if (api && allVisuals.length > 0) {
-        api.start(i => springTo(i, 0));
+        // D'abord masquer toutes les cartes
+        api.start(i => ({
+          display: 'none',
+          opacity: 0,
+          scale: 0.85,
+          immediate: true
+        }));
+        
+        // Puis afficher la première avec transition
+        setTimeout(() => {
+          api.start(i => springTo(i, 0));
+        }, 50);
       }
     }
   }, [project, isOpen, initialCollapsedY, allVisuals.length, api, springTo, resetGoneSet, actions]);
 
-  // Update spring animations when current image changes
+  // 🔧 CORRECTION: Update animations avec debounce
   useEffect(() => {
-    console.log('🔄 ProjectModal: Current image changed', {
-      newIndex: state.currentImageIndex,
-      isMounted: state.isMounted,
-      hasApi: !!api,
-      totalImages: allVisuals.length
-    });
-
     if (state.isMounted && api && allVisuals.length > 0) {
-      console.log('✅ ProjectModal: Updating spring animations for index', state.currentImageIndex);
-      api.start(i => springTo(i, state.currentImageIndex));
+      console.log('🔄 ProjectModal: Updating animations for index', state.currentImageIndex);
+      
+      // Timeout pour éviter les animations conflictuelles
+      const timeoutId = setTimeout(() => {
+        api.start(i => springTo(i, state.currentImageIndex));
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [state.currentImageIndex, api, state.isMounted, allVisuals.length, springTo]);
 
@@ -354,14 +362,6 @@ export default function ProjectModalMobile({
 
   const collapsedGripVisibleHeight = `calc(${MODAL_CONFIG.GRIP_HEIGHT_COLLAPSED} + 0px)`;
 
-  console.log('🎨 ProjectModal: Rendering with state', {
-    currentImageIndex: state.currentImageIndex,
-    totalImages: allVisuals.length,
-    isImageDragging: state.isImageDragging,
-    isDraggingPanel: state.isDraggingPanel,
-    isInfoVisible: state.isInfoVisible
-  });
-
   return (
     <div 
       className="fixed inset-0 bg-white z-50 overflow-hidden select-none" 
@@ -392,7 +392,7 @@ export default function ProjectModalMobile({
           bind={bind}
         />
 
-        {/* 🔧 CORRECTION: Navigation Controls avec handlers unifiés */}
+        {/* Navigation Controls */}
         <NavigationControls
           allVisuals={allVisuals}
           currentImageIndex={state.currentImageIndex}
@@ -422,4 +422,4 @@ export default function ProjectModalMobile({
 }
 
 // ===============================
-// === FIN DU COMPOSANT CORRIGÉ ===
+// === FIN DU COMPOSANT OPTIMISÉ ===
