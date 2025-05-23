@@ -1,5 +1,5 @@
 // ===============================
-// config/modal.ts
+// config/modal.ts YO
 // ===============================
 export const MODAL_CONFIG = {
     // Animation
