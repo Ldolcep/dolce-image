@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import ProjectModal from "./project-modal"
+import ProjectModal from "./ProjectModal" 
 import FillerCard from "./filler-card" // Nouveau import
 
 // Définir les types de base
