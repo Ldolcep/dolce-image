@@ -302,6 +302,7 @@ export default function ProjectModalMobile({
           </div>
         )}
       </div>
+      </div>
 
       {/* Panel Description - avec espacement équilibré pb-[10vh] */}
       <div 
