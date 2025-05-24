@@ -1,5 +1,5 @@
 // ========================================================================
-// === PROJECT MODAL MOBILE - AMÉLIORATIONS CARROUSEL ===
+// === PROJECT MODAL MOBILE - CORRECTIONS SYNTAX ===
 // ========================================================================
 
 "use client";
@@ -192,7 +192,6 @@ export default function ProjectModalMobile({
           paddingBottom: 'calc(38vh + 6vh)' // 🔧 FIX exact : 6vh pour l'indicateur
         }}
       >
-        
         {/* Carrousel Swiper */}
         <div className="relative w-full max-w-sm aspect-[4/5]" style={{ maxHeight: '65vh' }}>
           <Swiper
@@ -233,7 +232,7 @@ export default function ProjectModalMobile({
                     src={visual}
                     alt={`Image ${index + 1} du projet ${project.title}`}
                     fill
-                    className="object-cover" {/* 🔧 AUCUN coin arrondi */}
+                    className="object-cover" /* 🔧 AUCUN coin arrondi */
                     sizes="(max-width: 768px) 90vw, 400px"
                     priority={index === 0}
                   />
@@ -302,7 +301,6 @@ export default function ProjectModalMobile({
           </div>
         )}
       </div>
-      </div>
 
       {/* Panel Description - avec espacement équilibré pb-[10vh] */}
       <div 
@@ -336,10 +334,10 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* Zone de contenu avec scroll natif */}
+        {/* 🔧 Zone de contenu avec scrollbar stylée */}
         <div 
           ref={contentRef}
-          className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto"
+          className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto custom-scrollbar" /* 🔧 Classe custom scrollbar */
           style={{ 
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y'
