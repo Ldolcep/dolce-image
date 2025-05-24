@@ -1,5 +1,5 @@
 // ========================================================================
-// === PROJECT MODAL MOBILE - FIXES FINAUX ===
+// === PROJECT MODAL MOBILE - AMÉLIORATIONS CARROUSEL ===
 // ========================================================================
 
 "use client";
@@ -156,7 +156,7 @@ export default function ProjectModalMobile({
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none">
-      {/* 🔧 Header avec titre encore plus grand */}
+      {/* Header avec titre */}
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-white/95 backdrop-blur-sm h-16">
         <button 
           onClick={onClose} 
@@ -169,12 +169,11 @@ export default function ProjectModalMobile({
           </svg>
         </button>
         
-        {/* 🔧 FIX: Titre encore plus grand */}
         <h2 
           className="flex-1 text-center text-black font-semibold truncate mx-3"
           style={{ 
             fontFamily: 'Montserrat, sans-serif',
-            fontSize: '1.4rem', // 🔧 AUGMENTÉ de 1.25rem à 1.4rem
+            fontSize: '1.4rem',
             letterSpacing: '0.01em',
             lineHeight: '1.2'
           }}
@@ -185,38 +184,16 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-<<<<<<< Updated upstream
-      {/* 🔧 FIX: Zone d'images remontée + espace calculé précisément */}
-      <div className="absolute inset-0 pt-16 pb-[12vh] flex items-center justify-center px-4">
-        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[65vh]">
-=======
       {/* 🔧 ZONE CARROUSEL CORRIGÉE - Espacement équilibré */}
       <div className="absolute inset-0 pt-16 pb-[15vh] flex flex-col items-center justify-center px-4">
         
         {/* Carrousel Swiper */}
         <div className="relative w-full max-w-sm aspect-[4/5] max-h-[60vh]">
->>>>>>> Stashed changes
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
             }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-<<<<<<< Updated upstream
-            effect="cards"
-            modules={[Navigation, Pagination, EffectCards]}
-            spaceBetween={20}
-            slidesPerView={1}
-            speed={350}
-            threshold={3}
-            touchRatio={1}
-            resistance={true}
-            resistanceRatio={0.85}
-            cardsEffect={{
-              rotate: true,
-              perSlideRotate: 6,
-              perSlideOffset: 4,
-              slideShadows: true,
-=======
             effect="fade" // 🔧 RETOUR au fade au lieu de cards pour clarté
             modules={[Navigation, Pagination]}
             spaceBetween={20}
@@ -232,26 +209,17 @@ export default function ProjectModalMobile({
             longSwipesRatio={0.3}
             fadeEffect={{
               crossFade: true, // 🔧 Transition croisée plus claire
->>>>>>> Stashed changes
             }}
             pagination={false}
             navigation={{
               nextEl: '.swiper-button-next-custom',
               prevEl: '.swiper-button-prev-custom',
             }}
-<<<<<<< Updated upstream
-            className="w-full h-full"
-          >
-            {allVisuals.map((visual, index) => (
-              <SwiperSlide key={visual} className="relative">
-                <div className="relative w-full h-full overflow-hidden bg-white shadow-2xl">
-=======
             className="w-full h-full swiper-smooth"
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
                 <div className="relative w-full h-full overflow-hidden bg-white shadow-2xl"> {/* 🔧 Suppression de tous les coins arrondis */}
->>>>>>> Stashed changes
                   <Image
                     src={visual}
                     alt={`Image ${index + 1} du projet ${project.title}`}
@@ -261,20 +229,12 @@ export default function ProjectModalMobile({
                     priority={index === 0}
                   />
                   
-<<<<<<< Updated upstream
-                  {/* Frame pour carte active */}
-=======
                   {/* 🔧 Frame orange subtile pour image active - sans coins arrondis */}
->>>>>>> Stashed changes
                   {index === currentIndex && (
                     <div 
                       className="absolute inset-0 pointer-events-none"
                       style={{
-<<<<<<< Updated upstream
-                        boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.5)',
-=======
                         boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.4)',
->>>>>>> Stashed changes
                       }}
                     />
                   )}
@@ -283,19 +243,11 @@ export default function ProjectModalMobile({
             ))}
           </Swiper>
 
-<<<<<<< Updated upstream
-          {/* Navigation Buttons */}
-          {allVisuals.length > 1 && (
-            <>
-              <button 
-                className="swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-30"
-=======
           {/* Navigation Buttons - design épuré */}
           {allVisuals.length > 1 && (
             <>
               <button 
                 className="swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-30"
->>>>>>> Stashed changes
                 aria-label="Image précédente"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -304,11 +256,7 @@ export default function ProjectModalMobile({
               </button>
 
               <button 
-<<<<<<< Updated upstream
-                className="swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-30"
-=======
                 className="swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-30"
->>>>>>> Stashed changes
                 aria-label="Image suivante"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -317,31 +265,8 @@ export default function ProjectModalMobile({
               </button>
             </>
           )}
+        </div>
 
-<<<<<<< Updated upstream
-          {/* 🔧 FIX CRITIQUE: Indicateurs avec espacement équilibré */}
-          {allVisuals.length > 1 && (
-            <div 
-              className="absolute left-1/2 -translate-x-1/2 z-25"
-              style={{ 
-                bottom: '-3vh', // 🔧 ESPACEMENT PRÉCIS: 3vh du carrousel
-              }}
-            >
-              <div className="flex space-x-2.5 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-100">
-                {allVisuals.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => swiperRef.current?.slideTo(idx)}
-                    className={`rounded-full transition-all duration-300 ${
-                      currentIndex === idx 
-                        ? 'w-3 h-3 bg-orange-500 scale-110 shadow-sm' 
-                        : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400 active:scale-110 hover:scale-105'
-                    }`}
-                    aria-label={`Aller à l'image ${idx + 1}`}
-                  />
-                ))}
-              </div>
-=======
         {/* 🔧 INDICATEURS ÉPURÉS - Espacement équilibré 5vh de chaque côté */}
         {allVisuals.length > 1 && (
           <div className="mt-[5vh] flex justify-center">
@@ -358,17 +283,12 @@ export default function ProjectModalMobile({
                   aria-label={`Aller à l'image ${idx + 1}`}
                 />
               ))}
->>>>>>> Stashed changes
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-<<<<<<< Updated upstream
-      {/* 🔧 FIX: Panel avec grip et contenu séparés pour scroll */}
-=======
       {/* Panel Description - avec espacement équilibré pb-[10vh] */}
->>>>>>> Stashed changes
       <div 
         ref={panelRef}
         className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40"
@@ -377,7 +297,7 @@ export default function ProjectModalMobile({
           transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 6vh)'})`
         }}
       >
-        {/* 🔧 FIX CRITIQUE: Grip zone séparée avec ref */}
+        {/* Grip zone */}
         <div 
           ref={gripRef}
           className="w-full flex flex-col items-center justify-center px-4 h-[6vh] bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 cursor-grab active:cursor-grabbing"
@@ -400,14 +320,13 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* 🔧 FIX CRITIQUE: Zone de contenu avec scroll natif séparé */}
+        {/* Zone de contenu avec scroll natif */}
         <div 
           ref={contentRef}
           className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto"
           style={{ 
             WebkitOverflowScrolling: 'touch',
-            // 🔧 CRITIQUE: Pas de touch events sur le contenu pour éviter conflits
-            touchAction: 'pan-y' // Permet seulement le scroll vertical
+            touchAction: 'pan-y'
           }}
         >
           <div 
@@ -445,25 +364,6 @@ export default function ProjectModalMobile({
         </div>
       </div>
 
-<<<<<<< Updated upstream
-      {/* CSS + Montserrat */}
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-        
-        .swiper-cards .swiper-slide {
-          border-radius: 0 !important;
-          overflow: hidden !important;
-        }
-        
-        .swiper-cards .swiper-slide-shadow-left,
-        .swiper-cards .swiper-slide-shadow-right {
-          border-radius: 0 !important;
-          background: linear-gradient(to right, rgba(0,0,0,0.03), transparent) !important;
-        }
-
-        .swiper-cards .swiper-slide-active {
-          transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1) !important;
-=======
       {/* 🔧 CSS CORRIGÉ pour effet fade */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
@@ -488,14 +388,9 @@ export default function ProjectModalMobile({
         
         .swiper-fade .swiper-slide:not(.swiper-slide-active) {
           opacity: 0 !important;
->>>>>>> Stashed changes
         }
       `}</style>
     </div>
   );
 }
-<<<<<<< Updated upstream
-// Note: This code is designed to be used in a Next.js project with Tailwind CSS and Swiper.js.
-=======
 // Note: This code is designed to be used in a Next.js project with Swiper for carousels.
->>>>>>> Stashed changes
