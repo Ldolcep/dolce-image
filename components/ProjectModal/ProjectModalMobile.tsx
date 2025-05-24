@@ -184,16 +184,17 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* 🔧 ZONE CARROUSEL CORRIGÉE - Espacement Chrome fixé */}
+      {/* 🔧 ZONE CARROUSEL CORRIGÉE - Espacement fixé définitivement */}
       <div 
-        className="absolute inset-0 pt-16 flex flex-col items-center justify-center px-4"
+        className="absolute inset-0 flex flex-col items-center justify-center px-4"
         style={{
-          paddingBottom: 'calc(38vh + 5vh)' // 🔧 FIX Chrome : calcul exact au lieu de pb-[15vh]
+          paddingTop: '64px', // 🔧 FIX exact au lieu de pt-16
+          paddingBottom: 'calc(38vh + 6vh)' // 🔧 FIX exact : 6vh pour l'indicateur
         }}
       >
         
         {/* Carrousel Swiper */}
-        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[60vh]">
+        <div className="relative w-full max-w-sm aspect-[4/5]" style={{ maxHeight: '65vh' }}>
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
@@ -203,19 +204,19 @@ export default function ProjectModalMobile({
             modules={[Navigation, Pagination, EffectCards]} // 🔧 Réajout du module EffectCards
             spaceBetween={20}
             slidesPerView={1}
-            speed={400}
-            threshold={2}
-            touchRatio={1.2}
+            speed={300} // 🔧 Réduit pour plus de fluidité
+            threshold={1.5} // 🔧 Plus sensible
+            touchRatio={1} // 🔧 Ratio naturel
             resistance={true}
-            resistanceRatio={0.75}
+            resistanceRatio={0.85} // 🔧 Légèrement augmenté pour plus de contrôle
             followFinger={true}
             shortSwipes={true}
             longSwipes={true}
-            longSwipesRatio={0.3}
+            longSwipesRatio={0.2} // 🔧 Plus facile d'activer
             cardsEffect={{
               rotate: true,
-              perSlideRotate: 6, // 🔧 Valeur modérée pour clarté
-              perSlideOffset: 4, // 🔧 Valeur modérée
+              perSlideRotate: 4, // 🔧 Réduit pour plus de fluidité
+              perSlideOffset: 3, // 🔧 Réduit pour plus de fluidité
               slideShadows: true,
             }}
             pagination={false}
@@ -227,12 +228,12 @@ export default function ProjectModalMobile({
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
-                <div className="relative w-full h-full overflow-hidden bg-white shadow-2xl"> {/* 🔧 Suppression de tous les coins arrondis */}
+                <div className="relative w-full h-full overflow-hidden bg-white shadow-2xl"> {/* 🔧 AUCUN coin arrondi */}
                   <Image
                     src={visual}
                     alt={`Image ${index + 1} du projet ${project.title}`}
                     fill
-                    className="object-cover"
+                    className="object-cover" {/* 🔧 AUCUN coin arrondi */}
                     sizes="(max-width: 768px) 90vw, 400px"
                     priority={index === 0}
                   />
@@ -242,7 +243,7 @@ export default function ProjectModalMobile({
                     <div 
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.5)', // 🔧 Légèrement plus visible pour l'effet cards
+                        boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.5)',
                       }}
                     />
                   )}
@@ -275,12 +276,13 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* 🔧 INDICATEURS ÉPURÉS - Espacement Chrome fixé */}
+        {/* 🔧 INDICATEURS ÉPURÉS - Espacement exact fixé */}
         {allVisuals.length > 1 && (
           <div 
             className="flex justify-center"
             style={{
-              marginTop: '5vh' // 🔧 FIX Chrome : style inline au lieu de mt-[5vh]
+              marginTop: '6vh', // 🔧 FIX exact : 6vh comme paddingBottom
+              marginBottom: '0' // 🔧 Assurer aucun margin bottom
             }}
           >
             <div className="flex space-x-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
@@ -377,40 +379,74 @@ export default function ProjectModalMobile({
         </div>
       </div>
 
-      {/* 🔧 CSS CORRIGÉ pour effet cards */}
+      {/* 🔧 CSS CORRIGÉ pour fluidité cards + scrollbar stylée */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
         
-        /* 🔧 Retour aux styles cards avec améliorations */
+        /* 🔧 Scrollbar stylée orange */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: 2px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #f97316; /* Orange comme l'indicateur */
+          border-radius: 2px;
+          transition: background 0.3s ease;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #ea580c; /* Orange plus foncé au hover */
+        }
+        
+        /* 🔧 Fluidité cards améliorée */
         .swiper-smooth {
-          transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+          transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         }
         
         .swiper-smooth .swiper-wrapper {
-          transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+          transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         }
         
         .swiper-cards .swiper-slide {
           overflow: hidden !important;
-          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+          border-radius: 0 !important; /* 🔧 FORCE aucun coin arrondi */
+          transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         }
         
-        /* 🔧 Ombres cards améliorées */
+        /* 🔧 Suppression TOTALE des coins arrondis Swiper */
+        .swiper-cards .swiper-slide,
+        .swiper-cards .swiper-slide > div,
+        .swiper-cards .swiper-slide img {
+          border-radius: 0 !important;
+        }
+        
+        /* 🔧 Ombres cards plus subtiles */
         .swiper-cards .swiper-slide-shadow-left,
         .swiper-cards .swiper-slide-shadow-right {
-          background: linear-gradient(to right, rgba(0,0,0,0.05), transparent) !important;
+          background: linear-gradient(to right, rgba(0,0,0,0.03), transparent) !important;
+          border-radius: 0 !important;
         }
 
-        /* 🔧 Animation plus fluide pour carte active */
+        /* 🔧 Animation ultra fluide pour carte active */
         .swiper-cards .swiper-slide-active {
-          transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+          transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         }
         
-        /* 🔧 Améliorations touch feedback */
+        /* 🔧 Transitions harmonieuses pour toutes les cartes */
         .swiper-cards .swiper-slide-duplicate-active,
         .swiper-cards .swiper-slide-prev,
         .swiper-cards .swiper-slide-next {
-          transition: all 0.3s ease !important;
+          transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+        }
+        
+        /* 🔧 Force la suppression des border-radius sur tous les éléments Swiper */
+        .swiper-cards * {
+          border-radius: 0 !important;
         }
       `}</style>
     </div>
