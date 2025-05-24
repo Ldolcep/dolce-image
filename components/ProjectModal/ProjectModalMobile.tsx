@@ -1,5 +1,5 @@
 // ========================================================================
-// === VERSION FONCTIONNELLE - TESTÉE ET AUDITÉE ===
+// === VERSION CORRIGÉE - SWIPE FIX + PANEL COULISSANT ===
 // ========================================================================
 
 "use client";
@@ -21,13 +21,12 @@ interface Project {
   link: string;
 }
 
-// Config locale pour éviter les imports
+// Config locale
 const CONFIG = {
-  PANEL_ANIMATION_DURATION: 300,
-  GRIP_HEIGHT_COLLAPSED: '8vh',
-  GRIP_HEIGHT_EXPANDED: '75vh',
-  SWIPE_THRESHOLD: 100,
-  VELOCITY_THRESHOLD: 0.5
+  SWIPE_THRESHOLD: 80,
+  VELOCITY_THRESHOLD: 0.3,
+  PANEL_COLLAPSED_HEIGHT: '12vh',
+  PANEL_EXPANDED_HEIGHT: '60vh'
 } as const;
 
 interface ProjectModalMobileProps {
@@ -47,8 +46,7 @@ export default function ProjectModalMobile({
   // ===============================
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isImageDragging, setIsImageDragging] = useState(false);
-  const [isDraggingPanel, setIsDraggingPanel] = useState(false);
-  const [isInfoVisible, setIsInfoVisible] = useState(false);
+  const [isPanelExpanded, setIsPanelExpanded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   const allVisuals = useMemo(() => 
@@ -56,17 +54,19 @@ export default function ProjectModalMobile({
     [project]
   );
 
-  // Refs
-  const modalRef = useRef<HTMLDivElement>(null);
+  // Refs pour le panel
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelStartY = useRef(0);
+  const panelCurrentY = useRef(0);
 
   // ===============================
-  // FONCTION SPRING SIMPLE ET TESTÉE
+  // 🔧 CORRECTION: FONCTION SPRING SIMPLE ET TESTÉE
   // ===============================
   const getCardStyle = useCallback((index: number, active: number, gone: Set<number>) => {
     if (gone.has(index)) {
       return {
         x: index < active ? -400 : 400,
-        rot: index < active ? -30 : 30,
+        rot: index < active ? -20 : 20,
         scale: 0.8,
         opacity: 0,
         display: 'none'
@@ -88,10 +88,10 @@ export default function ProjectModalMobile({
     if (index === active + 1) {
       return {
         x: 0,
-        y: 10,
+        y: 8,
         rot: 0,
-        scale: 0.95,
-        opacity: 0.7,
+        scale: 0.96,
+        opacity: 0.8,
         display: 'block',
         zIndex: 9
       };
@@ -117,13 +117,13 @@ export default function ProjectModalMobile({
     allVisuals.length,
     (index) => ({
       ...getCardStyle(index, currentIndex, gone.current),
-      config: { tension: 300, friction: 30 }
+      config: { tension: 280, friction: 30 }
     }),
     [allVisuals.length, currentIndex]
   );
 
   // ===============================
-  // NAVIGATION SIMPLE ET FIABLE
+  // 🔧 CORRECTION: NAVIGATION CORRIGÉE
   // ===============================
   const goToNext = useCallback(() => {
     if (currentIndex < allVisuals.length - 1) {
@@ -134,10 +134,10 @@ export default function ProjectModalMobile({
         if (index === currentIndex) {
           return {
             x: -400,
-            rot: -30,
+            rot: -20,
             scale: 0.8,
             opacity: 0,
-            config: { tension: 200, friction: 25 }
+            config: { tension: 250, friction: 25 }
           };
         }
         return getCardStyle(index, newIndex, gone.current);
@@ -156,10 +156,10 @@ export default function ProjectModalMobile({
         if (index === currentIndex) {
           return {
             x: 400,
-            rot: 30,
+            rot: 20,
             scale: 0.8,
             opacity: 0,
-            config: { tension: 200, friction: 25 }
+            config: { tension: 250, friction: 25 }
           };
         }
         return getCardStyle(index, newIndex, gone.current);
@@ -171,12 +171,13 @@ export default function ProjectModalMobile({
 
   const goToIndex = useCallback((targetIndex: number) => {
     if (targetIndex >= 0 && targetIndex < allVisuals.length && targetIndex !== currentIndex) {
+      gone.current.clear();
       setCurrentIndex(targetIndex);
     }
   }, [currentIndex, allVisuals.length]);
 
   // ===============================
-  // DRAG LOGIC AVEC USE-GESTURE (TESTÉE)
+  // 🔧 CORRECTION: DRAG LOGIC CORRIGÉE
   // ===============================
   const bind = useDrag(({ 
     args: [index], 
@@ -192,12 +193,15 @@ export default function ProjectModalMobile({
     if (first) setIsImageDragging(true);
     if (last) setIsImageDragging(false);
 
-    // Limites élastiques
+    // 🔧 CORRECTION: Limites élastiques corrigées
+    const canGoNext = currentIndex < allVisuals.length - 1;
+    const canGoPrev = currentIndex > 0;
+    
     let constrainedMx = mx;
-    if (mx > 0 && currentIndex === 0) {
-      constrainedMx = Math.min(50, mx * 0.3);
-    } else if (mx < 0 && currentIndex === allVisuals.length - 1) {
-      constrainedMx = Math.max(-50, mx * 0.3);
+    if (mx > 0 && !canGoPrev) {
+      constrainedMx = Math.min(50, mx * 0.2); // Résistance vers la droite
+    } else if (mx < 0 && !canGoNext) {
+      constrainedMx = Math.max(-50, mx * 0.2); // Résistance vers la gauche
     }
 
     if (active) {
@@ -206,56 +210,101 @@ export default function ProjectModalMobile({
         if (i === index) {
           return {
             x: constrainedMx,
-            rot: constrainedMx / 20,
-            scale: 1.05,
+            rot: constrainedMx / 15,
+            scale: 1.02,
             opacity: 1,
             config: { tension: 0, friction: 0 },
             immediate: true
           };
         }
-        // Révéler la carte suivante
-        if (i === currentIndex + 1 && mx < -30) {
-          const progress = Math.min(1, Math.abs(mx) / 150);
+        // Révéler la carte suivante (swipe gauche)
+        if (i === currentIndex + 1 && mx < -30 && canGoNext) {
+          const progress = Math.min(1, Math.abs(mx) / 120);
           return {
-            scale: 0.95 + (progress * 0.05),
-            opacity: 0.7 + (progress * 0.3),
+            scale: 0.96 + (progress * 0.04),
+            opacity: 0.8 + (progress * 0.2),
+            y: 8 - (progress * 8),
             display: 'block'
           };
         }
-        // Révéler la carte précédente
-        if (i === currentIndex - 1 && mx > 30) {
-          const progress = Math.min(1, mx / 150);
+        // Révéler la carte précédente (swipe droite)
+        if (i === currentIndex - 1 && mx > 30 && canGoPrev) {
+          const progress = Math.min(1, mx / 120);
           return {
-            scale: 0.95 + (progress * 0.05),
-            opacity: 0.7 + (progress * 0.3),
+            scale: 0.96 + (progress * 0.04),
+            opacity: 0.8 + (progress * 0.2),
+            y: 8 - (progress * 8),
             display: 'block'
           };
         }
         return undefined;
       });
     } else {
-      // Fin du drag
+      // 🔧 CORRECTION: Fin du drag avec logique corrigée
       const shouldSwipe = Math.abs(mx) > CONFIG.SWIPE_THRESHOLD || Math.abs(vx) > CONFIG.VELOCITY_THRESHOLD;
       
       if (shouldSwipe) {
-        if (xDir < 0 && currentIndex < allVisuals.length - 1) {
+        // 🔧 CORRECTION: Direction corrigée
+        if (mx < 0 && canGoNext) {
+          // Swipe vers la gauche = image suivante
           goToNext();
-        } else if (xDir > 0 && currentIndex > 0) {
+          return;
+        } else if (mx > 0 && canGoPrev) {
+          // Swipe vers la droite = image précédente  
           goToPrevious();
-        } else {
-          // Reset position
-          api.start(i => i === index ? getCardStyle(i, currentIndex, gone.current) : undefined);
+          return;
         }
-      } else {
-        // Reset position
-        api.start(i => i === index ? getCardStyle(i, currentIndex, gone.current) : undefined);
       }
+      
+      // Reset position
+      api.start(i => {
+        if (i === index) {
+          return getCardStyle(i, currentIndex, gone.current);
+        }
+        return undefined;
+      });
     }
   }, {
     axis: 'x',
     filterTaps: true,
-    threshold: 10
+    threshold: 8
   });
+
+  // ===============================
+  // 🔧 PANEL COULISSANT - RÉIMPLÉMENTÉ
+  // ===============================
+  const handlePanelTouchStart = useCallback((e: React.TouchEvent) => {
+    panelStartY.current = e.touches[0].clientY;
+    panelCurrentY.current = isPanelExpanded ? 0 : window.innerHeight * 0.48; // 60vh - 12vh = 48vh
+  }, [isPanelExpanded]);
+
+  const handlePanelTouchMove = useCallback((e: React.TouchEvent) => {
+    const deltaY = e.touches[0].clientY - panelStartY.current;
+    const newY = Math.max(0, Math.min(window.innerHeight * 0.48, panelCurrentY.current + deltaY));
+    
+    if (panelRef.current) {
+      panelRef.current.style.transform = `translateY(${newY}px)`;
+    }
+  }, []);
+
+  const handlePanelTouchEnd = useCallback((e: React.TouchEvent) => {
+    const deltaY = e.changedTouches[0].clientY - panelStartY.current;
+    const shouldExpand = isPanelExpanded ? deltaY < -50 : deltaY < 50;
+    
+    setIsPanelExpanded(shouldExpand);
+    
+    if (panelRef.current) {
+      const targetY = shouldExpand ? 0 : window.innerHeight * 0.48;
+      panelRef.current.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+      panelRef.current.style.transform = `translateY(${targetY}px)`;
+      
+      setTimeout(() => {
+        if (panelRef.current) {
+          panelRef.current.style.transition = '';
+        }
+      }, 300);
+    }
+  }, [isPanelExpanded]);
 
   // ===============================
   // EFFECTS SIMPLES
@@ -267,6 +316,7 @@ export default function ProjectModalMobile({
   useEffect(() => {
     if (isOpen) {
       setCurrentIndex(0);
+      setIsPanelExpanded(false);
       gone.current.clear();
       api.start(index => getCardStyle(index, 0, gone.current));
     }
@@ -278,19 +328,22 @@ export default function ProjectModalMobile({
     }
   }, [currentIndex, isMounted, api, getCardStyle]);
 
+  // Panel position initialization
+  useEffect(() => {
+    if (isMounted && panelRef.current) {
+      const initialY = isPanelExpanded ? 0 : window.innerHeight * 0.48;
+      panelRef.current.style.transform = `translateY(${initialY}px)`;
+    }
+  }, [isMounted, isPanelExpanded]);
+
   // ===============================
-  // RENDER SIMPLE ET FONCTIONNEL
+  // RENDER AVEC PANEL COULISSANT
   // ===============================
   if (!isMounted || !isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-white z-50 overflow-hidden select-none" 
-      ref={modalRef}
-      role="dialog" 
-      aria-modal="true"
-    >
-      {/* Header Simple */}
+    <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none">
+      {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm h-16">
         <button 
           onClick={onClose} 
@@ -310,9 +363,9 @@ export default function ProjectModalMobile({
         <div className="w-10 h-10"></div>
       </div>
 
-      {/* Zone d'images */}
-      <div className="absolute inset-0 pt-16 pb-20 flex items-center justify-center px-4">
-        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[65vh]">
+      {/* Zone d'images - Ajustée pour le panel */}
+      <div className="absolute inset-0 pt-16 pb-[12vh] flex items-center justify-center px-4">
+        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[70vh]">
           {springs.map(({ x, y, rot, scale, opacity, display, zIndex }, i) => (
             <animated.div
               key={allVisuals[i] || `card-${i}`}
@@ -360,10 +413,9 @@ export default function ProjectModalMobile({
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation Buttons */}
       {allVisuals.length > 1 && !isImageDragging && (
         <>
-          {/* Boutons */}
           <button 
             onClick={goToPrevious}
             disabled={currentIndex <= 0}
@@ -389,48 +441,80 @@ export default function ProjectModalMobile({
           >
             <ChevronRight size={20} />
           </button>
-
-          {/* Indicateurs */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
-            <div className="flex space-x-3 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg">
-              {allVisuals.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => goToIndex(idx)}
-                  className={`rounded-full transition-all duration-300 ${
-                    currentIndex === idx 
-                      ? 'w-3 h-3 bg-orange-500 scale-110' 
-                      : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  aria-label={`Aller à l'image ${idx + 1}`}
-                />
-              ))}
-            </div>
-          </div>
         </>
       )}
 
-      {/* Panel Info Simple */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-        <div className="text-center">
-          <p className="text-sm text-gray-600 mb-2">
+      {/* 🔧 PANEL COULISSANT RÉIMPLÉMENTÉ */}
+      <div 
+        ref={panelRef}
+        className="absolute left-0 right-0 bottom-0 bg-white rounded-t-xl shadow-2xl cursor-grab active:cursor-grabbing touch-none"
+        style={{
+          height: CONFIG.PANEL_EXPANDED_HEIGHT,
+          transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 12vh)'})`
+        }}
+        onTouchStart={handlePanelTouchStart}
+        onTouchMove={handlePanelTouchMove}
+        onTouchEnd={handlePanelTouchEnd}
+      >
+        {/* Grip */}
+        <div className="w-full flex flex-col items-center justify-center pointer-events-none px-4" style={{ height: CONFIG.PANEL_COLLAPSED_HEIGHT }}>
+          <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-2"></div>
+          {!isPanelExpanded && (
+            <span className="font-medium text-gray-500 uppercase tracking-wider text-sm">
+              Description
+            </span>
+          )}
+        </div>
+
+        {/* Contenu */}
+        <div className="px-6 pb-6 h-[calc(100%-12vh)] overflow-y-auto">
+          <div className="space-y-4">
             {Array.isArray(project.description) 
-              ? project.description[0] 
-              : project.description}
-          </p>
+              ? project.description.map((p, i) => (
+                  <p key={i} className="text-gray-700 text-sm leading-relaxed">
+                    {p}
+                  </p>
+                ))
+              : (
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {project.description}
+                  </p>
+                )
+            }
+          </div>
+          
           {project.link && (
             <a 
               href={project.link} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-blue-600 hover:underline text-sm"
+              className="block mt-6 text-blue-600 hover:underline text-sm font-medium"
             >
               Visiter le site
             </a>
+          )}
+
+          {/* Indicateurs dans le panel */}
+          {allVisuals.length > 1 && (
+            <div className="flex justify-center mt-6">
+              <div className="flex space-x-3">
+                {allVisuals.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => goToIndex(idx)}
+                    className={`rounded-full transition-all duration-300 ${
+                      currentIndex === idx 
+                        ? 'w-3 h-3 bg-orange-500 scale-110' 
+                        : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                    aria-label={`Aller à l'image ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
 }
-// Styles globaux
