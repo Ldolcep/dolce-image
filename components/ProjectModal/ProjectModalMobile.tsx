@@ -184,8 +184,13 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* 🔧 ZONE CARROUSEL CORRIGÉE - Espacement équilibré */}
-      <div className="absolute inset-0 pt-16 pb-[15vh] flex flex-col items-center justify-center px-4">
+      {/* 🔧 ZONE CARROUSEL CORRIGÉE - Espacement Chrome fixé */}
+      <div 
+        className="absolute inset-0 pt-16 flex flex-col items-center justify-center px-4"
+        style={{
+          paddingBottom: 'calc(38vh + 5vh)' // 🔧 FIX Chrome : calcul exact au lieu de pb-[15vh]
+        }}
+      >
         
         {/* Carrousel Swiper */}
         <div className="relative w-full max-w-sm aspect-[4/5] max-h-[60vh]">
@@ -194,8 +199,8 @@ export default function ProjectModalMobile({
               swiperRef.current = swiper;
             }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-            effect="fade" // 🔧 RETOUR au fade au lieu de cards pour clarté
-            modules={[Navigation, Pagination]}
+            effect="cards" // 🔧 RETOUR à l'effet cards comme souhaité
+            modules={[Navigation, Pagination, EffectCards]} // 🔧 Réajout du module EffectCards
             spaceBetween={20}
             slidesPerView={1}
             speed={400}
@@ -207,8 +212,11 @@ export default function ProjectModalMobile({
             shortSwipes={true}
             longSwipes={true}
             longSwipesRatio={0.3}
-            fadeEffect={{
-              crossFade: true, // 🔧 Transition croisée plus claire
+            cardsEffect={{
+              rotate: true,
+              perSlideRotate: 6, // 🔧 Valeur modérée pour clarté
+              perSlideOffset: 4, // 🔧 Valeur modérée
+              slideShadows: true,
             }}
             pagination={false}
             navigation={{
@@ -229,12 +237,12 @@ export default function ProjectModalMobile({
                     priority={index === 0}
                   />
                   
-                  {/* 🔧 Frame orange subtile pour image active - sans coins arrondis */}
+                  {/* 🔧 Frame orange pour carte active - sans coins arrondis */}
                   {index === currentIndex && (
                     <div 
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.4)',
+                        boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.5)', // 🔧 Légèrement plus visible pour l'effet cards
                       }}
                     />
                   )}
@@ -267,9 +275,14 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* 🔧 INDICATEURS ÉPURÉS - Espacement équilibré 5vh de chaque côté */}
+        {/* 🔧 INDICATEURS ÉPURÉS - Espacement Chrome fixé */}
         {allVisuals.length > 1 && (
-          <div className="mt-[5vh] flex justify-center">
+          <div 
+            className="flex justify-center"
+            style={{
+              marginTop: '5vh' // 🔧 FIX Chrome : style inline au lieu de mt-[5vh]
+            }}
+          >
             <div className="flex space-x-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
               {allVisuals.map((_, idx) => (
                 <button
@@ -364,11 +377,11 @@ export default function ProjectModalMobile({
         </div>
       </div>
 
-      {/* 🔧 CSS CORRIGÉ pour effet fade */}
+      {/* 🔧 CSS CORRIGÉ pour effet cards */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
         
-        /* 🔧 Retour aux styles fade pour clarté */
+        /* 🔧 Retour aux styles cards avec améliorations */
         .swiper-smooth {
           transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
@@ -377,20 +390,30 @@ export default function ProjectModalMobile({
           transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
         
-        .swiper-fade .swiper-slide {
-          transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        .swiper-cards .swiper-slide {
+          overflow: hidden !important;
+          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
         
-        .swiper-fade .swiper-slide-active {
-          z-index: 10 !important;
-          opacity: 1 !important;
+        /* 🔧 Ombres cards améliorées */
+        .swiper-cards .swiper-slide-shadow-left,
+        .swiper-cards .swiper-slide-shadow-right {
+          background: linear-gradient(to right, rgba(0,0,0,0.05), transparent) !important;
+        }
+
+        /* 🔧 Animation plus fluide pour carte active */
+        .swiper-cards .swiper-slide-active {
+          transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
         }
         
-        .swiper-fade .swiper-slide:not(.swiper-slide-active) {
-          opacity: 0 !important;
+        /* 🔧 Améliorations touch feedback */
+        .swiper-cards .swiper-slide-duplicate-active,
+        .swiper-cards .swiper-slide-prev,
+        .swiper-cards .swiper-slide-next {
+          transition: all 0.3s ease !important;
         }
       `}</style>
     </div>
   );
 }
-// Note: This code is designed to be used in a Next.js project with Swiper for carousels.
+// Note: This code is designed to be used in a Next.js project with Tailwind CSS and Swiper.js.
