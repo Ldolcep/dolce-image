@@ -1,5 +1,5 @@
 // ========================================================================
-// === PROJECT MODAL MOBILE - VERSION PRODUCTION SENIOR ===
+// === PROJECT MODAL MOBILE - FIXES FINAUX ===
 // ========================================================================
 
 "use client";
@@ -48,6 +48,7 @@ export default function ProjectModalMobile({
   const swiperRef = useRef<SwiperType>();
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const gripRef = useRef<HTMLDivElement>(null);
 
   const allVisuals = React.useMemo(() => 
     [project.mainVisual, ...project.additionalVisuals].filter(Boolean), 
@@ -55,19 +56,40 @@ export default function ProjectModalMobile({
   );
 
   // ===============================
-  // 🔧 PANEL LOGIC FIXÉE - SENIOR
+  // 🔧 PANEL LOGIC FIXÉE - SCROLL SÉPARÉ
   // ===============================
   const panelStartY = useRef(0);
   const panelCurrentY = useRef(0);
+  const isDraggingPanel = useRef(false);
 
   const handlePanelTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
+    const target = e.target as HTMLElement;
+    
+    // 🔧 FIX CRITIQUE: Vérifier si on touche le grip ou le contenu
+    const isInGrip = gripRef.current?.contains(target);
+    const isInContent = contentRef.current?.contains(target);
+    
+    // 🔧 FIX CRITIQUE: Si on touche le contenu ET qu'il peut scroll, ne pas intercepter
+    if (isInContent && !isInGrip && contentRef.current && isPanelExpanded) {
+      const canScroll = contentRef.current.scrollHeight > contentRef.current.clientHeight;
+      if (canScroll) {
+        console.log('🔧 Permettre scroll natif du contenu');
+        return; // Laisser le scroll natif fonctionner
+      }
+    }
+    
+    // Seulement intercepter si on touche le grip ou si le contenu ne peut pas scroll
+    isDraggingPanel.current = true;
     panelStartY.current = touch.clientY;
-    // 🔧 SENIOR FIX: Calcul basé sur 6vh grip et 38vh total
-    panelCurrentY.current = isPanelExpanded ? 0 : window.innerHeight * 0.32; // 38vh - 6vh = 32vh
+    panelCurrentY.current = isPanelExpanded ? 0 : window.innerHeight * 0.32;
+    
+    console.log('🔧 Panel drag start', { isInGrip, isInContent });
   };
 
   const handlePanelTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingPanel.current) return;
+    
     e.preventDefault();
     
     const deltaY = e.touches[0].clientY - panelStartY.current;
@@ -79,6 +101,10 @@ export default function ProjectModalMobile({
   };
 
   const handlePanelTouchEnd = (e: React.TouchEvent) => {
+    if (!isDraggingPanel.current) return;
+    
+    isDraggingPanel.current = false;
+    
     const deltaY = e.changedTouches[0].clientY - panelStartY.current;
     const shouldExpand = isPanelExpanded ? deltaY < -50 : deltaY < 50;
     
@@ -95,6 +121,8 @@ export default function ProjectModalMobile({
         }
       }, 300);
     }
+    
+    console.log('🔧 Panel drag end', { shouldExpand });
   };
 
   // ===============================
@@ -114,7 +142,6 @@ export default function ProjectModalMobile({
     }
   }, [isOpen, project.id]);
 
-  // 🔧 SENIOR FIX: Panel position initialization corrigée
   useEffect(() => {
     if (isMounted && panelRef.current) {
       const initialY = isPanelExpanded ? 0 : window.innerHeight * 0.32;
@@ -129,8 +156,8 @@ export default function ProjectModalMobile({
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-white/95 backdrop-blur-sm h-14">
+      {/* 🔧 Header avec titre encore plus grand */}
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-white/95 backdrop-blur-sm h-16">
         <button 
           onClick={onClose} 
           className="text-gray-700 rounded-full p-1.5 hover:bg-gray-100 transition-colors flex-shrink-0" 
@@ -142,13 +169,14 @@ export default function ProjectModalMobile({
           </svg>
         </button>
         
+        {/* 🔧 FIX: Titre encore plus grand */}
         <h2 
           className="flex-1 text-center text-black font-semibold truncate mx-3"
           style={{ 
             fontFamily: 'Montserrat, sans-serif',
-            fontSize: '1.25rem',
+            fontSize: '1.4rem', // 🔧 AUGMENTÉ de 1.25rem à 1.4rem
             letterSpacing: '0.01em',
-            lineHeight: '1.3'
+            lineHeight: '1.2'
           }}
         >
           {project.title}
@@ -157,9 +185,9 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* 🔧 SENIOR FIX: Zone d'images remontée pour éviter chevauchement */}
-      <div className="absolute inset-0 pt-14 pb-[8vh] flex items-center justify-center px-4">
-        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[70vh]">
+      {/* 🔧 FIX: Zone d'images remontée + espace calculé précisément */}
+      <div className="absolute inset-0 pt-16 pb-[12vh] flex items-center justify-center px-4">
+        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[65vh]">
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
@@ -169,16 +197,15 @@ export default function ProjectModalMobile({
             modules={[Navigation, Pagination, EffectCards]}
             spaceBetween={20}
             slidesPerView={1}
-            // 🔧 SENIOR FIX: Animation plus fluide pour la fin de transition
-            speed={350} // Plus rapide pour éviter l'effet saccadé
+            speed={350}
             threshold={3}
             touchRatio={1}
             resistance={true}
             resistanceRatio={0.85}
             cardsEffect={{
               rotate: true,
-              perSlideRotate: 6,   // Plus subtil pour fin d'animation fluide
-              perSlideOffset: 4,   // Plus proche pour transition fluide
+              perSlideRotate: 6,
+              perSlideOffset: 4,
               slideShadows: true,
             }}
             pagination={false}
@@ -237,9 +264,14 @@ export default function ProjectModalMobile({
             </>
           )}
 
-          {/* 🔧 SENIOR FIX: Indicateurs plus éloignés du carrousel */}
+          {/* 🔧 FIX CRITIQUE: Indicateurs avec espacement équilibré */}
           {allVisuals.length > 1 && (
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-25">
+            <div 
+              className="absolute left-1/2 -translate-x-1/2 z-25"
+              style={{ 
+                bottom: '-3vh', // 🔧 ESPACEMENT PRÉCIS: 3vh du carrousel
+              }}
+            >
               <div className="flex space-x-2.5 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-100">
                 {allVisuals.map((_, idx) => (
                   <button
@@ -259,27 +291,30 @@ export default function ProjectModalMobile({
         </div>
       </div>
 
-      {/* 🔧 SENIOR FIX: Panel avec grip 6vh et logique corrigée */}
+      {/* 🔧 FIX: Panel avec grip et contenu séparés pour scroll */}
       <div 
         ref={panelRef}
-        className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl cursor-grab active:cursor-grabbing touch-none z-40"
+        className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40"
         style={{
-          height: '38vh', // Grip 6vh + contenu 32vh
+          height: '38vh',
           transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 6vh)'})`
         }}
-        onTouchStart={handlePanelTouchStart}
-        onTouchMove={handlePanelTouchMove}
-        onTouchEnd={handlePanelTouchEnd}
       >
-        {/* 🔧 SENIOR FIX: Grip 6vh avec titre 1rem */}
-        <div className="w-full flex flex-col items-center justify-center pointer-events-none px-4 h-[6vh] bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
+        {/* 🔧 FIX CRITIQUE: Grip zone séparée avec ref */}
+        <div 
+          ref={gripRef}
+          className="w-full flex flex-col items-center justify-center px-4 h-[6vh] bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 cursor-grab active:cursor-grabbing"
+          onTouchStart={handlePanelTouchStart}
+          onTouchMove={handlePanelTouchMove}
+          onTouchEnd={handlePanelTouchEnd}
+        >
           <div className="w-12 h-1 bg-gray-400 rounded-full mb-1.5 shadow-sm"></div>
           {!isPanelExpanded && (
             <span 
               className="font-semibold text-gray-600 uppercase tracking-wider"
               style={{ 
                 fontFamily: 'Montserrat, sans-serif',
-                fontSize: '1rem', // 🔧 AUGMENTÉ de 0.75rem à 1rem
+                fontSize: '1rem',
                 lineHeight: '1'
               }}
             >
@@ -288,17 +323,16 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* 🔧 SENIOR FIX: Contenu avec visibilité corrigée */}
+        {/* 🔧 FIX CRITIQUE: Zone de contenu avec scroll natif séparé */}
         <div 
           ref={contentRef}
           className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto"
           style={{ 
             WebkitOverflowScrolling: 'touch',
-            // 🔧 SENIOR FIX: Pas de opacity/visibility qui cassent l'affichage
-            display: 'block'
+            // 🔧 CRITIQUE: Pas de touch events sur le contenu pour éviter conflits
+            touchAction: 'pan-y' // Permet seulement le scroll vertical
           }}
         >
-          {/* 🔧 SENIOR FIX: Contenu qui s'affiche correctement */}
           <div 
             className={`space-y-4 pt-2 transition-opacity duration-300 ${
               isPanelExpanded ? 'opacity-100' : 'opacity-0'
@@ -330,16 +364,14 @@ export default function ProjectModalMobile({
             </a>
           )}
 
-          {/* Safe area */}
           <div className="h-[env(safe-area-inset-bottom,20px)]"></div>
         </div>
       </div>
 
-      {/* Montserrat Import + CSS fixes */}
+      {/* CSS + Montserrat */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
         
-        /* 🔧 SENIOR CSS: Suppression complète des arrondis */
         .swiper-cards .swiper-slide {
           border-radius: 0 !important;
           overflow: hidden !important;
@@ -351,7 +383,6 @@ export default function ProjectModalMobile({
           background: linear-gradient(to right, rgba(0,0,0,0.03), transparent) !important;
         }
 
-        /* 🔧 SENIOR CSS: Animation de fin plus fluide */
         .swiper-cards .swiper-slide-active {
           transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1) !important;
         }
@@ -359,5 +390,4 @@ export default function ProjectModalMobile({
     </div>
   );
 }
-// ========================================================================
-// === FIN DU CODE SENIOR - PROJECT MODAL MOBILE ===
+// Note: This code is designed to be used in a Next.js project with Tailwind CSS and Swiper.js.
