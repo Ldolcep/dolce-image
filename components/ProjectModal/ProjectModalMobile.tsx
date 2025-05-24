@@ -1,10 +1,7 @@
 // ========================================================================
-// === COMPOSANT PRINCIPAL - VERSION ULTRA-SIMPLIFIÉE ===
+// === COMPOSANT PRINCIPAL - STYLE TINDER ===
 // ========================================================================
 
-// ===============================
-// ProjectModalMobile.tsx - APPROCHE SIMPLIFIÉE
-// ===============================
 "use client";
 
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
@@ -12,20 +9,26 @@ import { useSprings } from '@react-spring/web';
 
 // Types & Config
 import { Project } from './types/modal';
-import { MODAL_CONFIG } from './config/modal';
 import { calculateInitialCollapsedY } from './utils/modal';
 
 // Hooks
 import { useModalReducer } from './hooks/useModalReducer';
 import { useImagePreloader } from './hooks/useImagePreloader';
 import { usePanelDrag } from './hooks/usePanelDrag';
-import { useSwipeGesture } from './hooks/useSwipeGesture';
 
 // Components
 import { ModalHeader } from './Mobile/ModalHeader';
-import { ImageStack } from './Mobile/ImageStack';
 import { NavigationControls } from './Mobile/NavigationControls';
 import { InfoPanel } from './Mobile/InfoPanel';
+
+// 🔧 CORRECTION: Config intégré pour éviter les imports
+const MODAL_CONFIG = {
+  PANEL_ANIMATION_DURATION: 300,
+  CONTENT_FADE_DURATION: 200,
+  GRIP_HEIGHT_COLLAPSED: '8vh',
+  GRIP_HEIGHT_EXPANDED: '75vh',
+  PANEL_DRAG_THRESHOLD: 50,
+} as const;
 
 interface ProjectModalMobileProps {
   project: Project;
@@ -59,41 +62,60 @@ export default function ProjectModalMobile({
   );
 
   // ===============================
-  // 🔧 CORRECTION: FONCTION SPRINGTO ULTRA-SIMPLIFIÉE
+  // 🔧 TINDER STYLE: SPRING CONFIGURATION
   // ===============================
-  const springTo = useCallback((
+  const getCardStyle = useCallback((
     i: number, 
-    activeIndex: number = state.currentImageIndex, 
-    forSwipeOut: boolean = false, 
-    swipeDir: number = 0
+    activeIndex: number = state.currentImageIndex,
+    dragX: number = 0,
+    isDragging: boolean = false
   ) => {
-    // 🔧 CORRECTION: Animation de sortie très simple
-    if (forSwipeOut) {
-      const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 300;
-      return { 
-        x: swipeDir * windowWidth * 1.2,
-        rot: swipeDir * 15,
-        scale: 0.8,
-        opacity: 0,
-        config: { tension: 200, friction: 25 }
-      };
-    }
+    const isActive = i === activeIndex;
+    const isNext = i === activeIndex + 1;
+    const isPrev = i === activeIndex - 1;
 
-    // 🔧 CORRECTION: Logique ultra-simple pour les cartes
-    if (i === activeIndex) {
-      // Carte active
+    if (isActive) {
+      // 🎯 CARTE ACTIVE: Style Tinder
+      return {
+        x: dragX,
+        y: 0,
+        rot: dragX / 20, // Rotation pendant le drag
+        scale: isDragging ? 1.05 : 1,
+        opacity: 1,
+        display: 'block',
+        zIndex: 10,
+        config: isDragging 
+          ? { tension: 0, friction: 0 } // Suit le doigt
+          : { tension: 300, friction: 30 } // Animation de retour
+      };
+    } else if (isNext && Math.abs(dragX) > 20) {
+      // 🎯 CARTE SUIVANTE: Révélée par le drag (comme Tinder)
+      const progress = Math.min(1, Math.abs(dragX) / 150);
       return {
         x: 0,
         y: 0,
         rot: 0,
-        scale: 1,
-        opacity: 1,
+        scale: 0.95 + (progress * 0.05), // Grandit pendant la révélation
+        opacity: 0.7 + (progress * 0.3),
         display: 'block',
-        zIndex: 10,
-        config: { tension: 250, friction: 30 }
+        zIndex: 9,
+        config: { tension: 300, friction: 30 }
+      };
+    } else if (isPrev && dragX > 20) {
+      // 🎯 CARTE PRÉCÉDENTE: Révélée par le drag vers la droite
+      const progress = Math.min(1, dragX / 150);
+      return {
+        x: 0,
+        y: 0,
+        rot: 0,
+        scale: 0.95 + (progress * 0.05),
+        opacity: 0.7 + (progress * 0.3),
+        display: 'block',
+        zIndex: 9,
+        config: { tension: 300, friction: 30 }
       };
     } else {
-      // Toutes les autres cartes masquées
+      // 🎯 AUTRES CARTES: Masquées
       return {
         x: 0,
         y: 0,
@@ -102,75 +124,146 @@ export default function ProjectModalMobile({
         opacity: 0,
         display: 'none',
         zIndex: 0,
-        config: { tension: 250, friction: 30 }
+        config: { tension: 300, friction: 30 }
       };
     }
   }, [state.currentImageIndex]);
 
   // ===============================
-  // 🔧 CORRECTION: SPRINGS SIMPLIFIÉS
+  // 🔧 TINDER STYLE: SPRINGS
   // ===============================
   const [springProps, api] = useSprings(
     allVisuals.length, 
-    i => springTo(i, 0), // Toujours commencer par la première image
+    i => getCardStyle(i, 0), 
     [allVisuals.length]
   );
 
   // ===============================
-  // 🔧 CORRECTION: NAVIGATION ULTRA-SIMPLIFIÉE
+  // 🔧 TINDER STYLE: NAVIGATION HANDLERS
   // ===============================
   const handleSwipeNext = useCallback(() => {
     if (state.currentImageIndex < allVisuals.length - 1) {
-      const newIndex = state.currentImageIndex + 1;
+      const currentIndex = state.currentImageIndex;
+      const nextIndex = currentIndex + 1;
       
-      // Animation de sortie de l'image actuelle
-      if (api) {
-        api.start(i => {
-          if (i === state.currentImageIndex) {
-            return springTo(i, state.currentImageIndex, true, -1);
-          } else if (i === newIndex) {
-            return springTo(i, newIndex);
-          }
-          return undefined;
-        });
-      }
+      // Animation de sortie style Tinder
+      api.start(i => {
+        if (i === currentIndex) {
+          return {
+            x: -400, // Sort vers la gauche
+            rot: -30,
+            scale: 0.8,
+            opacity: 0,
+            config: { tension: 200, friction: 25 }
+          };
+        } else if (i === nextIndex) {
+          return getCardStyle(i, nextIndex);
+        }
+        return undefined;
+      });
       
-      // Mise à jour de l'état avec délai
+      // Mise à jour de l'état après animation
       setTimeout(() => {
-        actions.setCurrentImage(newIndex);
-      }, 100);
+        actions.setCurrentImage(nextIndex);
+        // Reset la carte qui vient de sortir
+        api.start(i => i === currentIndex ? { display: 'none' } : undefined);
+      }, 150);
     }
-  }, [state.currentImageIndex, allVisuals.length, actions, api, springTo]);
+  }, [state.currentImageIndex, allVisuals.length, actions, api, getCardStyle]);
 
   const handleSwipePrevious = useCallback(() => {
     if (state.currentImageIndex > 0) {
-      const newIndex = state.currentImageIndex - 1;
+      const currentIndex = state.currentImageIndex;
+      const prevIndex = currentIndex - 1;
       
-      // Animation de sortie de l'image actuelle
-      if (api) {
-        api.start(i => {
-          if (i === state.currentImageIndex) {
-            return springTo(i, state.currentImageIndex, true, 1);
-          } else if (i === newIndex) {
-            return springTo(i, newIndex);
-          }
-          return undefined;
-        });
-      }
+      // Animation de sortie style Tinder
+      api.start(i => {
+        if (i === currentIndex) {
+          return {
+            x: 400, // Sort vers la droite
+            rot: 30,
+            scale: 0.8,
+            opacity: 0,
+            config: { tension: 200, friction: 25 }
+          };
+        } else if (i === prevIndex) {
+          return getCardStyle(i, prevIndex);
+        }
+        return undefined;
+      });
       
-      // Mise à jour de l'état avec délai
+      // Mise à jour de l'état après animation
       setTimeout(() => {
-        actions.setCurrentImage(newIndex);
-      }, 100);
+        actions.setCurrentImage(prevIndex);
+        // Reset la carte qui vient de sortir
+        api.start(i => i === currentIndex ? { display: 'none' } : undefined);
+      }, 150);
     }
-  }, [state.currentImageIndex, actions, api, springTo]);
+  }, [state.currentImageIndex, actions, api, getCardStyle]);
 
   const handleGoToImage = useCallback((targetIndex: number) => {
     if (targetIndex >= 0 && targetIndex < allVisuals.length && targetIndex !== state.currentImageIndex) {
-      // Navigation directe sans animation complexe
+      // Navigation directe sans animation Tinder
       actions.setCurrentImage(targetIndex);
     }
   }, [state.currentImageIndex, allVisuals.length, actions]);
+
+  // ===============================
+  // 🔧 TINDER STYLE: DRAG LOGIC
+  // ===============================
+  const dragState = useRef({ isDragging: false, startX: 0 });
+
+  const handleDragStart = useCallback(() => {
+    dragState.current.isDragging = true;
+    actions.setImageDragging(true);
+  }, [actions]);
+
+  const handleDragMove = useCallback((deltaX: number) => {
+    if (!dragState.current.isDragging) return;
+    
+    const currentIndex = state.currentImageIndex;
+    const canGoNext = currentIndex < allVisuals.length - 1;
+    const canGoPrev = currentIndex > 0;
+    
+    // Limiter le mouvement selon les limites
+    let constrainedX = deltaX;
+    if (deltaX < 0 && !canGoNext) {
+      constrainedX = Math.max(-50, deltaX * 0.3); // Résistance
+    } else if (deltaX > 0 && !canGoPrev) {
+      constrainedX = Math.min(50, deltaX * 0.3); // Résistance
+    }
+    
+    // Mettre à jour l'animation
+    api.start(i => {
+      if (i === currentIndex) {
+        return getCardStyle(i, currentIndex, constrainedX, true);
+      } else if ((i === currentIndex + 1 && deltaX < -20) || (i === currentIndex - 1 && deltaX > 20)) {
+        return getCardStyle(i, currentIndex, constrainedX, false);
+      }
+      return undefined;
+    });
+  }, [state.currentImageIndex, allVisuals.length, api, getCardStyle]);
+
+  const handleDragEnd = useCallback((deltaX: number, velocity: number) => {
+    dragState.current.isDragging = false;
+    actions.setImageDragging(false);
+    
+    const shouldSwipe = Math.abs(deltaX) > 100 || Math.abs(velocity) > 0.5;
+    
+    if (shouldSwipe) {
+      if (deltaX < -50) {
+        handleSwipeNext();
+      } else if (deltaX > 50) {
+        handleSwipePrevious();
+      } else {
+        // Reset position
+        api.start(i => i === state.currentImageIndex ? getCardStyle(i, state.currentImageIndex) : undefined);
+      }
+    } else {
+      // Reset position
+      api.start(i => i === state.currentImageIndex ? getCardStyle(i, state.currentImageIndex) : undefined);
+    }
+  }, [actions, handleSwipeNext, handleSwipePrevious, api, getCardStyle, state.currentImageIndex]);
 
   // ===============================
   // CUSTOM HOOKS
@@ -192,40 +285,8 @@ export default function ProjectModalMobile({
     actions.setImageLoaded
   );
 
-  // 🔧 CORRECTION: Swipe gesture simplifié
-  const {
-    bind,
-    handleNavNext,
-    handleNavPrevious,
-    resetGoneSet
-  } = useSwipeGesture({
-    allVisuals,
-    currentImageIndex: state.currentImageIndex,
-    isDraggingPanel: state.isDraggingPanel,
-    isMounted: state.isMounted,
-    onImageDragStart: () => actions.setImageDragging(true),
-    onImageDragEnd: () => setTimeout(() => actions.setImageDragging(false), 50),
-    onSwipeNext: handleSwipeNext,
-    onSwipePrevious: handleSwipePrevious,
-    springApi: api,
-    springTo
-  });
-
-  // Navigation unifiée
-  const unifiedHandleNext = useCallback(() => {
-    handleNavNext();
-  }, [handleNavNext]);
-
-  const unifiedHandlePrevious = useCallback(() => {
-    handleNavPrevious();
-  }, [handleNavPrevious]);
-
-  const unifiedHandleGoToImage = useCallback((targetIndex: number) => {
-    handleGoToImage(targetIndex);
-  }, [handleGoToImage]);
-
   // ===============================
-  // EFFECTS SIMPLIFIÉS
+  // EFFECTS
   // ===============================
   
   // Mount effect
@@ -234,10 +295,9 @@ export default function ProjectModalMobile({
     return () => actions.setMounted(false);
   }, [actions]);
 
-  // Reset state simplifié
+  // Reset state
   useEffect(() => {
     if (isOpen && initialCollapsedY !== null) {
-      resetGoneSet();
       actions.resetState(initialCollapsedY);
       
       if (panelRef.current) {
@@ -245,19 +305,18 @@ export default function ProjectModalMobile({
         panelRef.current.style.visibility = 'visible';
       }
       
-      // 🔧 CORRECTION: Reset springs simple
       if (api && allVisuals.length > 0) {
-        api.start(i => springTo(i, 0));
+        api.start(i => getCardStyle(i, 0));
       }
     }
-  }, [project, isOpen, initialCollapsedY, allVisuals.length, api, springTo, resetGoneSet, actions]);
+  }, [project, isOpen, initialCollapsedY, allVisuals.length, api, getCardStyle, actions]);
 
-  // 🔧 CORRECTION: Update animations simplifiées
+  // Update animations
   useEffect(() => {
     if (state.isMounted && api && allVisuals.length > 0) {
-      api.start(i => springTo(i, state.currentImageIndex));
+      api.start(i => getCardStyle(i, state.currentImageIndex));
     }
-  }, [state.currentImageIndex, api, state.isMounted, allVisuals.length, springTo]);
+  }, [state.currentImageIndex, api, state.isMounted, allVisuals.length, getCardStyle]);
 
   // Panel position initialization
   useEffect(() => {
@@ -308,7 +367,6 @@ export default function ProjectModalMobile({
   // RENDER
   // ===============================
   
-  // Loading fallback
   if (!state.isMounted) {
     if (!isOpen) return null;
     return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>;
@@ -339,13 +397,15 @@ export default function ProjectModalMobile({
         className="absolute inset-0 pt-16 pb-[--grip-visible-height] overflow-hidden flex items-center justify-center"
         style={{ '--grip-visible-height': collapsedGripVisibleHeight } as React.CSSProperties}
       >
-        {/* Image Stack */}
-        <ImageStack
+        {/* 🔧 TINDER STYLE: Image Stack */}
+        <TinderImageStack
           project={project}
           allVisuals={allVisuals}
           currentImageIndex={state.currentImageIndex}
           springProps={springProps}
-          bind={bind}
+          onDragStart={handleDragStart}
+          onDragMove={handleDragMove}
+          onDragEnd={handleDragEnd}
         />
 
         {/* Navigation Controls */}
@@ -354,9 +414,9 @@ export default function ProjectModalMobile({
           currentImageIndex={state.currentImageIndex}
           isImageDragging={state.isImageDragging}
           isDraggingPanel={state.isDraggingPanel}
-          onPrevious={unifiedHandlePrevious}
-          onNext={unifiedHandleNext}
-          onGoToImage={unifiedHandleGoToImage}
+          onPrevious={handleSwipePrevious}
+          onNext={handleSwipeNext}
+          onGoToImage={handleGoToImage}
         />
       </div>
 
@@ -378,4 +438,110 @@ export default function ProjectModalMobile({
 }
 
 // ===============================
-// === FIN DU COMPOSANT SIMPLIFIÉ ===
+// 🔧 TINDER STYLE: IMAGE STACK COMPONENT
+// ===============================
+import { animated } from '@react-spring/web';
+import { to as interpolate } from '@react-spring/web';
+import Image from 'next/image';
+
+interface TinderImageStackProps {
+  project: Project;
+  allVisuals: string[];
+  currentImageIndex: number;
+  springProps: any[];
+  onDragStart: () => void;
+  onDragMove: (deltaX: number) => void;
+  onDragEnd: (deltaX: number, velocity: number) => void;
+}
+
+const TinderImageStack: React.FC<TinderImageStackProps> = ({
+  project,
+  allVisuals,
+  currentImageIndex,
+  springProps,
+  onDragStart,
+  onDragMove,
+  onDragEnd
+}) => {
+  const dragState = useRef({ startX: 0, startTime: 0 });
+
+  const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    if (index !== currentImageIndex) return;
+    dragState.current.startX = e.touches[0].clientX;
+    dragState.current.startTime = Date.now();
+    onDragStart();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent, index: number) => {
+    if (index !== currentImageIndex) return;
+    const deltaX = e.touches[0].clientX - dragState.current.startX;
+    onDragMove(deltaX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent, index: number) => {
+    if (index !== currentImageIndex) return;
+    const deltaX = e.changedTouches[0].clientX - dragState.current.startX;
+    const deltaTime = Date.now() - dragState.current.startTime;
+    const velocity = Math.abs(deltaX) / Math.max(deltaTime, 1);
+    onDragEnd(deltaX, velocity);
+  };
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center px-4">
+      {/* Container FIXE 4:5 */}
+      <div className="relative w-full max-w-sm aspect-[4/5] max-h-[65vh]">
+        {springProps.map(({ x, y, rot, scale, opacity, display, zIndex }, i) => (
+          <animated.div
+            key={allVisuals[i] ? allVisuals[i] : `card-${i}`}
+            className="absolute inset-0 cursor-grab active:cursor-grabbing"
+            style={{
+              display,
+              opacity,
+              transform: interpolate([x, y, rot, scale], (xVal, yVal, rVal, sVal) =>
+                `perspective(1200px) translateX(${xVal}px) translateY(${yVal}px) rotateZ(${rVal}deg) scale(${sVal})`
+              ),
+              touchAction: 'none',
+              zIndex,
+            }}
+            onTouchStart={(e) => handleTouchStart(e, i)}
+            onTouchMove={(e) => handleTouchMove(e, i)}
+            onTouchEnd={(e) => handleTouchEnd(e, i)}
+          >
+            {/* Container uniforme SANS coins arrondis */}
+            <div className="relative w-full h-full overflow-hidden bg-white shadow-xl">
+              {allVisuals[i] && (
+                <>
+                  <Image
+                    src={allVisuals[i]}
+                    alt={`Image ${i + 1} du projet ${project.title}`}
+                    fill
+                    className="pointer-events-none"
+                    style={{
+                      objectFit: 'cover',
+                      objectPosition: 'center',
+                    }}
+                    sizes="(max-width: 768px) 85vw, 400px"
+                    priority={i === currentImageIndex}
+                    draggable="false"
+                  />
+                  
+                  {/* Frame pour la carte active */}
+                  {i === currentImageIndex && (
+                    <div 
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.3)',
+                      }}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          </animated.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+// ===============================
+// 🔧 TINDER STYLE: END OF IMAGE STACK COMPONENT

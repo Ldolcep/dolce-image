@@ -1,6 +1,14 @@
 // ===============================
-// utils/modal.ts
+// utils/modal.ts - IMPORT CORRIGÉ
 // ===============================
+
+// 🔧 CORRECTION CRITIQUE: Import du config
+const MODAL_CONFIG = {
+  GRIP_HEIGHT_COLLAPSED: '8vh',
+  GRIP_HEIGHT_EXPANDED: '75vh',
+  PANEL_DRAG_THRESHOLD: 50,
+} as const;
+
 export const calculateInitialCollapsedY = (isMounted: boolean): number | null => {
     if (typeof window !== 'undefined' && isMounted) {
       try {
@@ -48,9 +56,3 @@ export const calculateInitialCollapsedY = (isMounted: boolean): number | null =>
   ): boolean => {
     return isCurrentlyVisible ? deltaY <= threshold : deltaY < -threshold;
   };
-  
-  export const getSwipeTriggerDistance = (): number => {
-    const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 300;
-    return windowWidth / MODAL_CONFIG.SWIPE_TRIGGER_DISTANCE_RATIO;
-  };
-  

@@ -1,5 +1,5 @@
 // ===============================
-// components/ProjectModal/Mobile/NavigationControls.tsx - SIMPLIFIÉ
+// components/ProjectModal/Mobile/NavigationControls.tsx - UN SEUL INDICATEUR
 // ===============================
 "use client";
 
@@ -27,7 +27,6 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
 }) => {
   if (allVisuals.length <= 1) return null;
 
-  // 🔧 CORRECTION: Handlers simplifiés sans logs
   const handlePreviousClick = () => {
     if (!isImageDragging && !isDraggingPanel && currentImageIndex > 0) {
       onPrevious();
@@ -46,7 +45,6 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
     }
   };
 
-  // 🔧 CORRECTION: Conditions d'affichage simplifiées
   const shouldShow = !isImageDragging && !isDraggingPanel;
 
   return (
@@ -82,22 +80,22 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
         </>
       )}
 
-      {/* Pagination Indicators */}
+      {/* 🔧 CORRECTION: UN SEUL indicateur principal (suppression du second) */}
       {shouldShow && (
         <div
           className="absolute left-1/2 -translate-x-1/2 flex justify-center z-[35] transition-opacity duration-300"
           style={{ bottom: '2rem' }}
           aria-label="Indicateurs d'image"
         >
-          <div className="flex space-x-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg">
+          <div className="flex space-x-3 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg">
             {allVisuals.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => handleDotClick(idx)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                className={`rounded-full transition-all duration-300 ${
                   currentImageIndex === idx 
-                    ? 'bg-primary-orange scale-125' 
-                    : 'bg-gray-300 hover:bg-gray-400 active:scale-110'
+                    ? 'w-3 h-3 bg-primary-orange scale-110' 
+                    : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400 active:scale-110'
                 }`}
                 aria-label={`Aller à l'image ${idx + 1}`}
                 aria-current={currentImageIndex === idx ? "step" : undefined}
@@ -110,4 +108,4 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
   );
 };
 // ===============================
-// components/ProjectModal/Mobile/NavigationControls.tsx - FIN
+// components/ProjectModal/Mobile/NavigationControls.tsx - UN SEUL INDICATEUR
