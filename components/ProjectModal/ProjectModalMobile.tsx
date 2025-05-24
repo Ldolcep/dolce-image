@@ -1,5 +1,5 @@
 // ========================================================================
-// === PROJECT MODAL MOBILE - SWIPER.JS INTEGRATION ===
+// === PROJECT MODAL MOBILE - VERSION PEAUFINÉE ===
 // ========================================================================
 
 "use client";
@@ -54,19 +54,20 @@ export default function ProjectModalMobile({
   );
 
   // ===============================
-  // PANEL LOGIC
+  // 🔧 PANEL LOGIC AMÉLIORÉE
   // ===============================
   const panelStartY = useRef(0);
   const panelCurrentY = useRef(0);
 
   const handlePanelTouchStart = (e: React.TouchEvent) => {
     panelStartY.current = e.touches[0].clientY;
-    panelCurrentY.current = isPanelExpanded ? 0 : window.innerHeight * 0.48;
+    // 🔧 CORRECTION: Réduction de la hauteur du panel (30vh au lieu de 48vh)
+    panelCurrentY.current = isPanelExpanded ? 0 : window.innerHeight * 0.3; 
   };
 
   const handlePanelTouchMove = (e: React.TouchEvent) => {
     const deltaY = e.touches[0].clientY - panelStartY.current;
-    const newY = Math.max(0, Math.min(window.innerHeight * 0.48, panelCurrentY.current + deltaY));
+    const newY = Math.max(0, Math.min(window.innerHeight * 0.3, panelCurrentY.current + deltaY));
     
     if (panelRef.current) {
       panelRef.current.style.transform = `translateY(${newY}px)`;
@@ -80,7 +81,7 @@ export default function ProjectModalMobile({
     setIsPanelExpanded(shouldExpand);
     
     if (panelRef.current) {
-      const targetY = shouldExpand ? 0 : window.innerHeight * 0.48;
+      const targetY = shouldExpand ? 0 : window.innerHeight * 0.3;
       panelRef.current.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
       panelRef.current.style.transform = `translateY(${targetY}px)`;
       
@@ -111,7 +112,7 @@ export default function ProjectModalMobile({
 
   useEffect(() => {
     if (isMounted && panelRef.current) {
-      const initialY = isPanelExpanded ? 0 : window.innerHeight * 0.48;
+      const initialY = isPanelExpanded ? 0 : window.innerHeight * 0.3;
       panelRef.current.style.transform = `translateY(${initialY}px)`;
     }
   }, [isMounted, isPanelExpanded]);
@@ -123,29 +124,37 @@ export default function ProjectModalMobile({
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-4 bg-white/90 backdrop-blur-sm h-16">
+      {/* 🔧 Header Réduit avec Montserrat */}
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-white/90 backdrop-blur-sm h-12">
         <button 
           onClick={onClose} 
-          className="text-gray-700 rounded-full p-2 hover:bg-gray-200 transition-colors" 
+          className="text-gray-700 rounded-full p-1 hover:bg-gray-200 transition-colors flex-shrink-0" 
           aria-label="Fermer"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
         
-        <h2 className="flex-1 text-center text-black text-xl font-medium truncate mx-4">
+        {/* 🔧 CORRECTION: Titre en Montserrat, plus grand, centré */}
+        <h2 
+          className="flex-1 text-center text-black font-semibold truncate mx-2"
+          style={{ 
+            fontFamily: 'Montserrat, sans-serif',
+            fontSize: '1.1rem',
+            letterSpacing: '0.02em'
+          }}
+        >
           {project.title}
         </h2>
         
-        <div className="w-10 h-10"></div>
+        <div className="w-8 h-8 flex-shrink-0"></div>
       </div>
 
-      {/* Swiper Container */}
-      <div className="absolute inset-0 pt-16 pb-[12vh] flex items-center justify-center px-4">
-        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[70vh]">
+      {/* 🔧 CORRECTION: Zone d'images agrandie, moins d'espace en bas */}
+      <div className="absolute inset-0 pt-12 pb-[8vh] flex items-center justify-center px-4">
+        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[75vh]">
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
@@ -155,17 +164,16 @@ export default function ProjectModalMobile({
             modules={[Navigation, Pagination, EffectCards]}
             spaceBetween={30}
             slidesPerView={1}
+            // 🔧 CORRECTION: Amplitude de swipe réduite
+            threshold={5} // Plus sensible
             cardsEffect={{
               rotate: true,
-              perSlideRotate: 15,
-              perSlideOffset: 8,
+              perSlideRotate: 10, // Réduit de 15 à 10
+              perSlideOffset: 6,  // Réduit de 8 à 6
               slideShadows: true,
             }}
-            pagination={{
-              clickable: true,
-              bulletClass: 'swiper-pagination-bullet custom-bullet',
-              bulletActiveClass: 'swiper-pagination-bullet-active custom-bullet-active',
-            }}
+            // 🔧 CORRECTION: Pagination désactivée (on va la recréer)
+            pagination={false}
             navigation={{
               nextEl: '.swiper-button-next-custom',
               prevEl: '.swiper-button-prev-custom',
@@ -174,7 +182,8 @@ export default function ProjectModalMobile({
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
-                <div className="relative w-full h-full overflow-hidden bg-white shadow-xl rounded-lg">
+                {/* 🔧 CORRECTION: Suppression des arrondis */}
+                <div className="relative w-full h-full overflow-hidden bg-white shadow-xl">
                   <Image
                     src={visual}
                     alt={`Image ${index + 1} du projet ${project.title}`}
@@ -187,7 +196,7 @@ export default function ProjectModalMobile({
                   {/* Frame pour carte active */}
                   {index === currentIndex && (
                     <div 
-                      className="absolute inset-0 pointer-events-none rounded-lg"
+                      className="absolute inset-0 pointer-events-none"
                       style={{
                         boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.4)',
                       }}
@@ -198,55 +207,86 @@ export default function ProjectModalMobile({
             ))}
           </Swiper>
 
-          {/* Navigation Buttons Customisées */}
+          {/* Navigation Buttons */}
           {allVisuals.length > 1 && (
             <>
               <button 
-                className="swiper-button-prev-custom absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white active:scale-95 disabled:opacity-30"
+                className="swiper-button-prev-custom absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white active:scale-95 disabled:opacity-30"
                 aria-label="Image précédente"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="m15 18-6-6 6-6"/>
                 </svg>
               </button>
 
               <button 
-                className="swiper-button-next-custom absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white active:scale-95 disabled:opacity-30"
+                className="swiper-button-next-custom absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white active:scale-95 disabled:opacity-30"
                 aria-label="Image suivante"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="m9 18 6-6-6-6"/>
                 </svg>
               </button>
             </>
           )}
+
+          {/* 🔧 CORRECTION: Indicateurs repositionnés avec design amélioré */}
+          {allVisuals.length > 1 && (
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-25">
+              <div className="flex space-x-2 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg">
+                {allVisuals.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => swiperRef.current?.slideTo(idx)}
+                    className={`rounded-full transition-all duration-300 ${
+                      currentIndex === idx 
+                        ? 'w-3 h-3 bg-orange-500 scale-110' 
+                        : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400 active:scale-110'
+                    }`}
+                    aria-label={`Aller à l'image ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Panel Coulissant */}
+      {/* 🔧 CORRECTION: Panel plus petit et texte masqué par défaut */}
       <div 
         ref={panelRef}
         className="absolute left-0 right-0 bottom-0 bg-white rounded-t-xl shadow-2xl cursor-grab active:cursor-grabbing touch-none z-40"
         style={{
-          height: '60vh',
-          transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 12vh)'})`
+          height: '40vh', // Réduit de 60vh à 40vh
+          transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 8vh)'})`
         }}
         onTouchStart={handlePanelTouchStart}
         onTouchMove={handlePanelTouchMove}
         onTouchEnd={handlePanelTouchEnd}
       >
-        {/* Grip */}
-        <div className="w-full flex flex-col items-center justify-center pointer-events-none px-4 h-[12vh]">
-          <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-2"></div>
+        {/* 🔧 CORRECTION: Grip plus petit */}
+        <div className="w-full flex flex-col items-center justify-center pointer-events-none px-4 h-[8vh]">
+          <div className="w-10 h-1.5 bg-gray-300 rounded-full mb-1"></div>
           {!isPanelExpanded && (
-            <span className="font-medium text-gray-500 uppercase tracking-wider text-sm">
+            <span 
+              className="font-medium text-gray-500 uppercase tracking-wider text-xs"
+              style={{ fontFamily: 'Montserrat, sans-serif' }}
+            >
               Description
             </span>
           )}
         </div>
 
-        {/* Contenu */}
-        <div className="px-6 pb-6 h-[calc(100%-12vh)] overflow-y-auto">
+        {/* 🔧 CORRECTION: Contenu masqué par défaut */}
+        <div 
+          className={`px-6 pb-6 h-[calc(100%-8vh)] overflow-y-auto transition-opacity duration-300 ${
+            isPanelExpanded ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ 
+            pointerEvents: isPanelExpanded ? 'auto' : 'none',
+            visibility: isPanelExpanded ? 'visible' : 'hidden'
+          }}
+        >
           <div className="space-y-4">
             {Array.isArray(project.description) 
               ? project.description.map((p, i) => (
@@ -273,47 +313,17 @@ export default function ProjectModalMobile({
             </a>
           )}
 
-          {/* Safe area pour mobile */}
+          {/* Safe area */}
           <div className="h-[env(safe-area-inset-bottom,0px)]"></div>
         </div>
       </div>
 
-      {/* Styles Custom pour Swiper */}
+      {/* 🔧 CORRECTION: Import de Montserrat */}
       <style jsx global>{`
-        .custom-bullet {
-          width: 10px !important;
-          height: 10px !important;
-          background: #d1d5db !important;
-          opacity: 1 !important;
-          margin: 0 4px !important;
-          border-radius: 50% !important;
-          transition: all 0.3s ease !important;
-        }
-        
-        .custom-bullet-active {
-          background: #f97316 !important;
-          transform: scale(1.2) !important;
-        }
-        
-        .swiper-pagination {
-          bottom: 16px !important;
-          z-index: 25 !important;
-        }
-        
-        .swiper-pagination-bullets {
-          display: flex !important;
-          justify-content: center !important;
-          align-items: center !important;
-        }
-
-        /* Hide default Swiper buttons */
-        .swiper-button-next,
-        .swiper-button-prev {
-          display: none !important;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
       `}</style>
     </div>
   );
 }
-// ========================================================================
-// === END OF PROJECT MODAL MOBILE - SWIPER.JS INTEGRATION ===
+// Note: This code is designed to be used in a Next.js project with Tailwind CSS and Swiper.js.
+// Ensure you have the necessary packages installed:
