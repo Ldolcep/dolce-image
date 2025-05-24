@@ -1,5 +1,5 @@
 // ========================================================================
-// === PROJECT MODAL MOBILE - CORRECTIONS SYNTAX ===
+// === PROJECT MODAL MOBILE - EFFET TINDER + ESPACEMENT FIXÉ ===
 // ========================================================================
 
 "use client";
@@ -39,7 +39,7 @@ export default function ProjectModalMobile({
 }: ProjectModalMobileProps) {
   
   // ===============================
-  // ÉTAT SIMPLE
+  // ÉTAT
   // ===============================
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
@@ -56,7 +56,7 @@ export default function ProjectModalMobile({
   );
 
   // ===============================
-  // 🔧 PANEL LOGIC FIXÉE - SCROLL SÉPARÉ
+  // PANEL LOGIC
   // ===============================
   const panelStartY = useRef(0);
   const panelCurrentY = useRef(0);
@@ -66,25 +66,19 @@ export default function ProjectModalMobile({
     const touch = e.touches[0];
     const target = e.target as HTMLElement;
     
-    // 🔧 FIX CRITIQUE: Vérifier si on touche le grip ou le contenu
     const isInGrip = gripRef.current?.contains(target);
     const isInContent = contentRef.current?.contains(target);
     
-    // 🔧 FIX CRITIQUE: Si on touche le contenu ET qu'il peut scroll, ne pas intercepter
     if (isInContent && !isInGrip && contentRef.current && isPanelExpanded) {
       const canScroll = contentRef.current.scrollHeight > contentRef.current.clientHeight;
       if (canScroll) {
-        console.log('🔧 Permettre scroll natif du contenu');
-        return; // Laisser le scroll natif fonctionner
+        return;
       }
     }
     
-    // Seulement intercepter si on touche le grip ou si le contenu ne peut pas scroll
     isDraggingPanel.current = true;
     panelStartY.current = touch.clientY;
     panelCurrentY.current = isPanelExpanded ? 0 : window.innerHeight * 0.32;
-    
-    console.log('🔧 Panel drag start', { isInGrip, isInContent });
   };
 
   const handlePanelTouchMove = (e: React.TouchEvent) => {
@@ -121,8 +115,6 @@ export default function ProjectModalMobile({
         }
       }, 300);
     }
-    
-    console.log('🔧 Panel drag end', { shouldExpand });
   };
 
   // ===============================
@@ -156,8 +148,11 @@ export default function ProjectModalMobile({
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none">
-      {/* Header avec titre */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-white/95 backdrop-blur-sm h-16">
+      {/* Header */}
+      <div 
+        className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-white/95 backdrop-blur-sm"
+        style={{ height: '64px' }} // 🔧 Hauteur exacte
+      >
         <button 
           onClick={onClose} 
           className="text-gray-700 rounded-full p-1.5 hover:bg-gray-100 transition-colors flex-shrink-0" 
@@ -184,38 +179,49 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* 🔧 ZONE CARROUSEL CORRIGÉE - Espacement fixé définitivement */}
+      {/* 🔧 ZONE CARROUSEL - Espacement mathématiquement exact */}
       <div 
-        className="absolute inset-0 flex flex-col items-center justify-center px-4"
+        className="absolute inset-0"
         style={{
-          paddingTop: '64px', // 🔧 FIX exact au lieu de pt-16
-          paddingBottom: 'calc(38vh + 6vh)' // 🔧 FIX exact : 6vh pour l'indicateur
+          top: '64px', // Header exact
+          bottom: '38vh', // Panel exact
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 16px'
         }}
       >
-        {/* Carrousel Swiper */}
-        <div className="relative w-full max-w-sm aspect-[4/5]" style={{ maxHeight: '65vh' }}>
+        {/* Container Swiper avec calcul exact */}
+        <div 
+          className="relative w-full max-w-sm"
+          style={{ 
+            aspectRatio: '4/5',
+            maxHeight: 'calc(100vh - 64px - 38vh - 80px)', // 🔧 Calcul exact pour l'indicateur
+            height: '100%'
+          }}
+        >
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
             }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-            effect="cards" // 🔧 RETOUR à l'effet cards comme souhaité
-            modules={[Navigation, Pagination, EffectCards]} // 🔧 Réajout du module EffectCards
-            spaceBetween={20}
+            effect="cards" // 🔧 EFFET TINDER
+            modules={[Navigation, Pagination, EffectCards]}
+            spaceBetween={30}
             slidesPerView={1}
-            speed={300} // 🔧 Réduit pour plus de fluidité
-            threshold={1.5} // 🔧 Plus sensible
-            touchRatio={1} // 🔧 Ratio naturel
-            resistance={true}
-            resistanceRatio={0.85} // 🔧 Légèrement augmenté pour plus de contrôle
+            speed={250} // 🔧 Plus rapide = plus réactif
+            threshold={1} // 🔧 Très sensible
+            touchRatio={1.5} // 🔧 Plus sensible au touch
+            resistance={false} // 🔧 Pas de résistance = plus fluide
             followFinger={true}
             shortSwipes={true}
             longSwipes={true}
-            longSwipesRatio={0.2} // 🔧 Plus facile d'activer
+            longSwipesRatio={0.1} // 🔧 Très facile d'activer
             cardsEffect={{
               rotate: true,
-              perSlideRotate: 4, // 🔧 Réduit pour plus de fluidité
-              perSlideOffset: 3, // 🔧 Réduit pour plus de fluidité
+              perSlideRotate: 15, // 🔧 EFFET TINDER : plus de rotation
+              perSlideOffset: 8, // 🔧 EFFET TINDER : plus d'offset
               slideShadows: true,
             }}
             pagination={false}
@@ -223,26 +229,26 @@ export default function ProjectModalMobile({
               nextEl: '.swiper-button-next-custom',
               prevEl: '.swiper-button-prev-custom',
             }}
-            className="w-full h-full swiper-smooth"
+            className="w-full h-full swiper-tinder"
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
-                <div className="relative w-full h-full overflow-hidden bg-white shadow-2xl"> {/* 🔧 AUCUN coin arrondi */}
+                <div className="relative w-full h-full overflow-hidden bg-white shadow-2xl">
                   <Image
                     src={visual}
                     alt={`Image ${index + 1} du projet ${project.title}`}
                     fill
-                    className="object-cover" /* 🔧 AUCUN coin arrondi */
+                    className="object-cover"
                     sizes="(max-width: 768px) 90vw, 400px"
                     priority={index === 0}
                   />
                   
-                  {/* 🔧 Frame orange pour carte active - sans coins arrondis */}
+                  {/* Frame pour carte active */}
                   {index === currentIndex && (
                     <div 
                       className="absolute inset-0 pointer-events-none"
                       style={{
-                        boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.5)',
+                        boxShadow: 'inset 0 0 0 3px rgba(247,165,32,0.6)',
                       }}
                     />
                   )}
@@ -251,11 +257,11 @@ export default function ProjectModalMobile({
             ))}
           </Swiper>
 
-          {/* Navigation Buttons - design épuré */}
+          {/* Navigation Buttons */}
           {allVisuals.length > 1 && (
             <>
               <button 
-                className="swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-30"
+                className="swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95"
                 aria-label="Image précédente"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -264,7 +270,7 @@ export default function ProjectModalMobile({
               </button>
 
               <button 
-                className="swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-30"
+                className="swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95"
                 aria-label="Image suivante"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -275,13 +281,12 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* 🔧 INDICATEURS ÉPURÉS - Espacement exact fixé */}
+        {/* 🔧 INDICATEURS - Position absolue pour espacement exact */}
         {allVisuals.length > 1 && (
           <div 
-            className="flex justify-center"
+            className="absolute left-1/2 transform -translate-x-1/2"
             style={{
-              marginTop: '6vh', // 🔧 FIX exact : 6vh comme paddingBottom
-              marginBottom: '0' // 🔧 Assurer aucun margin bottom
+              bottom: '20px' // 🔧 Position absolue pour contrôle total
             }}
           >
             <div className="flex space-x-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
@@ -302,7 +307,7 @@ export default function ProjectModalMobile({
         )}
       </div>
 
-      {/* Panel Description - avec espacement équilibré pb-[10vh] */}
+      {/* Panel Description */}
       <div 
         ref={panelRef}
         className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40"
@@ -311,10 +316,11 @@ export default function ProjectModalMobile({
           transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 6vh)'})`
         }}
       >
-        {/* Grip zone */}
+        {/* Grip */}
         <div 
           ref={gripRef}
-          className="w-full flex flex-col items-center justify-center px-4 h-[6vh] bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 cursor-grab active:cursor-grabbing"
+          className="w-full flex flex-col items-center justify-center px-4 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 cursor-grab active:cursor-grabbing"
+          style={{ height: '6vh' }}
           onTouchStart={handlePanelTouchStart}
           onTouchMove={handlePanelTouchMove}
           onTouchEnd={handlePanelTouchEnd}
@@ -334,11 +340,12 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* 🔧 Zone de contenu avec scrollbar stylée */}
+        {/* Contenu avec scrollbar stylée */}
         <div 
           ref={contentRef}
-          className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto custom-scrollbar" /* 🔧 Classe custom scrollbar */
+          className="px-6 pb-6 overflow-y-auto custom-scrollbar"
           style={{ 
+            height: 'calc(100% - 6vh)',
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y'
           }}
@@ -378,11 +385,11 @@ export default function ProjectModalMobile({
         </div>
       </div>
 
-      {/* 🔧 CSS CORRIGÉ pour fluidité cards + scrollbar stylée */}
+      {/* 🔧 CSS TINDER + Scrollbar stylée */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
         
-        /* 🔧 Scrollbar stylée orange */
+        /* 🔧 Scrollbar orange */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
         }
@@ -393,57 +400,62 @@ export default function ProjectModalMobile({
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #f97316; /* Orange comme l'indicateur */
+          background: #f97316;
           border-radius: 2px;
           transition: background 0.3s ease;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #ea580c; /* Orange plus foncé au hover */
+          background: #ea580c;
         }
         
-        /* 🔧 Fluidité cards améliorée */
-        .swiper-smooth {
-          transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+        /* 🔧 EFFET TINDER - Animation fluide et réactive */
+        .swiper-tinder {
+          transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
         
-        .swiper-smooth .swiper-wrapper {
-          transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+        .swiper-tinder .swiper-wrapper {
+          transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
         
         .swiper-cards .swiper-slide {
           overflow: hidden !important;
-          border-radius: 0 !important; /* 🔧 FORCE aucun coin arrondi */
-          transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+          border-radius: 0 !important;
+          transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+          transform-origin: center center !important;
         }
         
-        /* 🔧 Suppression TOTALE des coins arrondis Swiper */
+        /* 🔧 TINDER - Carte active bien visible */
+        .swiper-cards .swiper-slide-active {
+          z-index: 10 !important;
+          transform: translateX(0) translateY(0) rotate(0deg) !important;
+        }
+        
+        /* 🔧 TINDER - Cartes suivantes empilées avec rotation */
+        .swiper-cards .swiper-slide-next {
+          z-index: 5 !important;
+          transform: translateX(8px) translateY(4px) rotate(15deg) scale(0.95) !important;
+        }
+        
+        .swiper-cards .swiper-slide:not(.swiper-slide-active):not(.swiper-slide-next) {
+          z-index: 1 !important;
+          transform: translateX(16px) translateY(8px) rotate(20deg) scale(0.9) !important;
+        }
+        
+        /* 🔧 Ombres pour effet de profondeur */
+        .swiper-cards .swiper-slide-shadow-left,
+        .swiper-cards .swiper-slide-shadow-right {
+          background: linear-gradient(to right, rgba(0,0,0,0.1), transparent) !important;
+          border-radius: 0 !important;
+        }
+        
+        /* 🔧 Suppression coins arrondis */
         .swiper-cards .swiper-slide,
         .swiper-cards .swiper-slide > div,
         .swiper-cards .swiper-slide img {
           border-radius: 0 !important;
         }
         
-        /* 🔧 Ombres cards plus subtiles */
-        .swiper-cards .swiper-slide-shadow-left,
-        .swiper-cards .swiper-slide-shadow-right {
-          background: linear-gradient(to right, rgba(0,0,0,0.03), transparent) !important;
-          border-radius: 0 !important;
-        }
-
-        /* 🔧 Animation ultra fluide pour carte active */
-        .swiper-cards .swiper-slide-active {
-          transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
-        }
-        
-        /* 🔧 Transitions harmonieuses pour toutes les cartes */
-        .swiper-cards .swiper-slide-duplicate-active,
-        .swiper-cards .swiper-slide-prev,
-        .swiper-cards .swiper-slide-next {
-          transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
-        }
-        
-        /* 🔧 Force la suppression des border-radius sur tous les éléments Swiper */
         .swiper-cards * {
           border-radius: 0 !important;
         }
