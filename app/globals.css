@@ -347,60 +347,183 @@
 }
 
 /* ===============================
-   SWIPER CUSTOM STYLES
-   À ajouter dans globals.css
+   🚀 SWIPER AMÉLIORATIONS - FLUIDITÉ & SÉPARATION
+   À ajouter/remplacer dans globals.css
    ===============================*/
 
-/* Custom Bullets */
+/* 🚀 Configuration globale Swiper pour plus de fluidité */
+.swiper {
+  --swiper-theme-color: #f97316;
+  /* Orange pour cohérence */
+  --swiper-navigation-size: 20px;
+}
+
+/* 🚀 Wrapper principal - transitions améliorées */
+.swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  will-change: transform !important;
+}
+
+/* 🚀 Slides individuelles - performance et fluidité */
+.swiper-slide {
+  backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  will-change: transform !important;
+}
+
+/* 🚀 Effet Cards amélioré */
+.swiper-cards {
+  perspective: 1200px !important;
+  /* Plus de profondeur */
+}
+
+.swiper-cards .swiper-slide {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  /* Ombre plus douce */
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  transform-origin: center center !important;
+}
+
+/* 🚀 Ombres des cartes plus réalistes */
+.swiper-cards .swiper-slide-shadow-left,
+.swiper-cards .swiper-slide-shadow-right {
+  border-radius: 8px !important;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent 50%) !important;
+  opacity: 0.8 !important;
+}
+
+.swiper-cards .swiper-slide-shadow-top,
+.swiper-cards .swiper-slide-shadow-bottom {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.04), transparent 50%) !important;
+  opacity: 0.6 !important;
+}
+
+/* 🚀 États des slides - animations fluides */
+.swiper-cards .swiper-slide-active {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+  z-index: 10 !important;
+}
+
+.swiper-cards .swiper-slide-next,
+.swiper-cards .swiper-slide-prev {
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  z-index: 5 !important;
+}
+
+/* 🚀 Indicateurs personnalisés - Design amélioré */
 .custom-bullet {
-  width: 10px !important;
-  height: 10px !important;
+  width: 12px !important;
+  height: 12px !important;
   background: #d1d5db !important;
   opacity: 1 !important;
-  margin: 0 4px !important;
+  margin: 0 6px !important;
+  /* Plus d'espace entre les points */
   border-radius: 50% !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  /* Transition plus fluide */
   cursor: pointer !important;
+  border: 2px solid transparent !important;
+  /* Prépare le border pour l'état actif */
+  transform: scale(1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  /* Ombre subtile */
+}
+
+.custom-bullet:hover {
+  background: #9ca3af !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .custom-bullet-active {
   background: #f97316 !important;
-  /* Orange */
-  transform: scale(1.2) !important;
+  /* Orange cohérent */
+  transform: scale(1.3) !important;
+  /* Plus gros pour l'état actif */
+  border: 2px solid rgba(249, 115, 22, 0.3) !important;
+  /* Halo orange */
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2), 0 4px 16px rgba(249, 115, 22, 0.3) !important;
+  /* Double ombre */
 }
 
-/* Pagination positioning */
+/* 🚀 Conteneur des indicateurs - Design moderne */
 .swiper-pagination {
-  bottom: 16px !important;
+  bottom: 20px !important;
   z-index: 25 !important;
   position: absolute !important;
+  padding: 12px 20px !important;
+  /* Plus de padding */
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 24px !important;
+  /* Plus arrondi */
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  /* Ombre moderne */
+  margin: 0 auto !important;
+  width: fit-content !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
 }
 
 .swiper-pagination-bullets {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
+  gap: 4px !important;
+  /* Espacement uniforme */
 }
 
-/* Hide default Swiper navigation */
+/* 🚀 Masquer la navigation par défaut Swiper */
 .swiper-button-next,
 .swiper-button-prev {
   display: none !important;
 }
 
-/* Cards effect customization */
-.swiper-cards .swiper-slide {
-  border-radius: 8px !important;
-  overflow: hidden !important;
+/* 🚀 Navigation personnalisée - Design amélioré */
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+  width: 48px !important;
+  height: 48px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  color: #374151 !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 20 !important;
+  cursor: pointer !important;
 }
 
-/* Ensure proper z-index for cards */
-.swiper-cards .swiper-slide-shadow-left,
-.swiper-cards .swiper-slide-shadow-right {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent) !important;
+.swiper-button-prev-custom:hover,
+.swiper-button-next-custom:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18) !important;
+  color: #f97316 !important;
+  /* Orange au hover */
 }
 
-/* Custom navigation buttons positioning */
+.swiper-button-prev-custom:active,
+.swiper-button-next-custom:active {
+  transform: scale(0.95) !important;
+  transition: all 0.1s ease !important;
+}
+
+.swiper-button-prev-custom:disabled,
+.swiper-button-next-custom:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+  transform: scale(1) !important;
+}
+
+/* 🚀 Positionnement responsive des boutons */
 .swiper-button-prev-custom {
   left: 16px !important;
 }
@@ -409,17 +532,171 @@
   right: 16px !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .custom-bullet {
-    width: 8px !important;
-    height: 8px !important;
-    margin: 0 3px !important;
+/* 🚀 Améliorations touch/swipe pour mobile */
+@media (max-width: 768px) {
+  .swiper {
+    touch-action: pan-y pinch-zoom !important;
+    /* Améliore les interactions tactiles */
   }
 
+  .swiper-wrapper {
+    cursor: grab !important;
+  }
+
+  .swiper-wrapper:active {
+    cursor: grabbing !important;
+  }
+
+  /* Indicateurs plus petits sur mobile */
+  .custom-bullet {
+    width: 10px !important;
+    height: 10px !important;
+    margin: 0 4px !important;
+  }
+
+  .custom-bullet-active {
+    transform: scale(1.2) !important;
+  }
+
+  /* Boutons navigation plus petits sur mobile */
   .swiper-button-prev-custom,
   .swiper-button-next-custom {
     width: 44px !important;
     height: 44px !important;
   }
+
+  /* Pagination plus compacte sur mobile */
+  .swiper-pagination {
+    padding: 10px 16px !important;
+    border-radius: 20px !important;
+    bottom: 16px !important;
+  }
 }
+
+/* 🚀 Optimisations performance */
+.swiper-cards .swiper-slide,
+.swiper-button-prev-custom,
+.swiper-button-next-custom,
+.custom-bullet {
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
+}
+
+/* 🚀 Support pour les écrans haute résolution */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+  .swiper-cards .swiper-slide {
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .custom-bullet {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .swiper-button-prev-custom,
+  .swiper-button-next-custom {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18) !important;
+  }
+}
+
+/* 🚀 Animation d'entrée pour les éléments Swiper */
+@keyframes swiper-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes swiper-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 🚀 Application des animations */
+.swiper {
+  animation: swiper-fade-in 0.6s ease-out !important;
+}
+
+.swiper-pagination {
+  animation: swiper-scale-in 0.4s ease-out 0.2s both !important;
+}
+
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+  animation: swiper-scale-in 0.4s ease-out 0.3s both !important;
+}
+
+/* 🚀 États de chargement - améliore l'expérience */
+.swiper-initialized .swiper-slide {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* 🚀 Gestion des états de focus pour accessibilité */
+.swiper-button-prev-custom:focus,
+.swiper-button-next-custom:focus,
+.custom-bullet:focus {
+  outline: 2px solid #f97316 !important;
+  outline-offset: 2px !important;
+}
+
+/* 🚀 Amélioration de la lisibilité en mode sombre (si nécessaire) */
+@media (prefers-color-scheme: dark) {
+  .swiper-pagination {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .swiper-button-prev-custom,
+  .swiper-button-next-custom {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .custom-bullet {
+    background: #6b7280 !important;
+  }
+
+  .custom-bullet-active {
+    background: #f97316 !important;
+  }
+}
+
+/* 🚀 Optimisations pour réduire la repaint */
+.swiper,
+.swiper-wrapper,
+.swiper-slide {
+  contain: layout style paint !important;
+}
+
+/* 🚀 Support pour reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .swiper,
+  .swiper-slide,
+  .custom-bullet,
+  .swiper-button-prev-custom,
+  .swiper-button-next-custom {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .swiper-cards .swiper-slide {
+    transition: transform 0.1s ease !important;
+  }
+}
+/* 🚀 Amélioration de la performance des images */
