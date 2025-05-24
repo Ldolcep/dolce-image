@@ -345,3 +345,81 @@
   transform: scale(1);
   opacity: 1;
 }
+
+/* ===============================
+   SWIPER CUSTOM STYLES
+   À ajouter dans globals.css
+   ===============================*/
+
+/* Custom Bullets */
+.custom-bullet {
+  width: 10px !important;
+  height: 10px !important;
+  background: #d1d5db !important;
+  opacity: 1 !important;
+  margin: 0 4px !important;
+  border-radius: 50% !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.custom-bullet-active {
+  background: #f97316 !important;
+  /* Orange */
+  transform: scale(1.2) !important;
+}
+
+/* Pagination positioning */
+.swiper-pagination {
+  bottom: 16px !important;
+  z-index: 25 !important;
+  position: absolute !important;
+}
+
+.swiper-pagination-bullets {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Hide default Swiper navigation */
+.swiper-button-next,
+.swiper-button-prev {
+  display: none !important;
+}
+
+/* Cards effect customization */
+.swiper-cards .swiper-slide {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+/* Ensure proper z-index for cards */
+.swiper-cards .swiper-slide-shadow-left,
+.swiper-cards .swiper-slide-shadow-right {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent) !important;
+}
+
+/* Custom navigation buttons positioning */
+.swiper-button-prev-custom {
+  left: 16px !important;
+}
+
+.swiper-button-next-custom {
+  right: 16px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .custom-bullet {
+    width: 8px !important;
+    height: 8px !important;
+    margin: 0 3px !important;
+  }
+
+  .swiper-button-prev-custom,
+  .swiper-button-next-custom {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
