@@ -347,8 +347,7 @@
 }
 
 /* ===============================
-   🚀 SWIPER MODAL MOBILE - EFFET CARTES POSTALES
-   Remplacez TOUTE la section Swiper dans globals.css
+   🃏 SWIPER MODAL MOBILE - ANIMATION ÉVENTAIL EN MAIN
    ===============================*/
 
 /* 🔧 Scrollbar orange pour modal mobile */
@@ -371,143 +370,157 @@
   background: #ea580c;
 }
 
-/* 🔧 EFFET CARTES POSTALES - Navigation slide avec style carte */
-.swiper-tinder-mobile {
+/* 🃏 ANIMATION ÉVENTAIL - Navigation qui simule des cartes en main */
+.swiper-card-fan {
   overflow: visible !important;
-  /* 🎯 Permettre de voir les cartes empilées */
   position: relative;
-  perspective: 1200px;
-  /* 🎯 Profondeur 3D */
+  perspective: 1500px;
+  /* 🃏 Perspective profonde pour éventail */
+  transform-style: preserve-3d;
 }
 
-.swiper-tinder-mobile .swiper-wrapper {
+.swiper-card-fan .swiper-wrapper {
   transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1) !important;
-  /* 🎯 Transition plus douce */
   will-change: transform !important;
   transform-style: preserve-3d;
 }
 
-.swiper-tinder-mobile .swiper-slide {
+.swiper-card-fan .swiper-slide {
   flex-shrink: 0 !important;
   width: 100% !important;
   position: relative !important;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) !important;
-  /* 🎯 Transition plus longue */
-  border-radius: 0 !important;
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1) !important;
+  /* 🃏 Plus long pour éventail */
+  border-radius: 8px !important;
+  /* 🃏 Coins légèrement arrondis pour cartes */
   overflow: hidden !important;
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  /* 🎯 Ombre de carte */
+  transform-origin: bottom center;
+  /* 🃏 Origine en bas pour rotation naturelle */
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  /* 🃏 Ombre forte de carte */
 }
 
-/* 🎯 CARTE ACTIVE - Au premier plan, bien visible */
-.swiper-tinder-mobile .swiper-slide-active {
-  transform: translateZ(40px) scale(1) rotate(0deg) !important;
-  z-index: 10 !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2) !important;
-  /* 🎯 Ombre plus forte */
-  animation: card-enter 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+/* 🃏 CARTE ACTIVE - Sortie de l'éventail, droite devant */
+.swiper-card-fan .swiper-slide-active {
+  transform: translateZ(60px) translateY(-30px) scale(1.05) rotate(0deg) !important;
+  z-index: 15 !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  /* 🃏 Ombre très forte */
+  animation: card-fan-select 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-/* 🎯 CARTE SUIVANTE - Légèrement en arrière, visible */
-.swiper-tinder-mobile .swiper-slide-next {
-  transform: translateZ(20px) translateX(12px) scale(0.96) rotate(1.5deg) !important;
+/* 🃏 CARTES EN ÉVENTAIL - Positionnées comme dans la main */
+.swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
+  transform: translateZ(20px) translateY(-5px) rotate(-20deg) scale(0.9) !important;
   z-index: 8 !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15) !important;
-  opacity: 0.9 !important;
+  opacity: 0.85 !important;
 }
 
-/* 🎯 CARTE PRÉCÉDENTE - En arrière, côté gauche */
-.swiper-tinder-mobile .swiper-slide-prev {
-  transform: translateZ(15px) translateX(-12px) scale(0.94) rotate(-1.5deg) !important;
-  z-index: 7 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-  opacity: 0.8 !important;
+.swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
+  transform: translateZ(15px) translateY(-3px) rotate(-12deg) scale(0.92) !important;
+  z-index: 9 !important;
+  opacity: 0.88 !important;
 }
 
-/* 🎯 CARTES ÉLOIGNÉES - Empilement en arrière-plan */
-.swiper-tinder-mobile .swiper-slide:not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
-  transform: translateZ(0px) translateX(var(--offset, 0px)) scale(0.92) rotate(var(--rotation, 0deg)) !important;
+.swiper-card-fan .swiper-slide:nth-child(3):not(.swiper-slide-active) {
+  transform: translateZ(10px) translateY(-1px) rotate(-6deg) scale(0.94) !important;
+  z-index: 10 !important;
+  opacity: 0.91 !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active) {
+  transform: translateZ(5px) translateY(-1px) rotate(6deg) scale(0.94) !important;
+  z-index: 10 !important;
+  opacity: 0.91 !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+  transform: translateZ(15px) translateY(-3px) rotate(12deg) scale(0.92) !important;
+  z-index: 9 !important;
+  opacity: 0.88 !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+  transform: translateZ(20px) translateY(-5px) rotate(20deg) scale(0.9) !important;
+  z-index: 8 !important;
+  opacity: 0.85 !important;
+}
+
+/* 🃏 Cartes supplémentaires (au-delà de 6) */
+.swiper-card-fan .swiper-slide:nth-child(n+7):not(.swiper-slide-active) {
+  transform: translateZ(0px) rotate(25deg) scale(0.85) !important;
   z-index: 5 !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
   opacity: 0.7 !important;
 }
 
-/* 🎯 Animation d'entrée style cartes postales */
-@keyframes card-enter {
+/* 🃏 Animation de sélection - Carte qui sort de l'éventail */
+@keyframes card-fan-select {
   0% {
-    transform: translateZ(-50px) translateX(120px) scale(0.8) rotate(15deg);
-    opacity: 0.3;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateZ(20px) translateY(-5px) rotate(var(--initial-rotation, 0deg)) scale(0.9);
+    opacity: 0.85;
   }
 
   30% {
-    transform: translateZ(10px) translateX(-20px) scale(0.95) rotate(-3deg);
-    opacity: 0.7;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateZ(40px) translateY(-15px) rotate(5deg) scale(0.98);
+    opacity: 0.95;
   }
 
   60% {
-    transform: translateZ(30px) translateX(5px) scale(1.02) rotate(1deg);
-    opacity: 0.9;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    transform: translateZ(55px) translateY(-25px) rotate(-2deg) scale(1.02);
+    opacity: 1;
   }
 
   100% {
-    transform: translateZ(40px) translateX(0) scale(1) rotate(0deg);
+    transform: translateZ(60px) translateY(-30px) rotate(0deg) scale(1.05);
     opacity: 1;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
   }
 }
 
-/* 🎯 Animation de sortie */
-@keyframes card-exit {
+/* 🃏 Animation d'entrée dans l'éventail */
+@keyframes card-fan-enter {
   0% {
-    transform: translateZ(40px) scale(1) rotate(0deg);
-    opacity: 1;
+    transform: translateZ(-30px) rotate(45deg) scale(0.7);
+    opacity: 0;
+  }
+
+  50% {
+    transform: translateZ(10px) rotate(var(--target-rotation, 0deg)) scale(0.85);
+    opacity: 0.7;
   }
 
   100% {
-    transform: translateZ(-20px) translateX(-120px) scale(0.85) rotate(-12deg);
-    opacity: 0.2;
+    transform: translateZ(20px) rotate(var(--target-rotation, 0deg)) scale(0.9);
+    opacity: 0.85;
   }
 }
 
-/* 🎯 Effet de papier/carte avec texture */
-.swiper-tinder-mobile .swiper-slide::before {
+/* 🃏 Effet de texture carte avec reflets */
+.swiper-card-fan .swiper-slide::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    linear-gradient(45deg, transparent 50%, rgba(0, 0, 0, 0.02) 100%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+    linear-gradient(45deg, transparent 60%, rgba(255, 255, 255, 0.05) 100%);
   pointer-events: none;
   z-index: 1;
+  border-radius: 8px;
 }
 
-/* 🎯 Effet de bordure subtile pour cartes */
-.swiper-tinder-mobile .swiper-slide::after {
+/* 🃏 Bordure subtile de carte */
+.swiper-card-fan .swiper-slide::after {
   content: '';
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
   pointer-events: none;
   z-index: 2;
 }
 
-/* 🔧 Suppression totale des coins arrondis */
-.swiper-tinder-mobile .swiper-slide,
-.swiper-tinder-mobile .swiper-slide>div,
-.swiper-tinder-mobile .swiper-slide img {
-  border-radius: 0 !important;
-}
-
-.swiper-tinder-mobile * {
-  border-radius: 0 !important;
-}
-
-/* 🔧 Configuration globale optimisée */
+/* 🔧 Configuration globale */
 .swiper {
   --swiper-theme-color: #f97316;
   --swiper-navigation-size: 18px;
@@ -524,40 +537,51 @@
   will-change: transform !important;
 }
 
-/* 🔧 BOUTONS NAVIGATION - Style simple sans scale */
+/* 🔧 BOUTONS NAVIGATION avec états grisés */
 .swiper-button-prev-custom,
 .swiper-button-next-custom {
   width: 44px !important;
   height: 44px !important;
-  background: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(10px) !important;
   border-radius: 50% !important;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
-  color: #374151 !important;
-  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease !important;
-  /* 🎯 Transition simple */
+  transition: all 0.3s ease !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  z-index: 20 !important;
-  cursor: pointer !important;
-  opacity: 1 !important;
+  z-index: 25 !important;
+  /* 🃏 Au-dessus des cartes */
 }
 
-.swiper-button-prev-custom:hover,
-.swiper-button-next-custom:hover {
+/* 🔧 Bouton actif */
+.swiper-button-prev-custom:not([disabled]),
+.swiper-button-next-custom:not([disabled]) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+}
+
+.swiper-button-prev-custom:not([disabled]):hover,
+.swiper-button-next-custom:not([disabled]):hover {
   background: rgba(255, 255, 255, 1) !important;
   color: #f97316 !important;
-  opacity: 1 !important;
-  /* 🎯 Pas de scale ou transform */
+  transform: scale(1.05) !important;
 }
 
-.swiper-button-prev-custom:active,
-.swiper-button-next-custom:active {
+.swiper-button-prev-custom:not([disabled]):active,
+.swiper-button-next-custom:not([disabled]):active {
   opacity: 0.7 !important;
-  /* 🎯 Simple changement d'opacité */
-  /* 🎯 Pas de scale */
+  transform: scale(0.95) !important;
+}
+
+/* 🔧 Bouton désactivé (grisé) */
+.swiper-button-prev-custom[disabled],
+.swiper-button-next-custom[disabled] {
+  background: rgba(200, 200, 200, 0.5) !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.4 !important;
 }
 
 /* 🔧 Masquer navigation par défaut */
@@ -567,7 +591,7 @@
 }
 
 /* 🔧 Performance optimizations */
-.swiper-tinder-mobile .swiper-slide,
+.swiper-card-fan .swiper-slide,
 .swiper-button-prev-custom,
 .swiper-button-next-custom {
   backface-visibility: hidden !important;
@@ -590,13 +614,21 @@
     cursor: grabbing !important;
   }
 
-  /* 🎯 Ajustements mobile pour cartes */
-  .swiper-tinder-mobile .swiper-slide-next {
-    transform: translateZ(15px) translateX(8px) scale(0.97) rotate(1deg) !important;
+  /* 🃏 Ajustements éventail mobile */
+  .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
+    transform: translateZ(15px) translateY(-3px) rotate(-15deg) scale(0.92) !important;
   }
 
-  .swiper-tinder-mobile .swiper-slide-prev {
-    transform: translateZ(10px) translateX(-8px) scale(0.95) rotate(-1deg) !important;
+  .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
+    transform: translateZ(12px) translateY(-2px) rotate(-8deg) scale(0.94) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(n+5):not(.swiper-slide-active) {
+    transform: translateZ(12px) translateY(-2px) rotate(8deg) scale(0.94) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(n+6):not(.swiper-slide-active) {
+    transform: translateZ(15px) translateY(-3px) rotate(15deg) scale(0.92) !important;
   }
 }
 
@@ -611,7 +643,7 @@
     animation: none !important;
   }
 
-  .swiper-tinder-mobile .swiper-slide {
-    transition: transform 0.1s ease !important;
+  .swiper-card-fan .swiper-slide {
+    transition: transform 0.2s ease !important;
   }
 }

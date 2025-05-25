@@ -38,7 +38,7 @@ export default function ProjectModalMobile({
 }: ProjectModalMobileProps) {
   
   // ===============================
-  // ÉTAT
+  // ÉTAT + LIMITES
   // ===============================
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
@@ -53,6 +53,10 @@ export default function ProjectModalMobile({
     [project.mainVisual, ...project.additionalVisuals].filter(Boolean), 
     [project]
   );
+
+  // 🔧 États des boutons aux limites
+  const isAtStart = currentIndex === 0;
+  const isAtEnd = currentIndex === allVisuals.length - 1;
 
   // ===============================
   // PANEL LOGIC
@@ -204,7 +208,7 @@ export default function ProjectModalMobile({
               nextEl: '.swiper-button-next-custom',
               prevEl: '.swiper-button-prev-custom',
             }}
-            className="w-full h-full swiper-tinder-mobile"
+            className="w-full h-full swiper-card-fan" // 🃏 Nouvelle classe pour éventail
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
@@ -232,12 +236,18 @@ export default function ProjectModalMobile({
             ))}
           </Swiper>
 
-          {/* Navigation Buttons */}
+          {/* 🃏 Navigation Buttons avec états limites */}
           {allVisuals.length > 1 && (
             <>
               <button 
-                className="swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-colors duration-200 hover:bg-white"
+                className={`swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                  isAtStart 
+                    ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' 
+                    : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer'
+                }`}
                 aria-label="Image précédente"
+                disabled={isAtStart}
+                onClick={() => !isAtStart && swiperRef.current?.slidePrev()}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="m15 18-6-6 6-6"/>
@@ -245,8 +255,14 @@ export default function ProjectModalMobile({
               </button>
 
               <button 
-                className="swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg transition-colors duration-200 hover:bg-white"
+                className={`swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                  isAtEnd 
+                    ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' 
+                    : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer'
+                }`}
                 aria-label="Image suivante"
+                disabled={isAtEnd}
+                onClick={() => !isAtEnd && swiperRef.current?.slideNext()}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="m9 18 6-6-6-6"/>
