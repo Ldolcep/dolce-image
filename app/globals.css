@@ -405,7 +405,7 @@
 
   /* 🎨 Animation qui suit le swipe en temps réel */
   transform:
-    translateZ(calc(20px + var(--swipe-progress, 0) * 10px)) translateY(calc(-10px - var(--swipe-progress, 0) * 5px)) scale(calc(0.98 + var(--swipe-progress, 0) * 0.02)) rotate(calc(var(--swipe-progress, 0) * -3deg)) !important;
+    translateZ(calc(20px + var(--swipe-progress, 0) * 10px)) translateY(calc(-10px + var(--swipe-progress, 0) * -5px)) scale(calc(0.98 + var(--swipe-progress, 0) * 0.02)) rotate(calc(var(--swipe-progress, 0) * -3deg)) !important;
 
   box-shadow:
     0 calc(12px + var(--swipe-progress, 0) * 8px) calc(40px + var(--swipe-progress, 0) * 20px) rgba(0, 0, 0, calc(0.25 + var(--swipe-progress, 0) * 0.1)) !important;
@@ -416,7 +416,7 @@
   z-index: 12 !important;
 
   transform:
-    translateZ(calc(8px + var(--swipe-progress, 0) * 12px)) translateY(calc(-1px - var(--swipe-progress, 0) * 9px)) scale(calc(0.94 + var(--swipe-progress, 0) * 0.04)) rotate(calc(10deg - var(--swipe-progress, 0) * 10deg)) !important;
+    translateZ(calc(8px + var(--swipe-progress, 0) * 12px)) translateY(calc(-1px + var(--swipe-progress, 0) * -9px)) scale(calc(0.94 + var(--swipe-progress, 0) * 0.04)) rotate(calc(10deg + var(--swipe-progress, 0) * -10deg)) !important;
 
   opacity: calc(0.88 + var(--swipe-progress, 0) * 0.12) !important;
 }
@@ -426,45 +426,45 @@
   z-index: 8 !important;
 
   transform:
-    translateZ(calc(12px - var(--swipe-progress, 0) * 4px)) translateY(calc(-2px + var(--swipe-progress, 0) * 2px)) scale(calc(0.96 - var(--swipe-progress, 0) * 0.02)) rotate(calc(-10deg - var(--swipe-progress, 0) * 5deg)) !important;
+    translateZ(calc(12px + var(--swipe-progress, 0) * -4px)) translateY(calc(-2px + var(--swipe-progress, 0) * 2px)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.02)) rotate(calc(-10deg + var(--swipe-progress, 0) * -5deg)) !important;
 
-  opacity: calc(0.9 - var(--swipe-progress, 0) * 0.2) !important;
+  opacity: calc(0.9 + var(--swipe-progress, 0) * -0.2) !important;
 }
 
 /* 🎨 CARTES EN ÉVENTAIL - Positions dynamiques selon progression */
 .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
   transform:
-    translateZ(calc(5px - var(--swipe-progress, 0) * 2px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) rotate(calc(-12deg - var(--swipe-progress, 0) * 3deg)) scale(calc(0.94 - var(--swipe-progress, 0) * 0.02)) !important;
+    translateZ(calc(5px + var(--swipe-progress, 0) * -2px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) rotate(calc(-12deg + var(--swipe-progress, 0) * -3deg)) scale(calc(0.94 + var(--swipe-progress, 0) * -0.02)) !important;
   z-index: 7 !important;
-  opacity: calc(0.85 - var(--swipe-progress, 0) * 0.15) !important;
+  opacity: calc(0.85 + var(--swipe-progress, 0) * -0.15) !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
   transform:
-    translateZ(calc(8px - var(--swipe-progress, 0) * 1px)) translateY(calc(0px)) rotate(calc(-6deg - var(--swipe-progress, 0) * 2deg)) scale(calc(0.96 - var(--swipe-progress, 0) * 0.01)) !important;
+    translateZ(calc(8px + var(--swipe-progress, 0) * -1px)) translateY(0px) rotate(calc(-6deg + var(--swipe-progress, 0) * -2deg)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) !important;
   z-index: 8 !important;
-  opacity: calc(0.88 - var(--swipe-progress, 0) * 0.1) !important;
+  opacity: calc(0.88 + var(--swipe-progress, 0) * -0.1) !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
   transform:
-    translateZ(calc(8px - var(--swipe-progress, 0) * 1px)) translateY(calc(0px)) rotate(calc(6deg + var(--swipe-progress, 0) * 2deg)) scale(calc(0.96 - var(--swipe-progress, 0) * 0.01)) !important;
+    translateZ(calc(8px + var(--swipe-progress, 0) * -1px)) translateY(0px) rotate(calc(6deg + var(--swipe-progress, 0) * 2deg)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) !important;
   z-index: 8 !important;
-  opacity: calc(0.88 - var(--swipe-progress, 0) * 0.1) !important;
+  opacity: calc(0.88 + var(--swipe-progress, 0) * -0.1) !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
   transform:
-    translateZ(calc(5px - var(--swipe-progress, 0) * 2px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) rotate(calc(12deg + var(--swipe-progress, 0) * 3deg)) scale(calc(0.94 - var(--swipe-progress, 0) * 0.02)) !important;
+    translateZ(calc(5px + var(--swipe-progress, 0) * -2px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) rotate(calc(12deg + var(--swipe-progress, 0) * 3deg)) scale(calc(0.94 + var(--swipe-progress, 0) * -0.02)) !important;
   z-index: 7 !important;
-  opacity: calc(0.85 - var(--swipe-progress, 0) * 0.15) !important;
+  opacity: calc(0.85 + var(--swipe-progress, 0) * -0.15) !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(n+6):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
   transform:
-    translateZ(calc(2px - var(--swipe-progress, 0) * 1px)) rotate(calc(15deg + var(--swipe-progress, 0) * 5deg)) scale(calc(0.92 - var(--swipe-progress, 0) * 0.02)) !important;
+    translateZ(calc(2px + var(--swipe-progress, 0) * -1px)) rotate(calc(15deg + var(--swipe-progress, 0) * 5deg)) scale(calc(0.92 + var(--swipe-progress, 0) * -0.02)) !important;
   z-index: 5 !important;
-  opacity: calc(0.7 - var(--swipe-progress, 0) * 0.2) !important;
+  opacity: calc(0.7 + var(--swipe-progress, 0) * -0.2) !important;
 }
 
 /* 🎨 Animation de finalisation après swipe */
@@ -587,17 +587,17 @@
   /* 🎨 Ajustements spécifiques mobile pour animation fluide */
   .swiper-card-fan .swiper-slide-active {
     transform:
-      translateZ(calc(15px + var(--swipe-progress, 0) * 5px)) translateY(calc(-8px - var(--swipe-progress, 0) * 2px)) scale(calc(0.96 + var(--swipe-progress, 0) * 0.02)) rotate(calc(var(--swipe-progress, 0) * -2deg)) !important;
+      translateZ(calc(15px + var(--swipe-progress, 0) * 5px)) translateY(calc(-8px + var(--swipe-progress, 0) * -2px)) scale(calc(0.96 + var(--swipe-progress, 0) * 0.02)) rotate(calc(var(--swipe-progress, 0) * -2deg)) !important;
   }
 
   .swiper-card-fan .swiper-slide-next {
     transform:
-      translateZ(calc(5px + var(--swipe-progress, 0) * 8px)) translateY(calc(0px - var(--swipe-progress, 0) * 6px)) scale(calc(0.94 + var(--swipe-progress, 0) * 0.02)) rotate(calc(8deg - var(--swipe-progress, 0) * 8deg)) !important;
+      translateZ(calc(5px + var(--swipe-progress, 0) * 8px)) translateY(calc(0px + var(--swipe-progress, 0) * -6px)) scale(calc(0.94 + var(--swipe-progress, 0) * 0.02)) rotate(calc(8deg + var(--swipe-progress, 0) * -8deg)) !important;
   }
 
   .swiper-card-fan .swiper-slide-prev {
     transform:
-      translateZ(calc(8px - var(--swipe-progress, 0) * 3px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) scale(calc(0.96 - var(--swipe-progress, 0) * 0.01)) rotate(calc(-8deg - var(--swipe-progress, 0) * 3deg)) !important;
+      translateZ(calc(8px + var(--swipe-progress, 0) * -3px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) rotate(calc(-8deg + var(--swipe-progress, 0) * -3deg)) !important;
   }
 }
 
