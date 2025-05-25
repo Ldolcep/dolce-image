@@ -1,5 +1,5 @@
 // ========================================================================
-// === PROJECT MODAL MOBILE - FADE FONCTIONNEL + STYLE TINDER ===
+// === PROJECT MODAL MOBILE - EFFET CARTES POSTALES ===
 // ========================================================================
 
 "use client";
@@ -175,7 +175,7 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* 🔧 ZONE CARROUSEL - Espacement simplifié qui fonctionne */}
+      {/* Zone carrousel */}
       <div className="absolute inset-0 pt-16 pb-[20vh] flex flex-col items-center justify-center px-4">
         
         {/* Carrousel Swiper */}
@@ -185,12 +185,12 @@ export default function ProjectModalMobile({
               swiperRef.current = swiper;
             }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-            effect="slide" // 🔧 SLIDE au lieu de fade pour navigation garantie
-            modules={[Navigation, Pagination]} // 🔧 Modules basiques qui fonctionnent
-            spaceBetween={0} // 🔧 Pas d'espace entre slides
+            effect="slide"
+            modules={[Navigation, Pagination]}
+            spaceBetween={0}
             slidesPerView={1}
-            speed={400} // 🔧 Vitesse normale
-            threshold={3} // 🔧 Threshold normal
+            speed={400}
+            threshold={3}
             touchRatio={1}
             resistance={true}
             resistanceRatio={0.85}
@@ -198,13 +198,13 @@ export default function ProjectModalMobile({
             shortSwipes={true}
             longSwipes={true}
             longSwipesRatio={0.3}
-            centeredSlides={true} // 🔧 Slides centrées
+            centeredSlides={true}
             pagination={false}
             navigation={{
               nextEl: '.swiper-button-next-custom',
               prevEl: '.swiper-button-prev-custom',
             }}
-            className="w-full h-full swiper-tinder-mobile" // 🔧 Classe spécifique
+            className="w-full h-full swiper-tinder-mobile"
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
@@ -256,7 +256,7 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* 🔧 INDICATEURS - Retour à la logique qui fonctionnait */}
+        {/* Indicateurs */}
         {allVisuals.length > 1 && (
           <div className="mt-6 flex justify-center">
             <div className="flex space-x-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm">
