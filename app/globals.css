@@ -347,79 +347,190 @@
 }
 
 /* ===============================
-   SWIPER CUSTOM STYLES
-   À ajouter dans globals.css
+   🚀 SWIPER MODAL MOBILE - CSS COMPLET
+   Remplace tout l'ancien CSS Swiper
    ===============================*/
 
-/* Custom Bullets */
-.custom-bullet {
-  width: 10px !important;
-  height: 10px !important;
-  background: #d1d5db !important;
+/* 🔧 Scrollbar orange pour modal mobile */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #f97316;
+  /* Orange comme l'indicateur */
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+  /* Orange plus foncé au hover */
+}
+
+/* 🔧 STYLE TINDER avec fade fonctionnel */
+.swiper-tinder-style {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.swiper-tinder-style .swiper-wrapper {
+  transform-style: preserve-3d;
+}
+
+.swiper-fade .swiper-slide {
+  transition: opacity 0.35s ease-in-out !important;
+  border-radius: 0 !important;
+}
+
+.swiper-fade .swiper-slide-active {
   opacity: 1 !important;
-  margin: 0 4px !important;
+  z-index: 10 !important;
+  transform: translateZ(0) scale(1) rotate(0deg) !important;
+}
+
+.swiper-fade .swiper-slide:not(.swiper-slide-active) {
+  opacity: 0 !important;
+  z-index: 1 !important;
+}
+
+/* 🔧 Effet visuel Tinder en CSS (sans casser la navigation) */
+.swiper-tinder-style .swiper-slide {
+  transform-origin: center bottom;
+  border-radius: 0 !important;
+}
+
+/* 🔧 Animation d'entrée style Tinder */
+.swiper-tinder-style .swiper-slide-active {
+  animation: tinder-slide-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes tinder-slide-in {
+  0% {
+    transform: translateX(50px) rotate(5deg) scale(0.95);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 🔧 Suppression coins arrondis */
+.swiper-fade .swiper-slide,
+.swiper-fade .swiper-slide>div,
+.swiper-fade .swiper-slide img {
+  border-radius: 0 !important;
+}
+
+.swiper-fade * {
+  border-radius: 0 !important;
+}
+
+/* 🔧 Configuration globale Swiper pour modal mobile */
+.swiper {
+  --swiper-theme-color: #f97316;
+  /* Orange pour cohérence */
+  --swiper-navigation-size: 18px;
+}
+
+/* 🔧 Wrapper principal - transitions optimisées */
+.swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  will-change: transform !important;
+}
+
+/* 🔧 Slides individuelles - performance */
+.swiper-slide {
+  backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  will-change: transform !important;
+}
+
+/* 🔧 Navigation personnalisée mobile */
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+  width: 44px !important;
+  height: 44px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
   border-radius: 50% !important;
-  transition: all 0.3s ease !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  color: #374151 !important;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 20 !important;
   cursor: pointer !important;
 }
 
-.custom-bullet-active {
-  background: #f97316 !important;
-  /* Orange */
-  transform: scale(1.2) !important;
+.swiper-button-prev-custom:hover,
+.swiper-button-next-custom:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  color: #f97316 !important;
+  /* Orange au hover */
 }
 
-/* Pagination positioning */
-.swiper-pagination {
-  bottom: 16px !important;
-  z-index: 25 !important;
-  position: absolute !important;
+.swiper-button-prev-custom:active,
+.swiper-button-next-custom:active {
+  transform: scale(0.95) !important;
+  transition: all 0.1s ease !important;
 }
 
-.swiper-pagination-bullets {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-}
-
-/* Hide default Swiper navigation */
+/* 🔧 Masquer navigation par défaut */
 .swiper-button-next,
 .swiper-button-prev {
   display: none !important;
 }
 
-/* Cards effect customization */
-.swiper-cards .swiper-slide {
-  border-radius: 8px !important;
-  overflow: hidden !important;
-}
-
-/* Ensure proper z-index for cards */
-.swiper-cards .swiper-slide-shadow-left,
-.swiper-cards .swiper-slide-shadow-right {
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent) !important;
-}
-
-/* Custom navigation buttons positioning */
-.swiper-button-prev-custom {
-  left: 16px !important;
-}
-
+/* 🔧 Optimisations performance */
+.swiper-fade .swiper-slide,
+.swiper-button-prev-custom,
 .swiper-button-next-custom {
-  right: 16px !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .custom-bullet {
-    width: 8px !important;
-    height: 8px !important;
-    margin: 0 3px !important;
-  }
+/* 🔧 Support pour reduced motion */
+@media (prefers-reduced-motion: reduce) {
 
+  .swiper,
+  .swiper-slide,
   .swiper-button-prev-custom,
   .swiper-button-next-custom {
-    width: 44px !important;
-    height: 44px !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .swiper-fade .swiper-slide {
+    transition: opacity 0.1s ease !important;
   }
 }
+
+/* 🔧 Responsive mobile */
+@media (max-width: 768px) {
+  .swiper {
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  .swiper-wrapper {
+    cursor: grab !important;
+  }
+
+  .swiper-wrapper:active {
+    cursor: grabbing !important;
+  }
+}
+/* 🔧 Styles pour les boutons de navigation */
