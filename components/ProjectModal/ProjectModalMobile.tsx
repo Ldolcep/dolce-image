@@ -38,11 +38,38 @@ export default function ProjectModalMobile({
 }: ProjectModalMobileProps) {
   
   // ===============================
-  // ÉTAT + LIMITES
+  // 🎨 ANIMATION FLUIDE - Suivi du swipe en temps réel
+  // ===============================
+  const handleSwipeProgress = React.useCallback((swiper: any) => {
+    if (!swiper) return;
+    
+    // Calculer la progression du swipe (-1 à 1)
+    const progress = swiper.progress || 0;
+    const translate = swiper.translate || 0;
+    const maxTranslate = swiper.maxTranslate() || 1;
+    
+    // Normaliser la progression (0 à 1)
+    const normalizedProgress = Math.abs(translate / maxTranslate);
+    setSwipeProgress(Math.min(normalizedProgress, 1));
+  }, []);
+
+  const handleTransitionStart = React.useCallback(() => {
+    setIsTransitioning(true);
+  }, []);
+
+  const handleTransitionEnd = React.useCallback(() => {
+    setIsTransitioning(false);
+    setSwipeProgress(0);
+  }, []);
+
+  // ===============================
+  // ÉTAT + LIMITES + ANIMATION FLUIDE
   // ===============================
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [swipeProgress, setSwipeProgress] = useState(0); // 🎨 Progression du swipe (0-1)
+  const [isTransitioning, setIsTransitioning] = useState(false); // 🎨 État de transition
   
   const swiperRef = useRef<SwiperType>();
   const panelRef = useRef<HTMLDivElement>(null);
