@@ -179,11 +179,11 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* Zone carrousel */}
-      <div className="absolute inset-0 pt-16 pb-[20vh] flex flex-col items-center justify-center px-4">
+      {/* Zone carrousel - Ajustements pour vrais téléphones */}
+      <div className="absolute inset-0 pt-16 pb-[20vh] flex flex-col items-center justify-center px-6"> {/* 🔧 Plus de padding horizontal */}
         
-        {/* Carrousel Swiper */}
-        <div className="relative w-full max-w-sm aspect-[4/5] max-h-[60vh]">
+        {/* Carrousel Swiper - Dimensions réduites */}
+        <div className="relative w-full max-w-xs aspect-[3/4] max-h-[50vh]"> {/* 🔧 Plus petit : max-w-xs + max-h-[50vh] */}
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;

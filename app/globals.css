@@ -402,78 +402,86 @@
   /* 🃏 Ombre forte de carte */
 }
 
-/* 🃏 CARTE ACTIVE - Sortie de l'éventail, droite devant */
+/* 🃏 CARTE ACTIVE - Sortie de l'éventail, plus compacte */
 .swiper-card-fan .swiper-slide-active {
-  transform: translateZ(60px) translateY(-30px) scale(1.05) rotate(0deg) !important;
+  transform: translateZ(30px) translateY(-15px) scale(1) rotate(0deg) !important;
+  /* 🔧 Réduit : 30px au lieu de 60px */
   z-index: 15 !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
-  /* 🃏 Ombre très forte */
-  animation: card-fan-select 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25) !important;
+  animation: card-fan-select-mobile 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  /* 🔧 Animation adaptée */
 }
 
-/* 🃏 CARTES EN ÉVENTAIL - Positionnées comme dans la main */
+/* 🃏 CARTES EN ÉVENTAIL - Positions plus compactes */
 .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
-  transform: translateZ(20px) translateY(-5px) rotate(-20deg) scale(0.9) !important;
+  transform: translateZ(8px) translateY(-2px) rotate(-16deg) scale(0.92) !important;
+  /* 🔧 Plus compact */
   z-index: 8 !important;
   opacity: 0.85 !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
-  transform: translateZ(15px) translateY(-3px) rotate(-12deg) scale(0.92) !important;
+  transform: translateZ(12px) translateY(-1px) rotate(-10deg) scale(0.94) !important;
+  /* 🔧 Plus compact */
   z-index: 9 !important;
   opacity: 0.88 !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(3):not(.swiper-slide-active) {
-  transform: translateZ(10px) translateY(-1px) rotate(-6deg) scale(0.94) !important;
+  transform: translateZ(15px) translateY(0px) rotate(-5deg) scale(0.96) !important;
+  /* 🔧 Plus compact */
   z-index: 10 !important;
   opacity: 0.91 !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active) {
-  transform: translateZ(5px) translateY(-1px) rotate(6deg) scale(0.94) !important;
+  transform: translateZ(15px) translateY(0px) rotate(5deg) scale(0.96) !important;
+  /* 🔧 Plus compact */
   z-index: 10 !important;
   opacity: 0.91 !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
-  transform: translateZ(15px) translateY(-3px) rotate(12deg) scale(0.92) !important;
+  transform: translateZ(12px) translateY(-1px) rotate(10deg) scale(0.94) !important;
+  /* 🔧 Plus compact */
   z-index: 9 !important;
   opacity: 0.88 !important;
 }
 
 .swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
-  transform: translateZ(20px) translateY(-5px) rotate(20deg) scale(0.9) !important;
+  transform: translateZ(8px) translateY(-2px) rotate(16deg) scale(0.92) !important;
+  /* 🔧 Plus compact */
   z-index: 8 !important;
   opacity: 0.85 !important;
 }
 
-/* 🃏 Cartes supplémentaires (au-delà de 6) */
+/* 🃏 Cartes supplémentaires (au-delà de 6) - Plus compactes */
 .swiper-card-fan .swiper-slide:nth-child(n+7):not(.swiper-slide-active) {
-  transform: translateZ(0px) rotate(25deg) scale(0.85) !important;
+  transform: translateZ(5px) rotate(20deg) scale(0.88) !important;
+  /* 🔧 Plus compact */
   z-index: 5 !important;
   opacity: 0.7 !important;
 }
 
-/* 🃏 Animation de sélection - Carte qui sort de l'éventail */
-@keyframes card-fan-select {
+/* 🔧 Animation de sélection adaptée mobile */
+@keyframes card-fan-select-mobile {
   0% {
-    transform: translateZ(20px) translateY(-5px) rotate(var(--initial-rotation, 0deg)) scale(0.9);
+    transform: translateZ(10px) translateY(-2px) rotate(var(--initial-rotation, 0deg)) scale(0.92);
     opacity: 0.85;
   }
 
   30% {
-    transform: translateZ(40px) translateY(-15px) rotate(5deg) scale(0.98);
+    transform: translateZ(20px) translateY(-8px) rotate(3deg) scale(0.98);
     opacity: 0.95;
   }
 
   60% {
-    transform: translateZ(55px) translateY(-25px) rotate(-2deg) scale(1.02);
+    transform: translateZ(28px) translateY(-12px) rotate(-1deg) scale(1.01);
     opacity: 1;
   }
 
   100% {
-    transform: translateZ(60px) translateY(-30px) rotate(0deg) scale(1.05);
+    transform: translateZ(30px) translateY(-15px) rotate(0deg) scale(1);
     opacity: 1;
   }
 }
@@ -600,7 +608,7 @@
   -webkit-transform-style: preserve-3d !important;
 }
 
-/* 🔧 Responsive mobile */
+/* 🔧 Responsive mobile - Ajustements pour vrais téléphones */
 @media (max-width: 768px) {
   .swiper {
     touch-action: pan-y pinch-zoom !important;
@@ -614,21 +622,65 @@
     cursor: grabbing !important;
   }
 
-  /* 🃏 Ajustements éventail mobile */
+  /* 🔧 Éventail très compact pour mobile */
+  .swiper-card-fan {
+    perspective: 800px !important;
+    /* 🔧 Perspective réduite */
+  }
+
+  .swiper-card-fan .swiper-slide-active {
+    transform: translateZ(20px) translateY(-10px) scale(0.98) rotate(0deg) !important;
+    /* 🔧 Encore plus compact */
+  }
+
   .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
-    transform: translateZ(15px) translateY(-3px) rotate(-15deg) scale(0.92) !important;
+    transform: translateZ(5px) translateY(-1px) rotate(-12deg) scale(0.94) !important;
   }
 
   .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
-    transform: translateZ(12px) translateY(-2px) rotate(-8deg) scale(0.94) !important;
+    transform: translateZ(8px) translateY(0px) rotate(-6deg) scale(0.96) !important;
   }
 
-  .swiper-card-fan .swiper-slide:nth-child(n+5):not(.swiper-slide-active) {
-    transform: translateZ(12px) translateY(-2px) rotate(8deg) scale(0.94) !important;
+  .swiper-card-fan .swiper-slide:nth-child(3):not(.swiper-slide-active) {
+    transform: translateZ(10px) translateY(0px) rotate(-3deg) scale(0.97) !important;
   }
 
-  .swiper-card-fan .swiper-slide:nth-child(n+6):not(.swiper-slide-active) {
-    transform: translateZ(15px) translateY(-3px) rotate(15deg) scale(0.92) !important;
+  .swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active) {
+    transform: translateZ(10px) translateY(0px) rotate(3deg) scale(0.97) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+    transform: translateZ(8px) translateY(0px) rotate(6deg) scale(0.96) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(-1px) rotate(12deg) scale(0.94) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(n+7):not(.swiper-slide-active) {
+    transform: translateZ(2px) rotate(15deg) scale(0.92) !important;
+  }
+}
+
+/* 🔧 Ajustements pour très petits écrans */
+@media (max-width: 480px) {
+  .swiper-card-fan {
+    perspective: 600px !important;
+    /* 🔧 Perspective encore plus réduite */
+  }
+
+  .swiper-card-fan .swiper-slide-active {
+    transform: translateZ(15px) translateY(-8px) scale(0.96) rotate(0deg) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active),
+  .swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+    transform: translateZ(3px) translateY(0px) rotate(var(--rotation, 10deg)) scale(0.95) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active),
+  .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(0px) rotate(var(--rotation, 5deg)) scale(0.97) !important;
   }
 }
 
