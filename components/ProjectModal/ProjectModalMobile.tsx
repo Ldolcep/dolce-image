@@ -7,14 +7,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, EffectFade } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
 
 // Types
 interface Project {
@@ -186,12 +185,12 @@ export default function ProjectModalMobile({
               swiperRef.current = swiper;
             }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-            effect="fade" // 🔧 FADE fonctionnel pour vraie navigation
-            modules={[Navigation, Pagination, EffectFade]}
-            spaceBetween={20}
+            effect="slide" // 🔧 SLIDE au lieu de fade pour navigation garantie
+            modules={[Navigation, Pagination]} // 🔧 Modules basiques qui fonctionnent
+            spaceBetween={0} // 🔧 Pas d'espace entre slides
             slidesPerView={1}
-            speed={350}
-            threshold={3}
+            speed={400} // 🔧 Vitesse normale
+            threshold={3} // 🔧 Threshold normal
             touchRatio={1}
             resistance={true}
             resistanceRatio={0.85}
@@ -199,15 +198,13 @@ export default function ProjectModalMobile({
             shortSwipes={true}
             longSwipes={true}
             longSwipesRatio={0.3}
-            fadeEffect={{
-              crossFade: true, // 🔧 Transition croisée pour navigation claire
-            }}
+            centeredSlides={true} // 🔧 Slides centrées
             pagination={false}
             navigation={{
               nextEl: '.swiper-button-next-custom',
               prevEl: '.swiper-button-prev-custom',
             }}
-            className="w-full h-full swiper-tinder-style"
+            className="w-full h-full swiper-tinder-mobile" // 🔧 Classe spécifique
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">

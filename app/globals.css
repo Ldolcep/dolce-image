@@ -347,8 +347,7 @@
 }
 
 /* ===============================
-   🚀 SWIPER MODAL MOBILE - CSS COMPLET
-   Remplace tout l'ancien CSS Swiper
+   🚀 SWIPER MODAL MOBILE - NAVIGATION FONCTIONNELLE
    ===============================*/
 
 /* 🔧 Scrollbar orange pour modal mobile */
@@ -363,57 +362,61 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #f97316;
-  /* Orange comme l'indicateur */
   border-radius: 2px;
   transition: background 0.3s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #ea580c;
-  /* Orange plus foncé au hover */
 }
 
-/* 🔧 STYLE TINDER avec fade fonctionnel */
-.swiper-tinder-style {
-  transform-style: preserve-3d;
-  perspective: 1000px;
+/* 🔧 SWIPER MOBILE - Navigation slide fonctionnelle */
+.swiper-tinder-mobile {
+  overflow: hidden;
+  position: relative;
 }
 
-.swiper-tinder-style .swiper-wrapper {
-  transform-style: preserve-3d;
+.swiper-tinder-mobile .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  will-change: transform !important;
 }
 
-.swiper-fade .swiper-slide {
-  transition: opacity 0.35s ease-in-out !important;
+.swiper-tinder-mobile .swiper-slide {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  position: relative !important;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
   border-radius: 0 !important;
+  overflow: hidden !important;
 }
 
-.swiper-fade .swiper-slide-active {
-  opacity: 1 !important;
-  z-index: 10 !important;
+/* 🔧 Animation d'entrée Tinder style */
+.swiper-tinder-mobile .swiper-slide-active {
   transform: translateZ(0) scale(1) rotate(0deg) !important;
+  z-index: 10 !important;
+  animation: slide-in-tinder 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.swiper-fade .swiper-slide:not(.swiper-slide-active) {
-  opacity: 0 !important;
-  z-index: 1 !important;
+.swiper-tinder-mobile .swiper-slide-next {
+  transform: translateX(8px) scale(0.95) rotate(2deg) !important;
+  z-index: 5 !important;
 }
 
-/* 🔧 Effet visuel Tinder en CSS (sans casser la navigation) */
-.swiper-tinder-style .swiper-slide {
-  transform-origin: center bottom;
-  border-radius: 0 !important;
+.swiper-tinder-mobile .swiper-slide-prev {
+  transform: translateX(-8px) scale(0.95) rotate(-2deg) !important;
+  z-index: 5 !important;
 }
 
-/* 🔧 Animation d'entrée style Tinder */
-.swiper-tinder-style .swiper-slide-active {
-  animation: tinder-slide-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes tinder-slide-in {
+/* 🔧 Animation Tinder d'entrée */
+@keyframes slide-in-tinder {
   0% {
-    transform: translateX(50px) rotate(5deg) scale(0.95);
-    opacity: 0;
+    transform: translateX(100px) rotate(8deg) scale(0.9);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translateX(-10px) rotate(-1deg) scale(0.98);
+    opacity: 0.9;
   }
 
   100% {
@@ -422,38 +425,35 @@
   }
 }
 
-/* 🔧 Suppression coins arrondis */
-.swiper-fade .swiper-slide,
-.swiper-fade .swiper-slide>div,
-.swiper-fade .swiper-slide img {
+/* 🔧 Suppression totale des coins arrondis */
+.swiper-tinder-mobile .swiper-slide,
+.swiper-tinder-mobile .swiper-slide>div,
+.swiper-tinder-mobile .swiper-slide img {
   border-radius: 0 !important;
 }
 
-.swiper-fade * {
+.swiper-tinder-mobile * {
   border-radius: 0 !important;
 }
 
-/* 🔧 Configuration globale Swiper pour modal mobile */
+/* 🔧 Configuration globale optimisée */
 .swiper {
   --swiper-theme-color: #f97316;
-  /* Orange pour cohérence */
   --swiper-navigation-size: 18px;
 }
 
-/* 🔧 Wrapper principal - transitions optimisées */
 .swiper-wrapper {
   transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
   will-change: transform !important;
 }
 
-/* 🔧 Slides individuelles - performance */
 .swiper-slide {
   backface-visibility: hidden !important;
   transform-style: preserve-3d !important;
   will-change: transform !important;
 }
 
-/* 🔧 Navigation personnalisée mobile */
+/* 🔧 Navigation buttons optimisés */
 .swiper-button-prev-custom,
 .swiper-button-next-custom {
   width: 44px !important;
@@ -478,7 +478,6 @@
   transform: scale(1.05) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
   color: #f97316 !important;
-  /* Orange au hover */
 }
 
 .swiper-button-prev-custom:active,
@@ -493,30 +492,14 @@
   display: none !important;
 }
 
-/* 🔧 Optimisations performance */
-.swiper-fade .swiper-slide,
+/* 🔧 Performance optimizations */
+.swiper-tinder-mobile .swiper-slide,
 .swiper-button-prev-custom,
 .swiper-button-next-custom {
   backface-visibility: hidden !important;
   -webkit-backface-visibility: hidden !important;
   transform-style: preserve-3d !important;
   -webkit-transform-style: preserve-3d !important;
-}
-
-/* 🔧 Support pour reduced motion */
-@media (prefers-reduced-motion: reduce) {
-
-  .swiper,
-  .swiper-slide,
-  .swiper-button-prev-custom,
-  .swiper-button-next-custom {
-    transition: none !important;
-    animation: none !important;
-  }
-
-  .swiper-fade .swiper-slide {
-    transition: opacity 0.1s ease !important;
-  }
 }
 
 /* 🔧 Responsive mobile */
@@ -533,4 +516,19 @@
     cursor: grabbing !important;
   }
 }
-/* 🔧 Styles pour les boutons de navigation */
+
+/* 🔧 Support reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .swiper,
+  .swiper-slide,
+  .swiper-button-prev-custom,
+  .swiper-button-next-custom {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .swiper-tinder-mobile .swiper-slide {
+    transition: transform 0.1s ease !important;
+  }
+}
