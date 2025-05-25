@@ -204,10 +204,7 @@ export default function ProjectModalMobile({
             longSwipesRatio={0.3}
             centeredSlides={true}
             pagination={false}
-            navigation={{
-              nextEl: '.swiper-button-next-custom',
-              prevEl: '.swiper-button-prev-custom',
-            }}
+            navigation={false} // 🔧 Désactivé pour éviter conflit avec boutons manuels
             className="w-full h-full swiper-card-fan" // 🃏 Nouvelle classe pour éventail
           >
             {allVisuals.map((visual, index) => (
@@ -236,7 +233,7 @@ export default function ProjectModalMobile({
             ))}
           </Swiper>
 
-          {/* 🃏 Navigation Buttons avec états limites */}
+          {/* 🔧 Navigation Buttons - Fix double déclenchement mobile */}
           {allVisuals.length > 1 && (
             <>
               <button 
@@ -247,7 +244,18 @@ export default function ProjectModalMobile({
                 }`}
                 aria-label="Image précédente"
                 disabled={isAtStart}
-                onClick={() => !isAtStart && swiperRef.current?.slidePrev()}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  if (!isAtStart) {
+                    swiperRef.current?.slidePrev();
+                  }
+                }}
+                onMouseDown={(e) => {
+                  // PC/Desktop - fallback pour souris
+                  if (!('ontouchstart' in window) && !isAtStart) {
+                    swiperRef.current?.slidePrev();
+                  }
+                }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="m15 18-6-6 6-6"/>
@@ -262,7 +270,18 @@ export default function ProjectModalMobile({
                 }`}
                 aria-label="Image suivante"
                 disabled={isAtEnd}
-                onClick={() => !isAtEnd && swiperRef.current?.slideNext()}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  if (!isAtEnd) {
+                    swiperRef.current?.slideNext();
+                  }
+                }}
+                onMouseDown={(e) => {
+                  // PC/Desktop - fallback pour souris
+                  if (!('ontouchstart' in window) && !isAtEnd) {
+                    swiperRef.current?.slideNext();
+                  }
+                }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="m9 18 6-6-6-6"/>
