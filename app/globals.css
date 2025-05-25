@@ -34,11 +34,21 @@
     @apply bg-background text-foreground;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-great-vibes;
   }
 
-  p, span, a, button, input, textarea {
+  p,
+  span,
+  a,
+  button,
+  input,
+  textarea {
     @apply font-poppins;
   }
 
@@ -221,10 +231,23 @@
     background-position: -100% 0;
     opacity: 0;
   }
-  15% { opacity: 0.3; }
-  40% { opacity: 0.7; }
-  60% { opacity: 0.7; }
-  85% { opacity: 0.3; }
+
+  15% {
+    opacity: 0.3;
+  }
+
+  40% {
+    opacity: 0.7;
+  }
+
+  60% {
+    opacity: 0.7;
+  }
+
+  85% {
+    opacity: 0.3;
+  }
+
   100% {
     background-position: 200% 0;
     opacity: 0;
@@ -240,8 +263,8 @@
   perspective: 1000px;
   cursor: default;
   transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-              box-shadow 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   will-change: transform, box-shadow;
 }
 
@@ -271,12 +294,10 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.15),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent);
   background-size: 200% 100%;
   opacity: 0;
   transition: opacity 0.5s ease;
@@ -505,8 +526,14 @@
 .swiper-wrapper {
   transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
   will-change: transform !important;
+  cursor: grab !important;
 }
 
+.swiper-wrapper:active {
+  cursor: grabbing !important;
+}
+
+/* 🔧 Swiper slide base */
 .swiper-slide {
   backface-visibility: hidden !important;
   transform-style: preserve-3d !important;
@@ -571,14 +598,6 @@
     touch-action: pan-y pinch-zoom !important;
   }
 
-  .swiper-wrapper {
-    cursor: grab !important;
-  }
-
-  .swiper-wrapper:active {
-    cursor: grabbing !important;
-  }
-
   /* 🎨 Réduction des effets pour performance mobile */
   .swiper-card-fan {
     perspective: 600px !important;
@@ -599,87 +618,41 @@
     transform:
       translateZ(calc(8px + var(--swipe-progress, 0) * -3px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) rotate(calc(-8deg + var(--swipe-progress, 0) * -3deg)) !important;
   }
-}
 
-/* 🔧 Ajustements pour très petits écrans */
-@media (max-width: 480px) {
-  .swiper-card-fan {
-    perspective: 400px !important;
+  /* 🔧 Éventail très compact pour mobile */
+  .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(-1px) rotate(-12deg) scale(0.94) !important;
   }
 
-  /* 🎨 Animation encore plus subtile pour petits écrans */
-  .swiper-card-fan .swiper-slide-active {
-    transform:
-      translateZ(calc(10px + var(--swipe-progress, 0) * 3px)) translateY(calc(-5px - var(--swipe-progress, 0) * 2px)) scale(calc(0.98 + var(--swipe-progress, 0) * 0.01)) !important;
-  }
-}
-
-/* 🔧 Support reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .swiper-card-fan .swiper-slide {
-    transition: transform 0.3s ease, opacity 0.3s ease !important;
+  .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
+    transform: translateZ(8px) translateY(0px) rotate(-6deg) scale(0.96) !important;
   }
 
-  /* 🎨 Désactiver animation fluide si motion réduite */
-  .swiper-card-fan .swiper-slide-active,
-  .swiper-card-fan .swiper-slide-next,
-  .swiper-card-fan .swiper-slide-prev {
-    transform: translateZ(20px) !important;
+  .swiper-card-fan .swiper-slide:nth-child(3):not(.swiper-slide-active) {
+    transform: translateZ(10px) translateY(0px) rotate(-3deg) scale(0.97) !important;
   }
-}
 
-cursor: grab !important;
-}
+  .swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active) {
+    transform: translateZ(10px) translateY(0px) rotate(3deg) scale(0.97) !important;
+  }
 
-.swiper-wrapper:active {
-  cursor: grabbing !important;
-}
+  .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+    transform: translateZ(8px) translateY(0px) rotate(6deg) scale(0.96) !important;
+  }
 
-/* 🔧 Éventail très compact pour mobile */
-.swiper-card-fan {
-  perspective: 800px !important;
-  /* 🔧 Perspective réduite */
-}
+  .swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(-1px) rotate(12deg) scale(0.94) !important;
+  }
 
-.swiper-card-fan .swiper-slide-active {
-  transform: translateZ(20px) translateY(-10px) scale(0.98) rotate(0deg) !important;
-  /* 🔧 Encore plus compact */
-}
-
-.swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
-  transform: translateZ(5px) translateY(-1px) rotate(-12deg) scale(0.94) !important;
-}
-
-.swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
-  transform: translateZ(8px) translateY(0px) rotate(-6deg) scale(0.96) !important;
-}
-
-.swiper-card-fan .swiper-slide:nth-child(3):not(.swiper-slide-active) {
-  transform: translateZ(10px) translateY(0px) rotate(-3deg) scale(0.97) !important;
-}
-
-.swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active) {
-  transform: translateZ(10px) translateY(0px) rotate(3deg) scale(0.97) !important;
-}
-
-.swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
-  transform: translateZ(8px) translateY(0px) rotate(6deg) scale(0.96) !important;
-}
-
-.swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
-  transform: translateZ(5px) translateY(-1px) rotate(12deg) scale(0.94) !important;
-}
-
-.swiper-card-fan .swiper-slide:nth-child(n+7):not(.swiper-slide-active) {
-  transform: translateZ(2px) rotate(15deg) scale(0.92) !important;
-}
+  .swiper-card-fan .swiper-slide:nth-child(n+7):not(.swiper-slide-active) {
+    transform: translateZ(2px) rotate(15deg) scale(0.92) !important;
+  }
 }
 
 /* 🔧 Ajustements pour très petits écrans */
 @media (max-width: 480px) {
   .swiper-card-fan {
     perspective: 600px !important;
-    /* 🔧 Perspective encore plus réduite */
   }
 
   .swiper-card-fan .swiper-slide-active {
