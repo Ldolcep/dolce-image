@@ -52,9 +52,9 @@ export default function Footer() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M16.5 6.5v6a3.5 3.5 0 1 1-7 0V10" />
-                <path d="M16.5 3a3.5 3.5 0 0 0-3.5 3.5H8" />
-                <path d="M8 14a3.5 3.5 0 1 0 0-7" />
+                <path d="M16.805 7.42A5.194 5.194 0 0 1 12.17 3.5v10.36a3.181 3.181 0 1 1-3.18-3.18v0" />
+                <path d="M12.17 3.5a5.192 5.192 0 0 0-4.634 3.92" />
+                <path d="M8.99 14.018a3.181 3.181 0 1 0 0-6.362" />
               </svg>
             </Link>
           </div>
