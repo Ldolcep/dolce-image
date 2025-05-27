@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectModal from "./ProjectModal" 
-import FillerCard from "./filler-card" // Nouveau import
+import FillerCard from "./filler-card" 
 
 // Définir les types de base
 interface Project {
@@ -251,7 +251,7 @@ export default function ProjectGallery() {
   return (
     <section id="projects" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
-        <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
+        <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Nos Projets</h2>
 
         {/* Grille masonry */}
         <div className="masonry-grid">

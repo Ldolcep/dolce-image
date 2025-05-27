@@ -12,7 +12,7 @@ export default function Footer() {
 
           <div className="flex space-x-6">
             <Link
-              href="https://instagram.com/dolce"
+              href="https://instagram.com/groupedolce"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -35,10 +35,10 @@ export default function Footer() {
               </svg>
             </Link>
             <Link
-              href="https://linkedin.com/company/dolce"
+              href="https://tiktok.com/@groupedolce"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="LinkedIn"
+              aria-label="TikTok"
               className="text-black hover:text-primary-orange transition-colors"
             >
               <svg
@@ -52,31 +52,9 @@ export default function Footer() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                <rect x="2" y="9" width="4" height="12"></rect>
-                <circle cx="4" cy="4" r="2"></circle>
-              </svg>
-            </Link>
-            <Link
-              href="https://dribbble.com/dolce"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Dribbble"
-              className="text-black hover:text-primary-orange transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"></path>
+                <path d="M16.5 6.5v6a3.5 3.5 0 1 1-7 0V10" />
+                <path d="M16.5 3a3.5 3.5 0 0 0-3.5 3.5H8" />
+                <path d="M8 14a3.5 3.5 0 1 0 0-7" />
               </svg>
             </Link>
           </div>
