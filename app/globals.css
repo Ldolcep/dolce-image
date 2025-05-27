@@ -409,7 +409,7 @@
   flex-shrink: 0 !important;
   width: 100% !important;
   position: relative !important;
-  border-radius: 8px !important;
+  border-radius: 0px !important;
   overflow: hidden !important;
   transform-style: preserve-3d;
   backface-visibility: hidden;
@@ -503,7 +503,7 @@
     linear-gradient(45deg, transparent 60%, rgba(255, 255, 255, 0.05) 100%);
   pointer-events: none;
   z-index: 1;
-  border-radius: 8px;
+  border-radius: 0px;
 }
 
 /* 🎨 Bordure subtile de carte */
@@ -512,7 +512,7 @@
   position: absolute;
   inset: 0;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 0px;
   pointer-events: none;
   z-index: 2;
 }
