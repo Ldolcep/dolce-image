@@ -6,7 +6,7 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "*.{js,ts,jsx,tsx,mdx}",
+    "*.{js,ts,jsx,tsx,mdx}", // Assurez-vous que ce glob est correct pour votre structure
   ],
   theme: {
     extend: {
@@ -19,9 +19,9 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        "primary-orange": "#F7A520",
-        "primary-blue": "#09478E",
-        "primary-black": "#000000",
+        "primary-orange": "#F7A520", // Vous pouvez aussi utiliser var(--color-primary-orange) ici si défini dans :root
+        "primary-blue": "#09478E",   // idem
+        "primary-black": "#000000",  // idem
         "secondary-orange": "#F9AF3F",
         "secondary-cream-1": "#EFE4E4",
         "secondary-cream-2": "#F0E9E6",
@@ -59,8 +59,16 @@ const config: Config = {
         ring: "hsl(var(--ring))",
       },
       fontFamily: {
-        "great-vibes": ["var(--font-great-vibes)"],
-        poppins: ["var(--font-poppins)"],
+        // Nouvelle configuration des polices
+        'sans': ['var(--font-montserrat)', 'sans-serif'],        // Pour le corps du texte (Montserrat)
+        'serif-display': ['var(--font-dm-serif-display)', 'serif'], // Pour les titres (DM Serif Display)
+
+        // Si vous voulez toujours utiliser les anciennes clés avec les nouvelles polices
+        // pour une transition plus douce dans votre CSS/classes, vous pouvez faire :
+        // "great-vibes": ['var(--font-dm-serif-display)', 'serif'], // Remplace l'ancien great-vibes par DM Serif Display
+        // poppins: ['var(--font-montserrat)', 'sans-serif'],      // Remplace l'ancien poppins par Montserrat
+        // Sinon, supprimez les anciennes clés si vous ne les utilisez plus directement
+        // et que vous passez par `font-sans` et `font-serif-display` dans votre CSS.
       },
       borderRadius: {
         lg: "var(--radius)",
