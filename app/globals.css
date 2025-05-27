@@ -99,7 +99,7 @@
 /* Masonry Grid avec CSS Columns - simple et fiable */
 .masonry-grid {
   column-count: 1;
-  column-gap: 20px;
+  column-gap: 60px;
 }
 
 @media (min-width: 640px) {
@@ -122,7 +122,7 @@
 
 .masonry-item {
   break-inside: avoid;
-  margin-bottom: 20px;
+  margin-bottom: 60px;
   position: relative;
 }
 
