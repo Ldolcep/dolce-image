@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="relative h-16 w-16 mb-4 md:mb-0">
-            <Image src="/images/DOLCE_LOGO_SECONDAIRE.png" alt="Dolce" fill className="object-contain" />
+            <Image src="/images/DOLCE_LOGO_SHORT.png" alt="Dolce" fill className="object-contain" />
           </div>
 
           <div className="flex space-x-6">
