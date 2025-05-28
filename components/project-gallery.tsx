@@ -47,7 +47,7 @@ const projectsData = {
       mainVisual: "/images/projects/ellipse-real-estate-main.jpg",
       additionalVisuals: [
         "/images/projects/ellipse-real-estate-gallery-1.jpg",
-        "/images/projects/web-design-2.jpg",
+        "/images/projects/ellipse-real-estate-gallery-2.jpg",
         "/images/projects/web-design-3.jpg",
       ],
       description: [
@@ -251,7 +251,7 @@ export default function ProjectGallery() {
   return (
     <section id="projects" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
-        <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Nos Projets</h2>
+        <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Portfolio</h2>
 
         {/* Grille masonry */}
         <div className="masonry-grid">
