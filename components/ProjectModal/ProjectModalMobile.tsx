@@ -210,7 +210,7 @@ export default function ProjectModalMobile({
       <div className="absolute inset-0 pt-16 pb-[20vh] flex flex-col items-center justify-center px-6"> {/* 🔧 Plus de padding horizontal */}
         
         {/* Carrousel Swiper - Dimensions réduites */}
-        <div className="relative w-full max-w-xs aspect-[3/4] max-h-[50vh]"> {/* 🔧 Plus petit : max-w-xs + max-h-[50vh] */}
+        <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]"> {/* 🔧 Plus petit : max-w-xs + max-h-[50vh] */}
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
