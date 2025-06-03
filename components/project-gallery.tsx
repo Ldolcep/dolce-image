@@ -7,12 +7,12 @@ import FillerCard from "./filler-card"
 
 // Définir les types de base
 interface Project {
-  id: string
-  title: string
-  mainVisual: string
-  additionalVisuals: string[]
-  description: string
-  link: string
+  id: string;
+  title: string;
+  mainVisual: string;
+  additionalVisuals: string[];
+  description: string | string[];
+  link: string;
 }
 
 // Interface pour les fillers (sans textContent)
