@@ -32,13 +32,18 @@ const projectsData = {
       title: "Le Boudoir Miadana",
       mainVisual: "/images/projects/le-boudoir-miadana-main.jpg",
       additionalVisuals: [
-        "/images/projects/le-boudoir-miadana-gallery-1.jpg",
-        "/images/projects/le-boudoir-miadana-gallery-2.jpg",
-        "/images/projects/le-boudoir-miadana-gallery-3.jpg",
-        "/images/projects/le-boudoir-miadana-gallery-4.jpg",
-        "/images/projects/le-boudoir-miadana-gallery-5.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-1.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-2.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-3.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-4.jpg",
+        "/images/projectsLe Boudoir de Miadana/le-boudoir-miadana-gallery-5.jpg",
       ],
-      description: "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
+      description: [
+
+        "Situé à Toulon, Le Boudoir Miadana est un salon de beauté du regard spécialisé dans les extensions de cils, offrant une expérience chaleureuse et sensorielle.",
+        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
+        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
+      ],
       link: "https://ellipse-real-estate.com/",
     },
     {
