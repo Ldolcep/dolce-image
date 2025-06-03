@@ -1,12 +1,18 @@
-// components/ProjectModalDesktop.tsx
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect, useRef, useMemo, useCallback } from "react"
-import Image from "next/image"
-import { X, ChevronLeft, ChevronRight } from 'lucide-react'
-import DOMPurify from 'dompurify'
-import { type Project } from '@/lib/validations/project'
+import type React from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import Image from "next/image";
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+
+export interface Project {
+  id: string
+  title: string
+  mainVisual: string
+  additionalVisuals: string[]
+  description: string | string[]
+  link: string
+}
 
 interface ProjectModalDesktopProps {
   project: Project
@@ -15,21 +21,43 @@ interface ProjectModalDesktopProps {
 }
 
 export default function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopProps) {
-  // ... (hooks et logique existants inchangés)
   const allVisuals = useMemo(() => [project.mainVisual, ...project.additionalVisuals].filter(Boolean), [project]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
   const [isMounted, setIsMounted] = useState(false);
+  const [DOMPurify, setDOMPurify] = useState<any>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageColumnRef = useRef<HTMLDivElement>(null);
   const descriptionColumnRef = useRef<HTMLDivElement>(null);
 
+  // Charger DOMPurify côté client uniquement
+  useEffect(() => {
+    const loadDOMPurify = async () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const { default: DOMPurifyLib } = await import('dompurify');
+          setDOMPurify(DOMPurifyLib);
+        } catch (error) {
+          console.warn('DOMPurify non disponible:', error);
+        }
+      }
+    };
+    
+    loadDOMPurify();
+    setIsMounted(true);
+  }, []);
+
   // Fonction de sanitisation sécurisée
   const sanitizeDescription = useCallback((description: string | string[]) => {
-    const ALLOWED_TAGS = ['strong', 'em', 'br', 'p', 'span']
-    const ALLOWED_ATTR = ['class']
+    // Si DOMPurify n'est pas chargé, retourner tel quel (fallback sécurisé)
+    if (!DOMPurify) {
+      return description;
+    }
+
+    const ALLOWED_TAGS = ['strong', 'em', 'br', 'p', 'span'];
+    const ALLOWED_ATTR = ['class'];
 
     if (Array.isArray(description)) {
       return description.map(paragraph => 
@@ -39,7 +67,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
           FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
         })
-      )
+      );
     }
     
     return DOMPurify.sanitize(description, {
@@ -47,11 +75,8 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
       ALLOWED_ATTR,
       FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
       FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
-    })
-  }, [])
-
-  // ... (reste de la logique existante)
-  useEffect(() => { setIsMounted(true); }, []);
+    });
+  }, [DOMPurify]);
 
   const prevIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
   const nextIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
@@ -67,16 +92,74 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     const newIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
     setCurrentImageIndex(newIndex);
   }, [currentImageIndex, allVisuals.length]);
+  
+  // Effects
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentImageIndex(0);
+      setImagesLoaded({});
+    }
+  }, [project, isOpen]);
 
-  // Fallbacks de sécurité
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    if (isOpen && isMounted) { 
+      timeoutId = setTimeout(() => setIsAnimating(true), 50); 
+    }
+    else { 
+      setIsAnimating(false); 
+    }
+    return () => { if (timeoutId) clearTimeout(timeoutId); };
+  }, [isOpen, isMounted]);
+
+  useEffect(() => {
+    if (!isMounted || !isOpen) return;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+        try { 
+          if (modalRef.current && !modalRef.current.contains(event.target as Node)) onClose(); 
+        }
+        catch (error) { 
+          console.error("Click outside error:", error); 
+          onClose(); 
+        }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen, onClose, isMounted]);
+
+  useEffect(() => {
+    if (!isMounted || !isOpen) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (!isOpen) return;
+        if (e.key === "Escape") { 
+          onClose(); 
+        }
+        else if (allVisuals.length > 1) {
+            if (e.key === "ArrowRight") { 
+              handleNext(); 
+            }
+            else if (e.key === "ArrowLeft") { 
+              handlePrevious(); 
+            }
+        }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isMounted, onClose, allVisuals.length, handleNext, handlePrevious]);
+
+  // Render fallback
   if (!isMounted) {
     if (!isOpen) return null;
     return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>;
   }
   if (!isOpen) return null;
 
-  // Sanitiser la description avant le rendu
-  const sanitizedDescription = sanitizeDescription(project.description)
+  // Sanitiser la description (avec fallback si DOMPurify pas chargé)
+  const sanitizedDescription = sanitizeDescription(project.description);
 
   return (
     <div 
@@ -91,7 +174,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
         className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl" 
         style={{ transform: isAnimating ? 'scale(1)' : 'scale(0.95)', opacity: isAnimating ? 1 : 0 }}
       >
-        {/* Colonne Image (inchangée) */}
+        {/* Colonne Image */}
         <div className="w-full md:w-1/2 relative" ref={imageColumnRef}>
           <div className="relative" style={{ aspectRatio: '4/5' }}>
             {allVisuals[currentImageIndex] && (
@@ -105,11 +188,45 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
                 key={allVisuals[currentImageIndex]} 
               />
             )}
-            {/* Navigation et indicateurs... (code existant) */}
+            {allVisuals.length > 1 && (
+              <>
+                <button 
+                  onClick={handlePrevious} 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
+                  aria-label="Image précédente"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={handleNext} 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
+                  aria-label="Image suivante"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+            {allVisuals.length > 1 && (
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center">
+                <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                  {allVisuals.map((_, index) => (
+                    <button 
+                      key={index} 
+                      onClick={() => setCurrentImageIndex(index)} 
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'
+                      }`} 
+                      aria-label={`Aller à l'image ${index + 1}`} 
+                      aria-current={currentImageIndex === index ? "step" : undefined}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Colonne Description SÉCURISÉE */}
+        {/* Colonne Description */}
         <div className="w-full md:w-1/2 p-8 overflow-y-auto" ref={descriptionColumnRef}>
           <h2 
             id={`modal-title-${project.id}`} 
@@ -118,9 +235,9 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             {project.title}
           </h2>
           
-          {/* Section de description sécurisée */}
           <div className="font-poppins text-base text-gray-700 leading-relaxed">
-            {Array.isArray(sanitizedDescription) ? (
+            {DOMPurify && Array.isArray(sanitizedDescription) ? (
+              // Si DOMPurify est chargé et description est un array
               sanitizedDescription.map((paragraph, i) => (
                 <p 
                   key={i} 
@@ -128,10 +245,17 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
                   dangerouslySetInnerHTML={{ __html: paragraph }} 
                 />
               ))
+            ) : DOMPurify && typeof sanitizedDescription === 'string' ? (
+              // Si DOMPurify est chargé et description est un string
+              <p dangerouslySetInnerHTML={{ __html: sanitizedDescription }} />
+            ) : Array.isArray(project.description) ? (
+              // Fallback sans DOMPurify - array
+              project.description.map((paragraph, i) => (
+                <p key={i} className="mb-4 last:mb-0">{paragraph}</p>
+              ))
             ) : (
-              <p 
-                dangerouslySetInnerHTML={{ __html: sanitizedDescription }} 
-              />
+              // Fallback sans DOMPurify - string
+              <p>{project.description}</p>
             )}
           </div>
 

@@ -1,7 +1,3 @@
-// ========================================================================
-// === PROJECT MODAL MOBILE - EFFET CARTES POSTALES ===
-// ========================================================================
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -9,14 +5,13 @@ import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
-import DOMPurify from 'dompurify';
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-// Types - Alignés avec la nouvelle structure
+// Types
 interface Project {
   id: string;
   title: string;
@@ -38,33 +33,47 @@ export default function ProjectModalMobile({
   onClose 
 }: ProjectModalMobileProps) {
   
-  // ===============================
-  // 🎨 ANIMATION FLUIDE - Suivi du swipe en temps réel
-  // ===============================
-  const handleSwipeProgress = useCallback((swiper: any) => {
-    if (!swiper) return;
+  // États
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPanelExpanded, setIsPanelExpanded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [swipeProgress, setSwipeProgress] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [DOMPurify, setDOMPurify] = useState<any>(null);
+  
+  const swiperRef = useRef<SwiperType>();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const gripRef = useRef<HTMLDivElement>(null);
+
+  const allVisuals = React.useMemo(() => 
+    [project.mainVisual, ...project.additionalVisuals].filter(Boolean), 
+    [project]
+  );
+
+  // Charger DOMPurify côté client uniquement
+  useEffect(() => {
+    const loadDOMPurify = async () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const { default: DOMPurifyLib } = await import('dompurify');
+          setDOMPurify(DOMPurifyLib);
+        } catch (error) {
+          console.warn('DOMPurify non disponible:', error);
+        }
+      }
+    };
     
-    // Calculer la progression du swipe (-1 à 1)
-    const progress = swiper.progress || 0;
-    const translate = swiper.translate || 0;
-    const maxTranslate = swiper.maxTranslate() || 1;
-    
-    // Normaliser la progression (0 à 1)
-    const normalizedProgress = Math.abs(translate / maxTranslate);
-    setSwipeProgress(Math.min(normalizedProgress, 1));
+    loadDOMPurify();
+    setIsMounted(true);
   }, []);
 
-  const handleTransitionStart = useCallback(() => {
-    setIsTransitioning(true);
-  }, []);
-
-  const handleTransitionEnd = useCallback(() => {
-    setIsTransitioning(false);
-    setSwipeProgress(0);
-  }, []);
-
-  // Fonction de sanitisation sécurisée pour mobile
+  // Fonction de sanitisation sécurisée
   const sanitizeDescription = useCallback((description: string | string[]) => {
+    if (!DOMPurify) {
+      return description;
+    }
+
     const ALLOWED_TAGS = ['strong', 'em', 'br', 'p', 'span'];
     const ALLOWED_ATTR = ['class'];
 
@@ -85,34 +94,32 @@ export default function ProjectModalMobile({
       FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
       FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
     });
+  }, [DOMPurify]);
+
+  // Callbacks Swiper
+  const handleSwipeProgress = useCallback((swiper: any) => {
+    if (!swiper) return;
+    const progress = swiper.progress || 0;
+    const translate = swiper.translate || 0;
+    const maxTranslate = swiper.maxTranslate() || 1;
+    const normalizedProgress = Math.abs(translate / maxTranslate);
+    setSwipeProgress(Math.min(normalizedProgress, 1));
   }, []);
 
-  // ===============================
-  // ÉTAT + LIMITES + ANIMATION FLUIDE
-  // ===============================
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPanelExpanded, setIsPanelExpanded] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [swipeProgress, setSwipeProgress] = useState(0); // 🎨 Progression du swipe (0-1)
-  const [isTransitioning, setIsTransitioning] = useState(false); // 🎨 État de transition
-  
-  const swiperRef = useRef<SwiperType>();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const gripRef = useRef<HTMLDivElement>(null);
+  const handleTransitionStart = useCallback(() => {
+    setIsTransitioning(true);
+  }, []);
 
-  const allVisuals = React.useMemo(() => 
-    [project.mainVisual, ...project.additionalVisuals].filter(Boolean), 
-    [project]
-  );
+  const handleTransitionEnd = useCallback(() => {
+    setIsTransitioning(false);
+    setSwipeProgress(0);
+  }, []);
 
-  // 🔧 États des boutons aux limites
+  // États des boutons aux limites
   const isAtStart = currentIndex === 0;
   const isAtEnd = currentIndex === allVisuals.length - 1;
 
-  // ===============================
-  // PANEL LOGIC
-  // ===============================
+  // Panel Logic
   const panelStartY = useRef(0);
   const panelCurrentY = useRef(0);
   const isDraggingPanel = useRef(false);
@@ -138,7 +145,6 @@ export default function ProjectModalMobile({
 
   const handlePanelTouchMove = (e: React.TouchEvent) => {
     if (!isDraggingPanel.current) return;
-    
     e.preventDefault();
     
     const deltaY = e.touches[0].clientY - panelStartY.current;
@@ -172,13 +178,7 @@ export default function ProjectModalMobile({
     }
   };
 
-  // ===============================
-  // EFFECTS
-  // ===============================
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
+  // Effects
   useEffect(() => {
     if (isOpen) {
       setCurrentIndex(0);
@@ -196,12 +196,10 @@ export default function ProjectModalMobile({
     }
   }, [isMounted, isPanelExpanded]);
 
-  // ===============================
-  // RENDER
-  // ===============================
+  // Render
   if (!isMounted || !isOpen) return null;
 
-  // Sanitiser la description avant le rendu
+  // Sanitiser la description
   const sanitizedDescription = sanitizeDescription(project.description);
 
   return (
@@ -219,25 +217,17 @@ export default function ProjectModalMobile({
           </svg>
         </button>
         
-        <h2 
-          className="flex-1 text-center text-black font-semibold truncate mx-3"
-          style={{ 
-            fontFamily: 'var(--font-great-vibes), cursive',
-            fontSize: '1.4rem',
-            letterSpacing: '0.01em',
-            lineHeight: '1.2'
-          }}
-        >
+        <h2 className="flex-1 text-center text-black font-semibold truncate mx-3 font-great-vibes text-xl">
           {project.title}
         </h2>
         
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* Zone carrousel - Ajustements pour vrais téléphones */}
+      {/* Zone carrousel */}
       <div className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center px-6">
         
-        {/* Carrousel Swiper - Dimensions réduites */}
+        {/* Carrousel Swiper */}
         <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]">
           <Swiper
             onBeforeInit={(swiper) => {
@@ -263,7 +253,7 @@ export default function ProjectModalMobile({
             centeredSlides={true}
             pagination={false}
             navigation={false}
-            className="w-full h-full swiper-card-fan"
+            className="w-full h-full"
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
@@ -277,7 +267,6 @@ export default function ProjectModalMobile({
                     priority={index === 0}
                   />
                   
-                  {/* Frame pour image active */}
                   {index === currentIndex && (
                     <div 
                       className="absolute inset-0 pointer-events-none"
@@ -295,7 +284,7 @@ export default function ProjectModalMobile({
           {allVisuals.length > 1 && (
             <>
               <button 
-                className={`swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                className={`absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
                   isAtStart 
                     ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' 
                     : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer'
@@ -320,7 +309,7 @@ export default function ProjectModalMobile({
               </button>
 
               <button 
-                className={`swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                className={`absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
                   isAtEnd 
                     ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' 
                     : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer'
@@ -387,22 +376,16 @@ export default function ProjectModalMobile({
         >
           <div className="w-12 h-1 bg-gray-400 rounded-full mb-1.5 shadow-sm"></div>
           {!isPanelExpanded && (
-            <span 
-              className="font-semibold text-gray-600 uppercase tracking-wider font-poppins"
-              style={{ 
-                fontSize: '1rem',
-                lineHeight: '1'
-              }}
-            >
+            <span className="font-semibold text-gray-600 uppercase tracking-wider font-poppins text-sm">
               Description
             </span>
           )}
         </div>
 
-        {/* Contenu avec description sécurisée */}
+        {/* Contenu */}
         <div 
           ref={contentRef}
-          className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto custom-scrollbar"
+          className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto"
           style={{ 
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y'
@@ -413,9 +396,9 @@ export default function ProjectModalMobile({
               isPanelExpanded ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {/* Section de description sécurisée */}
+            {/* Description avec fallback */}
             <div className="font-poppins text-sm text-gray-700 leading-relaxed">
-              {Array.isArray(sanitizedDescription) ? (
+              {DOMPurify && Array.isArray(sanitizedDescription) ? (
                 sanitizedDescription.map((paragraph, i) => (
                   <p 
                     key={i} 
@@ -423,10 +406,14 @@ export default function ProjectModalMobile({
                     dangerouslySetInnerHTML={{ __html: paragraph }} 
                   />
                 ))
+              ) : DOMPurify && typeof sanitizedDescription === 'string' ? (
+                <p dangerouslySetInnerHTML={{ __html: sanitizedDescription }} />
+              ) : Array.isArray(project.description) ? (
+                project.description.map((paragraph, i) => (
+                  <p key={i} className="mb-4 last:mb-0">{paragraph}</p>
+                ))
               ) : (
-                <p 
-                  dangerouslySetInnerHTML={{ __html: sanitizedDescription }} 
-                />
+                <p>{project.description}</p>
               )}
             </div>
           </div>
