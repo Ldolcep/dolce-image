@@ -4,18 +4,19 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
+import DOMPurify from 'dompurify';
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-// Types
+// Types - Alignés avec la nouvelle structure
 interface Project {
   id: string;
   title: string;
@@ -40,7 +41,7 @@ export default function ProjectModalMobile({
   // ===============================
   // 🎨 ANIMATION FLUIDE - Suivi du swipe en temps réel
   // ===============================
-  const handleSwipeProgress = React.useCallback((swiper: any) => {
+  const handleSwipeProgress = useCallback((swiper: any) => {
     if (!swiper) return;
     
     // Calculer la progression du swipe (-1 à 1)
@@ -53,13 +54,37 @@ export default function ProjectModalMobile({
     setSwipeProgress(Math.min(normalizedProgress, 1));
   }, []);
 
-  const handleTransitionStart = React.useCallback(() => {
+  const handleTransitionStart = useCallback(() => {
     setIsTransitioning(true);
   }, []);
 
-  const handleTransitionEnd = React.useCallback(() => {
+  const handleTransitionEnd = useCallback(() => {
     setIsTransitioning(false);
     setSwipeProgress(0);
+  }, []);
+
+  // Fonction de sanitisation sécurisée pour mobile
+  const sanitizeDescription = useCallback((description: string | string[]) => {
+    const ALLOWED_TAGS = ['strong', 'em', 'br', 'p', 'span'];
+    const ALLOWED_ATTR = ['class'];
+
+    if (Array.isArray(description)) {
+      return description.map(paragraph => 
+        DOMPurify.sanitize(paragraph, {
+          ALLOWED_TAGS,
+          ALLOWED_ATTR,
+          FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+          FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
+        })
+      );
+    }
+    
+    return DOMPurify.sanitize(description, {
+      ALLOWED_TAGS,
+      ALLOWED_ATTR,
+      FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+      FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
+    });
   }, []);
 
   // ===============================
@@ -176,6 +201,9 @@ export default function ProjectModalMobile({
   // ===============================
   if (!isMounted || !isOpen) return null;
 
+  // Sanitiser la description avant le rendu
+  const sanitizedDescription = sanitizeDescription(project.description);
+
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none">
       {/* Header */}
@@ -194,7 +222,7 @@ export default function ProjectModalMobile({
         <h2 
           className="flex-1 text-center text-black font-semibold truncate mx-3"
           style={{ 
-            fontFamily: 'Montserrat, sans-serif',
+            fontFamily: 'var(--font-great-vibes), cursive',
             fontSize: '1.4rem',
             letterSpacing: '0.01em',
             lineHeight: '1.2'
@@ -207,15 +235,18 @@ export default function ProjectModalMobile({
       </div>
 
       {/* Zone carrousel - Ajustements pour vrais téléphones */}
-      <div className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center px-6"> {/* 🔧 Plus de padding horizontal */}
+      <div className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center px-6">
         
         {/* Carrousel Swiper - Dimensions réduites */}
-        <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]"> {/* 🔧 Plus petit : max-w-xs + max-h-[50vh] */}
+        <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]">
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
             }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
+            onProgress={handleSwipeProgress}
+            onTransitionStart={handleTransitionStart}
+            onTransitionEnd={handleTransitionEnd}
             effect="slide"
             modules={[Navigation, Pagination]}
             spaceBetween={0}
@@ -231,8 +262,8 @@ export default function ProjectModalMobile({
             longSwipesRatio={0.3}
             centeredSlides={true}
             pagination={false}
-            navigation={false} // 🔧 Désactivé pour éviter conflit avec boutons manuels
-            className="w-full h-full swiper-card-fan" // 🃏 Nouvelle classe pour éventail
+            navigation={false}
+            className="w-full h-full swiper-card-fan"
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
@@ -260,7 +291,7 @@ export default function ProjectModalMobile({
             ))}
           </Swiper>
 
-          {/* 🔧 Navigation Buttons - Fix double déclenchement mobile */}
+          {/* Navigation Buttons */}
           {allVisuals.length > 1 && (
             <>
               <button 
@@ -278,7 +309,6 @@ export default function ProjectModalMobile({
                   }
                 }}
                 onMouseDown={(e) => {
-                  // PC/Desktop - fallback pour souris
                   if (!('ontouchstart' in window) && !isAtStart) {
                     swiperRef.current?.slidePrev();
                   }
@@ -304,7 +334,6 @@ export default function ProjectModalMobile({
                   }
                 }}
                 onMouseDown={(e) => {
-                  // PC/Desktop - fallback pour souris
                   if (!('ontouchstart' in window) && !isAtEnd) {
                     swiperRef.current?.slideNext();
                   }
@@ -359,9 +388,8 @@ export default function ProjectModalMobile({
           <div className="w-12 h-1 bg-gray-400 rounded-full mb-1.5 shadow-sm"></div>
           {!isPanelExpanded && (
             <span 
-              className="font-semibold text-gray-600 uppercase tracking-wider"
+              className="font-semibold text-gray-600 uppercase tracking-wider font-poppins"
               style={{ 
-                fontFamily: 'Montserrat, sans-serif',
                 fontSize: '1rem',
                 lineHeight: '1'
               }}
@@ -371,7 +399,7 @@ export default function ProjectModalMobile({
           )}
         </div>
 
-        {/* Contenu avec scrollbar stylée */}
+        {/* Contenu avec description sécurisée */}
         <div 
           ref={contentRef}
           className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto custom-scrollbar"
@@ -385,18 +413,22 @@ export default function ProjectModalMobile({
               isPanelExpanded ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {Array.isArray(project.description) 
-              ? project.description.map((p, i) => (
-                  <p key={i} className="text-gray-700 text-sm leading-relaxed">
-                    {p}
-                  </p>
+            {/* Section de description sécurisée */}
+            <div className="font-poppins text-sm text-gray-700 leading-relaxed">
+              {Array.isArray(sanitizedDescription) ? (
+                sanitizedDescription.map((paragraph, i) => (
+                  <p 
+                    key={i} 
+                    className="mb-4 last:mb-0" 
+                    dangerouslySetInnerHTML={{ __html: paragraph }} 
+                  />
                 ))
-              : (
-                  <p className="text-gray-700 text-sm leading-relaxed">
-                    {project.description}
-                  </p>
-                )
-            }
+              ) : (
+                <p 
+                  dangerouslySetInnerHTML={{ __html: sanitizedDescription }} 
+                />
+              )}
+            </div>
           </div>
           
           {project.link && isPanelExpanded && (
@@ -404,8 +436,7 @@ export default function ProjectModalMobile({
               href={project.link} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="block mt-6 text-blue-600 hover:underline text-sm font-medium"
-              style={{ fontFamily: 'Montserrat, sans-serif' }}
+              className="block mt-6 text-blue-600 hover:underline text-sm font-medium font-poppins"
             >
               Visiter le site du projet →
             </a>

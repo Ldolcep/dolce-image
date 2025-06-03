@@ -3,26 +3,36 @@
     {
       "id": "1",
       "title": "Le Boudoir Miadana",
-      "mainVisual": "/images/projects/le-boudoir-miadana-main.jpg",
+      "mainVisual": "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-main.jpg",
       "additionalVisuals": [
-        "/images/projects/brand-identity-1.jpg",
-        "/images/projects/brand-identity-2.jpg",
-        "/images/projects/brand-identity-3.jpg"
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-1.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-2.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-3.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-4.jpg",
       ],
-      "description": "A complete brand identity redesign for a luxury fashion brand, focusing on elegance and minimalism while maintaining brand recognition.",
-      "link": "https://example.com/brand-identity"
+      "description": [
+
+        "<em>Situé à Toulon, Le Boudoir Miadana est un salon de beauté du regard spécialisé dans les extensions de cils, offrant une expérience chaleureuse et sensorielle.</em>",
+        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
+        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
+      ],
+      "link": "https://ellipse-real-estate.com/",
     },
     {
       "id": "2",
       "title": "Ellipse Real Estate",
       "mainVisual": "/images/projects/ellipse-real-estate-main.jpg",
       "additionalVisuals": [
-        "/images/projects/web-design-1.jpg",
-        "/images/projects/web-design-2.jpg",
-        "/images/projects/web-design-3.jpg"
+        "/images/projects/ellipse-real-estate-gallery-1.jpg",
+        "/images/projects/ellipse-real-estate-gallery-2.jpg",
+        "/images/projects/web-design-3.jpg",
       ],
-      "description": "A responsive e-commerce website with a focus on user experience and conversion optimization, resulting in a 40% increase in sales.",
-      "link": "https://ellipse-real-estate.com/"
+      "description": [
+        "ELLIPSE REAL ESTATE est un groupe immobilier spécialisé dans les biens d'exception, basé à Nice, dans le sud de la France.",
+        "Dans le cadre de leur volonté d'expansion et de l'ouverture d'une seconde agence en Grèce, sur l'île de Zakynthos, leur souhait était de moderniser leur identité visuelle ainsi que leur présence digitale.",
+        "Nous avons dans un premier temps imaginé un nouveau logo, élégant et intemporel, reflètant la prestance, le luxe et l'esprit grec. Nous avons également réalisé une refonte complète de leur site internet."
+      ],
+      "link": "https://ellipse-real-estate.com/",
     },
     {
       "id": "3",
@@ -31,34 +41,47 @@
       "additionalVisuals": [
         "/images/projects/digital-marketing-1.jpg",
         "/images/projects/digital-marketing-2.jpg",
-        "/images/projects/digital-marketing-3.jpg"
+        "/images/projects/digital-marketing-3.jpg",
       ],
       "description": "A comprehensive digital marketing campaign that increased brand awareness by 65% and generated a 3x return on ad spend.",
-      "link": "https://example.com/digital-marketing"
+      "link": "https://example.com/digital-marketing",
     },
     {
       "id": "4",
       "title": "Dolce",
       "mainVisual": "/images/projects/dolce-main.jpg",
       "additionalVisuals": [
-        "/images/projects/social-media-1.jpg",
-        "/images/projects/social-media-2.jpg",
-        "/images/projects/social-media-3.jpg"
+        "/images/projects/dolce-gallery-1.jpg",
+        "/images/projects/dolce-gallery-2.jpg",
+        "/images/projects/dolce-gallery-3.jpg",
+        "/images/projects/dolce-gallery-4.jpg",
       ],
-      "description": "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
-      "link": "https://example.com/social-media"
+      "description": [
+        "Notre première mission a bien entendu été celle de développer notre propre identité visuelle.",
+        "DOLCE puise son inspiration de la beauté de la Méditerranée, de l'élégance de la French Riviera des années 60 et de la Dolce Vita.",
+        "Notre souhait était donc d'avoir une identité visuelle qui retranscrirait cette inspiration avec une touche de modernité.",
+        "Le logo inspire l’élégance, la typographie dotée de sérifs confére une touche de sophistication et de finesse.",
+        "Le jeu graphique réalisé avec la lettre ‘o’. crée une dualité visuelle captivante. Les éléments graphiques reprennent la forme de vagues, tracées au pinceau pour induire la dimension artistique."
+      ],
+      "link":" "https://example.com/social-media",
     },
     {
       "id": "5",
       "title": "Ilios Immobilier",
       "mainVisual": "/images/projects/ilios-immobilier-main.jpg",
       "additionalVisuals": [
-        "/images/projects/ui-ux-1.jpg",
-        "/images/projects/ui-ux-2.jpg",
-        "/images/projects/ui-ux-3.jpg"
+        "/images/projects/ilios-immobilier-gallery-1.jpg",
+        "/images/projects/ilios-immobilier-gallery-2.jpg",
+        "/images/projects/ilios-immobilier-gallery-3.jpg",
+        "/images/projects/ilios-immobilier-gallery-4.jpg",
+        "/images/projects/ilios-immobilier-gallery-5.jpg",
       ],
-      "description": "A complete user interface and experience redesign for a mobile app, resulting in a 60% increase in user retention.",
-      "link": "https://example.com/ui-ux"
+      "description": [
+        "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
+        "Nous avons conçu un logotype moderne et dynamique, reflétant la nature technologique et innovante de l'application.",
+        "L'identité visuelle s'accompagne d'un système graphique cohérent qui a été décliné sur l'ensemble des supports de communication."
+      ],
+      "link": "https://example.com/ui-ux",
     },
     {
       "id": "6",
@@ -67,10 +90,39 @@
       "additionalVisuals": [
         "/images/projects/pickup-gallery-1.jpg",
         "/images/projects/pickup-gallery-2.jpg",
-        "/images/projects/pickup-gallery-3.jpg"
+        "/images/projects/pickup-gallery-3.jpg",
       ],
-      "description": "A content strategy and creation service that increased organic traffic by 85% and conversions by 35% within 6 months.",
+      "description": [
+        "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
+        "Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.",
+        "La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.",
+        "L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
+        "Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature."
+      ],
       "link": "https://example.com/content"
+    }
+  ],
+  "fillers": [
+    {
+      "id": "filler_1",
+      "backgroundImage": "/images/fillers/filler_1_bg.jpg",
+      "textImage": "/images/fillers/filler_1_text.png", 
+      "aspectRatio": "4/3",
+      "isFiller": true
+    },
+    {
+      "id": "filler_2",
+      "backgroundImage": "/images/fillers/filler_2_bg.jpg",
+      "textImage": "/images/fillers/filler_2_text.png",
+      "aspectRatio": "3/2",
+      "isFiller": true
+    },
+    {
+      "id": "filler_3",
+      "backgroundImage": "/images/fillers/filler_3_bg.jpg",
+      "textImage": "/images/fillers/filler_3_text.png",
+      "aspectRatio": "4/3",
+     "isFiller": true
     }
   ]
 }
