@@ -31,9 +31,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   const imageColumnRef = useRef<HTMLDivElement>(null);
   const descriptionColumnRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { 
-    setIsMounted(true); 
-  }, []);
+  useEffect(() => { setIsMounted(true); }, []);
 
   const prevIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
   const nextIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
@@ -50,7 +48,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     setCurrentImageIndex(newIndex);
   }, [currentImageIndex, allVisuals.length]);
   
-  // Effects
+  // --- EFFECTS ---
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(0);
@@ -68,6 +66,76 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     }
     return () => { if (timeoutId) clearTimeout(timeoutId); };
   }, [isOpen, isMounted]);
+
+  useEffect(() => {
+    if (!isMounted || !isOpen || !allVisuals?.length) return;
+    
+    const preloadImage = (src: string): Promise<void> => {
+        if (imagesLoaded[src]) return Promise.resolve();
+        return new Promise((resolve) => {
+            if (typeof window === 'undefined' || typeof window.Image === 'undefined') { 
+              resolve(); 
+              return; 
+            }
+            const img = new window.Image();
+            img.onload = () => { 
+              setImagesLoaded(prev => ({ ...prev, [src]: true })); 
+              resolve(); 
+            };
+            img.onerror = () => { 
+              console.error(`Preload error: ${src}`); 
+              resolve(); 
+            };
+            img.src = src;
+        });
+    };
+    
+    const preloadAllImages = async () => {
+        try {
+            const priorityIndices = [...new Set([currentImageIndex, nextIndex, prevIndex])];
+            await Promise.all(priorityIndices.map(idx => allVisuals[idx] ? preloadImage(allVisuals[idx]) : Promise.resolve()));
+            
+            const otherImages = allVisuals.filter((_, i) => !priorityIndices.includes(i));
+            Promise.all(otherImages.map(src => src ? preloadImage(src) : Promise.resolve()));
+        } catch (error) { 
+          console.error("Preload error:", error); 
+        }
+    };
+    
+    preloadAllImages();
+  }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
+
+  useEffect(() => {
+    if (!isMounted || !isOpen) { 
+      try { 
+        if (descriptionColumnRef.current) descriptionColumnRef.current.style.maxHeight = ''; 
+      } catch (e) {} 
+      return; 
+    }
+    
+    const adjustHeight = () => {
+        try {
+            if (imageColumnRef.current && descriptionColumnRef.current) {
+                descriptionColumnRef.current.style.maxHeight = `${imageColumnRef.current.offsetHeight}px`;
+            } else if (descriptionColumnRef.current) {
+                descriptionColumnRef.current.style.maxHeight = '';
+            }
+        } catch (error) { 
+          console.error("Height sync error:", error); 
+        }
+    };
+    
+    const timerId = setTimeout(adjustHeight, 150); 
+    window.addEventListener('resize', adjustHeight);
+    
+    return () => { 
+      clearTimeout(timerId); 
+      window.removeEventListener('resize', adjustHeight); 
+      try { 
+        if (descriptionColumnRef.current) descriptionColumnRef.current.style.maxHeight = ''; 
+      } catch(e) {} 
+    };
+  }, [isOpen, currentImageIndex, isMounted]);
 
   useEffect(() => {
     if (!isMounted || !isOpen) return;
@@ -108,7 +176,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, isMounted, onClose, allVisuals.length, handleNext, handlePrevious]);
 
-  // Render fallback
+  // --- RENDER FALLBACK ---
   if (!isMounted) {
     if (!isOpen) return null;
     return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>;
@@ -128,7 +196,6 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
         className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl" 
         style={{ transform: isAnimating ? 'scale(1)' : 'scale(0.95)', opacity: isAnimating ? 1 : 0 }}
       >
-        {/* Colonne Image */}
         <div className="w-full md:w-1/2 relative" ref={imageColumnRef}>
           <div className="relative" style={{ aspectRatio: '4/5' }}>
             {allVisuals[currentImageIndex] && (
@@ -179,8 +246,6 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             )}
           </div>
         </div>
-
-        {/* Colonne Description - SANS DOMPurify temporairement */}
         <div className="w-full md:w-1/2 p-8 overflow-y-auto" ref={descriptionColumnRef}>
           <h2 
             id={`modal-title-${project.id}`} 
@@ -188,19 +253,13 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           >
             {project.title}
           </h2>
-          
           <div className="font-poppins text-base text-gray-700 leading-relaxed">
             {Array.isArray(project.description) ? (
-              project.description.map((paragraph, i) => (
-                <p key={i} className="mb-4 last:mb-0">
-                  {paragraph}
-                </p>
-              ))
+              project.description.map((p, i) => <p key={i} className="mb-4 last:mb-0">{p}</p>)
             ) : (
               <p>{project.description}</p>
             )}
           </div>
-
           {project.link && (
             <a 
               href={project.link} 
@@ -212,7 +271,6 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             </a>
           )}
         </div>
-
         <button 
           className="absolute -top-5 -right-5 z-20 bg-primary-orange text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-orange/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-orange" 
           onClick={onClose} 
