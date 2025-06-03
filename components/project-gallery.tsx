@@ -30,13 +30,13 @@ const projectsData = {
     {
       id: "1",
       title: "Le Boudoir Miadana",
-      mainVisual: "/images/projects/le-boudoir-miadana-main.jpg",
+      mainVisual: "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-main.jpg",
       additionalVisuals: [
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-1.jpg",
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-2.jpg",
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-3.jpg",
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-4.jpg",
-        "/images/projectsLe Boudoir de Miadana/le-boudoir-miadana-gallery-5.jpg",
+        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-5.jpg",
       ],
       description: [
 
