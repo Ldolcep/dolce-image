@@ -36,7 +36,6 @@ const projectsData = {
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-2.jpg",
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-3.jpg",
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-4.jpg",
-        "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-5.jpg",
       ],
       description: [
 
