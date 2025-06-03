@@ -39,7 +39,6 @@ export default function ProjectModalMobile({
   const [isMounted, setIsMounted] = useState(false);
   const [swipeProgress, setSwipeProgress] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [DOMPurify, setDOMPurify] = useState<any>(null);
   
   const swiperRef = useRef<SwiperType>();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -50,51 +49,6 @@ export default function ProjectModalMobile({
     [project.mainVisual, ...project.additionalVisuals].filter(Boolean), 
     [project]
   );
-
-  // Charger DOMPurify côté client uniquement
-  useEffect(() => {
-    const loadDOMPurify = async () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const { default: DOMPurifyLib } = await import('dompurify');
-          setDOMPurify(DOMPurifyLib);
-        } catch (error) {
-          console.warn('DOMPurify non disponible:', error);
-        }
-      }
-    };
-    
-    loadDOMPurify();
-    setIsMounted(true);
-  }, []);
-
-  // Fonction de sanitisation sécurisée
-  const sanitizeDescription = useCallback((description: string | string[]) => {
-    if (!DOMPurify) {
-      return description;
-    }
-
-    const ALLOWED_TAGS = ['strong', 'em', 'br', 'p', 'span'];
-    const ALLOWED_ATTR = ['class'];
-
-    if (Array.isArray(description)) {
-      return description.map(paragraph => 
-        DOMPurify.sanitize(paragraph, {
-          ALLOWED_TAGS,
-          ALLOWED_ATTR,
-          FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-          FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
-        })
-      );
-    }
-    
-    return DOMPurify.sanitize(description, {
-      ALLOWED_TAGS,
-      ALLOWED_ATTR,
-      FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-      FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
-    });
-  }, [DOMPurify]);
 
   // Callbacks Swiper
   const handleSwipeProgress = useCallback((swiper: any) => {
@@ -180,6 +134,10 @@ export default function ProjectModalMobile({
 
   // Effects
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (isOpen) {
       setCurrentIndex(0);
       setIsPanelExpanded(false);
@@ -198,9 +156,6 @@ export default function ProjectModalMobile({
 
   // Render
   if (!isMounted || !isOpen) return null;
-
-  // Sanitiser la description
-  const sanitizedDescription = sanitizeDescription(project.description);
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-hidden select-none">
@@ -357,7 +312,7 @@ export default function ProjectModalMobile({
         )}
       </div>
 
-      {/* Panel Description */}
+      {/* Panel Description - SANS DOMPurify temporairement */}
       <div 
         ref={panelRef}
         className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40"
@@ -396,19 +351,9 @@ export default function ProjectModalMobile({
               isPanelExpanded ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {/* Description avec fallback */}
+            {/* Description simple SANS HTML */}
             <div className="font-poppins text-sm text-gray-700 leading-relaxed">
-              {DOMPurify && Array.isArray(sanitizedDescription) ? (
-                sanitizedDescription.map((paragraph, i) => (
-                  <p 
-                    key={i} 
-                    className="mb-4 last:mb-0" 
-                    dangerouslySetInnerHTML={{ __html: paragraph }} 
-                  />
-                ))
-              ) : DOMPurify && typeof sanitizedDescription === 'string' ? (
-                <p dangerouslySetInnerHTML={{ __html: sanitizedDescription }} />
-              ) : Array.isArray(project.description) ? (
+              {Array.isArray(project.description) ? (
                 project.description.map((paragraph, i) => (
                   <p key={i} className="mb-4 last:mb-0">{paragraph}</p>
                 ))

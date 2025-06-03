@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import type React from "react";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import Image from "next/image";
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import type React from "react"
+import { useState, useEffect, useRef, useMemo, useCallback } from "react"
+import Image from "next/image"
+import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export interface Project {
   id: string
@@ -26,57 +26,14 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   const [isAnimating, setIsAnimating] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
   const [isMounted, setIsMounted] = useState(false);
-  const [DOMPurify, setDOMPurify] = useState<any>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageColumnRef = useRef<HTMLDivElement>(null);
   const descriptionColumnRef = useRef<HTMLDivElement>(null);
 
-  // Charger DOMPurify côté client uniquement
-  useEffect(() => {
-    const loadDOMPurify = async () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const { default: DOMPurifyLib } = await import('dompurify');
-          setDOMPurify(DOMPurifyLib);
-        } catch (error) {
-          console.warn('DOMPurify non disponible:', error);
-        }
-      }
-    };
-    
-    loadDOMPurify();
-    setIsMounted(true);
+  useEffect(() => { 
+    setIsMounted(true); 
   }, []);
-
-  // Fonction de sanitisation sécurisée
-  const sanitizeDescription = useCallback((description: string | string[]) => {
-    // Si DOMPurify n'est pas chargé, retourner tel quel (fallback sécurisé)
-    if (!DOMPurify) {
-      return description;
-    }
-
-    const ALLOWED_TAGS = ['strong', 'em', 'br', 'p', 'span'];
-    const ALLOWED_ATTR = ['class'];
-
-    if (Array.isArray(description)) {
-      return description.map(paragraph => 
-        DOMPurify.sanitize(paragraph, {
-          ALLOWED_TAGS,
-          ALLOWED_ATTR,
-          FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-          FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
-        })
-      );
-    }
-    
-    return DOMPurify.sanitize(description, {
-      ALLOWED_TAGS,
-      ALLOWED_ATTR,
-      FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-      FORBID_ATTR: ['onclick', 'onload', 'onerror', 'javascript']
-    });
-  }, [DOMPurify]);
 
   const prevIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
   const nextIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
@@ -158,9 +115,6 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   }
   if (!isOpen) return null;
 
-  // Sanitiser la description (avec fallback si DOMPurify pas chargé)
-  const sanitizedDescription = sanitizeDescription(project.description);
-
   return (
     <div 
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300" 
@@ -226,7 +180,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           </div>
         </div>
 
-        {/* Colonne Description */}
+        {/* Colonne Description - SANS DOMPurify temporairement */}
         <div className="w-full md:w-1/2 p-8 overflow-y-auto" ref={descriptionColumnRef}>
           <h2 
             id={`modal-title-${project.id}`} 
@@ -236,25 +190,13 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           </h2>
           
           <div className="font-poppins text-base text-gray-700 leading-relaxed">
-            {DOMPurify && Array.isArray(sanitizedDescription) ? (
-              // Si DOMPurify est chargé et description est un array
-              sanitizedDescription.map((paragraph, i) => (
-                <p 
-                  key={i} 
-                  className="mb-4 last:mb-0" 
-                  dangerouslySetInnerHTML={{ __html: paragraph }} 
-                />
-              ))
-            ) : DOMPurify && typeof sanitizedDescription === 'string' ? (
-              // Si DOMPurify est chargé et description est un string
-              <p dangerouslySetInnerHTML={{ __html: sanitizedDescription }} />
-            ) : Array.isArray(project.description) ? (
-              // Fallback sans DOMPurify - array
+            {Array.isArray(project.description) ? (
               project.description.map((paragraph, i) => (
-                <p key={i} className="mb-4 last:mb-0">{paragraph}</p>
+                <p key={i} className="mb-4 last:mb-0">
+                  {paragraph}
+                </p>
               ))
             ) : (
-              // Fallback sans DOMPurify - string
               <p>{project.description}</p>
             )}
           </div>
