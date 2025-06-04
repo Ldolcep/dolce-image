@@ -462,24 +462,42 @@
    🎨 SWIPER MODAL MOBILE - ANIMATION FLUIDE TEMPS RÉEL
    ===============================*/
 
-/* 🔧 Scrollbar orange pour modal mobile */
+/* 🔧 Scrollbar orange pour modal mobile et desktop */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
+  /* Plus large pour desktop */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 2px;
+  background: #fff3e0;
+  /* Fond crème clair assorti à votre palette */
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #f97316;
-  border-radius: 2px;
-  transition: background 0.3s ease;
+  background: #f7a520;
+  /* Votre couleur orange principale */
+  border-radius: 3px;
+  transition: all 0.3s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
+  background: #e89410;
+  /* Orange plus foncé au survol */
+  box-shadow: 0 0 6px rgba(247, 165, 32, 0.4);
+}
+
+/* Support Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #f7a520 #fff3e0;
+}
+
+/* Ajustement mobile - scrollbar plus fine */
+@media (max-width: 768px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
 }
 
 /* 🎨 ANIMATION ÉVENTAIL FLUIDE - Suit le mouvement du doigt */

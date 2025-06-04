@@ -106,37 +106,60 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     preloadAllImages();
   }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
 
+  // Gestion améliorée de la hauteur et du scroll
   useEffect(() => {
-    if (!isMounted || !isOpen) { 
-      try { 
-        if (descriptionColumnRef.current) descriptionColumnRef.current.style.maxHeight = ''; 
-      } catch (e) {} 
-      return; 
+    if (!isMounted || !isOpen) {
+      if (descriptionColumnRef.current) {
+        descriptionColumnRef.current.style.maxHeight = '';
+        descriptionColumnRef.current.style.overflowY = 'hidden';
+        descriptionColumnRef.current.classList.remove('custom-scrollbar');
+      }
+      return;
     }
-    
-    const adjustHeight = () => {
-        try {
-            if (imageColumnRef.current && descriptionColumnRef.current) {
-                descriptionColumnRef.current.style.maxHeight = `${imageColumnRef.current.offsetHeight}px`;
-            } else if (descriptionColumnRef.current) {
-                descriptionColumnRef.current.style.maxHeight = '';
-            }
-        } catch (error) { 
-          console.error("Height sync error:", error); 
+
+    const adjustHeightAndScroll = () => {
+      if (imageColumnRef.current && descriptionColumnRef.current) {
+        const imageHeight = imageColumnRef.current.offsetHeight;
+        descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
+
+        // Vérifier si le contenu dépasse la hauteur de l'image
+        if (descriptionColumnRef.current.scrollHeight > imageHeight) {
+          descriptionColumnRef.current.style.overflowY = 'auto';
+          descriptionColumnRef.current.classList.add('custom-scrollbar');
+        } else {
+          descriptionColumnRef.current.style.overflowY = 'hidden';
+          descriptionColumnRef.current.classList.remove('custom-scrollbar');
         }
+      } else if (descriptionColumnRef.current) {
+        descriptionColumnRef.current.style.maxHeight = '';
+        descriptionColumnRef.current.style.overflowY = 'hidden';
+        descriptionColumnRef.current.classList.remove('custom-scrollbar');
+      }
     };
-    
-    const timerId = setTimeout(adjustHeight, 150); 
-    window.addEventListener('resize', adjustHeight);
-    
-    return () => { 
-      clearTimeout(timerId); 
-      window.removeEventListener('resize', adjustHeight); 
-      try { 
-        if (descriptionColumnRef.current) descriptionColumnRef.current.style.maxHeight = ''; 
-      } catch(e) {} 
+
+    // Ajuster immédiatement et après un délai pour le chargement du contenu
+    adjustHeightAndScroll();
+    const timerId = setTimeout(adjustHeightAndScroll, 150);
+
+    // Observer les changements de taille du contenu
+    const resizeObserver = new ResizeObserver(adjustHeightAndScroll);
+    if (descriptionColumnRef.current) {
+      resizeObserver.observe(descriptionColumnRef.current);
+    }
+
+    window.addEventListener('resize', adjustHeightAndScroll);
+
+    return () => {
+      clearTimeout(timerId);
+      window.removeEventListener('resize', adjustHeightAndScroll);
+      resizeObserver.disconnect();
+      if (descriptionColumnRef.current) {
+        descriptionColumnRef.current.style.maxHeight = '';
+        descriptionColumnRef.current.style.overflowY = 'hidden';
+        descriptionColumnRef.current.classList.remove('custom-scrollbar');
+      }
     };
-  }, [isOpen, currentImageIndex, isMounted]);
+  }, [isOpen, currentImageIndex, allVisuals, isMounted, project.description]);
 
   useEffect(() => {
     if (!isMounted || !isOpen) return;
@@ -247,7 +270,11 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             )}
           </div>
         </div>
-        <div className="w-full md:w-1/2 p-8 overflow-y-auto" ref={descriptionColumnRef}>
+        <div 
+          className="w-full md:w-1/2 p-8"
+          ref={descriptionColumnRef}
+          style={{ overflowY: 'hidden' }}
+        >
           <h2 
             id={`modal-title-${project.id}`} 
             className="font-koolegant text-2xl md:text-3xl font-medium mb-4"
@@ -256,12 +283,10 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           </h2>
           <div className="text-base text-gray-700 leading-relaxed prose lg:prose-base">
             {Array.isArray(project.description) ? (
-              // Cas où project.description EST un tableau
               project.description.map((markdownContent, i) => (
                 <ReactMarkdown key={i}>{markdownContent}</ReactMarkdown>
               ))
             ) : (
-              // Cas où project.description N'EST PAS un tableau (c'est une chaîne unique)
               <ReactMarkdown>{project.description}</ReactMarkdown>
             )}
           </div>

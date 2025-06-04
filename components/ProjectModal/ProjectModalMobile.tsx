@@ -206,11 +206,11 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
 
-      {/* Zone carrousel - Ajustements pour vrais téléphones */}
-      <div className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center px-6"> {/* 🔧 Plus de padding horizontal */}
+      {/* Zone carrousel - Largeur étendue pour tablette */}
+      <div className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center w-[92%] mx-auto sm:w-[85%] md:w-[80%]">
         
-        {/* Carrousel Swiper - Dimensions réduites */}
-        <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]"> {/* 🔧 Plus petit : max-w-xs + max-h-[50vh] */}
+        {/* Carrousel Swiper */}
+        <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]">
           <Swiper
             onBeforeInit={(swiper) => {
               swiperRef.current = swiper;
@@ -231,8 +231,8 @@ export default function ProjectModalMobile({
             longSwipesRatio={0.3}
             centeredSlides={true}
             pagination={false}
-            navigation={false} // 🔧 Désactivé pour éviter conflit avec boutons manuels
-            className="w-full h-full swiper-card-fan" // 🃏 Nouvelle classe pour éventail
+            navigation={false}
+            className="w-full h-full swiper-card-fan"
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
@@ -260,7 +260,7 @@ export default function ProjectModalMobile({
             ))}
           </Swiper>
 
-          {/* 🔧 Navigation Buttons - Fix double déclenchement mobile */}
+          {/* Navigation Buttons */}
           {allVisuals.length > 1 && (
             <>
               <button 
@@ -278,7 +278,6 @@ export default function ProjectModalMobile({
                   }
                 }}
                 onMouseDown={(e) => {
-                  // PC/Desktop - fallback pour souris
                   if (!('ontouchstart' in window) && !isAtStart) {
                     swiperRef.current?.slidePrev();
                   }
@@ -304,7 +303,6 @@ export default function ProjectModalMobile({
                   }
                 }}
                 onMouseDown={(e) => {
-                  // PC/Desktop - fallback pour souris
                   if (!('ontouchstart' in window) && !isAtEnd) {
                     swiperRef.current?.slideNext();
                   }
@@ -339,10 +337,10 @@ export default function ProjectModalMobile({
         )}
       </div>
 
-      {/* Panel Description */}
+      {/* Panel Description - Largeur étendue avec coins arrondis */}
       <div 
         ref={panelRef}
-        className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40"
+        className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40 w-[92%] mx-auto sm:w-[85%] md:w-[80%]"
         style={{
           height: '38vh',
           transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 6vh)'})`
@@ -380,7 +378,7 @@ export default function ProjectModalMobile({
           }}
         >
           <div 
-            className={`space-y-4 pt-2 transition-opacity duration-300 prose  prose-sm ${
+            className={`space-y-4 pt-2 transition-opacity duration-300 prose prose-sm ${
               isPanelExpanded ? 'opacity-100' : 'opacity-0'
             }`}
           >
