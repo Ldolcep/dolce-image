@@ -107,48 +107,45 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
 
   // Gestion améliorée de la hauteur et du scroll
+
   useEffect(() => {
     if (!isMounted || !isOpen) {
       if (descriptionColumnRef.current) {
         descriptionColumnRef.current.style.maxHeight = '';
         descriptionColumnRef.current.style.overflowY = 'hidden';
-        descriptionColumnRef.current.classList.remove('custom-scrollbar');
       }
       return;
     }
-
+  
     const adjustHeightAndScroll = () => {
       if (imageColumnRef.current && descriptionColumnRef.current) {
         const imageHeight = imageColumnRef.current.offsetHeight;
         descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
-
-        // Vérifier si le contenu dépasse la hauteur de l'image
+        
+        // Toujours activer le scroll pour la cohérence visuelle
+        descriptionColumnRef.current.style.overflowY = 'auto';
+        
+        // Vérifier si le contenu dépasse pour afficher ou non la scrollbar
         if (descriptionColumnRef.current.scrollHeight > imageHeight) {
-          descriptionColumnRef.current.style.overflowY = 'auto';
-          descriptionColumnRef.current.classList.add('custom-scrollbar');
+          // Le contenu dépasse, la scrollbar sera visible
+          descriptionColumnRef.current.classList.add('has-overflow');
         } else {
-          descriptionColumnRef.current.style.overflowY = 'hidden';
-          descriptionColumnRef.current.classList.remove('custom-scrollbar');
+          // Le contenu ne dépasse pas, mais on garde overflow:auto
+          descriptionColumnRef.current.classList.remove('has-overflow');
         }
-      } else if (descriptionColumnRef.current) {
-        descriptionColumnRef.current.style.maxHeight = '';
-        descriptionColumnRef.current.style.overflowY = 'hidden';
-        descriptionColumnRef.current.classList.remove('custom-scrollbar');
       }
     };
-
-    // Ajuster immédiatement et après un délai pour le chargement du contenu
+  
     adjustHeightAndScroll();
     const timerId = setTimeout(adjustHeightAndScroll, 150);
-
-    // Observer les changements de taille du contenu
+  
     const resizeObserver = new ResizeObserver(adjustHeightAndScroll);
     if (descriptionColumnRef.current) {
       resizeObserver.observe(descriptionColumnRef.current);
     }
-
+  
     window.addEventListener('resize', adjustHeightAndScroll);
-
+  
     return () => {
       clearTimeout(timerId);
       window.removeEventListener('resize', adjustHeightAndScroll);
@@ -156,7 +153,6 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
       if (descriptionColumnRef.current) {
         descriptionColumnRef.current.style.maxHeight = '';
         descriptionColumnRef.current.style.overflowY = 'hidden';
-        descriptionColumnRef.current.classList.remove('custom-scrollbar');
       }
     };
   }, [isOpen, currentImageIndex, allVisuals, isMounted, project.description]);
@@ -271,7 +267,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           </div>
         </div>
         <div 
-          className="w-full md:w-1/2 p-8"
+          className="w-full md:w-1/2 p-8 custom-scrollbar"
           ref={descriptionColumnRef}
           style={{ overflowY: 'hidden' }}
         >
