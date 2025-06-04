@@ -76,19 +76,19 @@ const hardcodedProjectsData = {
     {
       id: "4",
       title: "Dolce",
-      mainVisual: "/images/projects/dolce-main.jpg",
+      mainVisual: "/images/projects/Dolce/dolce-main.jpg",
       additionalVisuals: [
-        "/images/projects/dolce-gallery-1.jpg",
-        "/images/projects/dolce-gallery-2.jpg",
-        "/images/projects/dolce-gallery-3.jpg",
-        "/images/projects/dolce-gallery-4.jpg",
+        "/images/projects/Dolce/dolce-gallery-2.jpg",
+        "/images/projects/Dolce/dolce-gallery-3.jpg",
+        "/images/projects/Dolce/dolce-gallery-4.jpg",
+        "/images/projects/Dolce/dolce-gallery-5.jpg",
+        "/images/projects/Dolce/dolce-gallery-6.jpg",
+        "/images/projects/Dolce/dolce-gallery-7.jpg"
       ],
-      description: [
-        "Notre première mission a bien entendu été celle de développer notre propre identité visuelle.",
-        "DOLCE puise son inspiration de la beauté de la Méditerranée, de l'élégance de la French Riviera des années 60 et de la Dolce Vita.",
-        "Notre souhait était donc d'avoir une identité visuelle qui retranscrirait cette inspiration avec une touche de modernité.",
-        "Le logo inspire l’élégance, la typographie dotée de sérifs confére une touche de sophistication et de finesse.",
-        "Le jeu graphique réalisé avec la lettre ‘o’. crée une dualité visuelle captivante. Les éléments graphiques reprennent la forme de vagues, tracées au pinceau pour induire la dimension artistique."
+      description: [ 
+        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l’élégance intemporelle de la French Riviera des années 60 et l’art de vivre de la Dolce Vita",
+        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre 'O' crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
+        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
       ],
       link: "https://example.com/social-media",
     },
