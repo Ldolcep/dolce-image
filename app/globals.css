@@ -1,6 +1,68 @@
+/* globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/**
+ * ========================================
+ * FONT DECLARATIONS
+ * ========================================
+ */
+
+/* Koolegant pour les titres */
+@font-face {
+  font-family: 'Koolegant';
+  src: url('/fonts/Koolegant.woff2') format('woff2');
+  /* Adaptez si vous convertissez en .woff2 */
+  font-weight: normal;
+  /* Supposons que c'est un poids normal/regular */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Cocogoose pour le corps du texte */
+@font-face {
+  font-family: 'Cocogoose Pro';
+  /* J'utilise "Cocogoose Pro" pour correspondre aux noms de fichiers */
+  src: url('/fonts/Cocogoose-Pro-Regular-trial.woff2') format('woff2');
+  font-weight: 400;
+  /* Normal/Regular */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cocogoose Pro';
+  src: url('/fonts/Cocogoose-Pro-Bold-trial.woff2') format('woff2');
+  font-weight: 700;
+  /* Bold */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 
+  Ajoutez ici d'autres @font-face pour les variations de Cocogoose Pro 
+  que vous souhaitez utiliser (Light, Italic, etc.), en ajustant 
+  font-weight et font-style en conséquence. Par exemple :
+
+@font-face {
+  font-family: 'Cocogoose Pro';
+  src: url('/fonts/Cocogoose-Pro-Light-trial.ttf') format('truetype');
+  font-weight: 300; // Light 
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cocogoose Pro';
+  src: url('/fonts/Cocogoose-Pro-Italic-trial.ttf') format('truetype');
+  font-weight: 400; // Regular Italic
+  font-style: italic;
+  font-display: swap;
+}
+*/
+
 
 /**
  * ========================================
@@ -22,6 +84,12 @@
   /* Background */
   --background: #faf7f7;
   --foreground: #000000;
+
+  /* Définition des familles de polices pour une utilisation facile (optionnel mais propre) */
+  --font-koolegant: 'Koolegant', Georgia, serif;
+  /* Fallback pour Koolegant */
+  --font-cocogoose: 'Cocogoose Pro', 'Helvetica Neue', Arial, sans-serif;
+  /* Fallback pour Cocogoose */
 }
 
 /**
@@ -32,6 +100,8 @@
 @layer base {
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-cocogoose);
+    /* Appliquer Cocogoose comme police de corps par défaut */
   }
 
   h1,
@@ -40,17 +110,27 @@
   h4,
   h5,
   h6 {
-    @apply font-serif-display;
+    /* @apply font-serif-display; */
+    /* Supprimé car on va utiliser Tailwind ou une variable CSS */
+    font-family: var(--font-koolegant);
+    /* Appliquer Koolegant aux titres par défaut */
   }
 
+  /* 
+    Les styles pour p, span, a, etc. hériteront de la police du body (Cocogoose) 
+    grâce à la configuration de Tailwind plus bas. 
+    On peut supprimer la directive @apply font-sans ici si on gère via Tailwind.
+  */
+  /*
   p,
   span,
   a,
   button,
   input,
   textarea {
-    @apply font-sans;
+    @apply font-sans; 
   }
+  */
 
   /* Smooth scrolling for anchor links */
   html {
@@ -64,6 +144,8 @@
   }
 }
 
+/* ... Reste de votre fichier globals.css (COMPONENTS, MASONRY, etc.) inchangé ... */
+
 /**
  * ========================================
  * COMPONENT STYLES
@@ -72,10 +154,14 @@
 @layer components {
   .btn-primary {
     @apply bg-primary-orange text-white px-6 py-3 transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2;
+    font-family: var(--font-cocogoose);
+    /* Assurer que les boutons utilisent Cocogoose s'ils ne l'héritent pas */
   }
 
   .btn-secondary {
     @apply bg-primary-blue text-white px-6 py-3 transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2;
+    font-family: var(--font-cocogoose);
+    /* Idem */
   }
 }
 
@@ -154,7 +240,10 @@
 }
 
 .project-card-title {
-  font-family: var(--font-great-vibes);
+  /* font-family: var(--font-great-vibes); */
+  /* Remplacé par Koolegant via les styles Hx globaux ou classe Tailwind */
+  font-family: var(--font-koolegant);
+  /* Ou appliquer spécifiquement si besoin de surcharger */
   font-size: 2rem;
   margin-top: 1rem;
   text-align: center;
@@ -195,6 +284,7 @@
 }
 
 .project-title {
+  /* Sera affecté par les styles Hx globaux pour Koolegant si c'est un h3 */
   font-size: 1.7rem;
   margin: 0;
   line-height: 1.2;
@@ -202,6 +292,7 @@
 }
 
 .project-description {
+  /* Héritera de Cocogoose Pro du body */
   font-size: 14px;
   margin-top: 5px;
   color: #666;

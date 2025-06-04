@@ -250,11 +250,11 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
         <div className="w-full md:w-1/2 p-8 overflow-y-auto" ref={descriptionColumnRef}>
           <h2 
             id={`modal-title-${project.id}`} 
-            className="font-great-vibes text-2xl md:text-3xl font-medium mb-4"
+            className="font-koolegant text-2xl md:text-3xl font-medium mb-4"
           >
             {project.title}
           </h2>
-          <div className="font-poppins text-base text-gray-700 leading-relaxed prose lg:prose-base">
+          <div className="text-base text-gray-700 leading-relaxed prose lg:prose-base">
             {Array.isArray(project.description) ? (
               // Cas où project.description EST un tableau
               project.description.map((markdownContent, i) => (
@@ -270,7 +270,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
               href={project.link} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="font-poppins block mt-6 text-primary-blue hover:underline"
+              className="block mt-6 text-primary-blue hover:underline"
             >
               Visiter le site du projet
             </a>

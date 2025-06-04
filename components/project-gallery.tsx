@@ -301,7 +301,7 @@ export default function ProjectGallery() {
   return (
     <section id="projects" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
-        <h2 className="font-great-vibes text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
+        <h2 className="font-koolegant text-4xl md:text-5xl mb-16 text-center">Our Projects</h2>
 
         {/* État de chargement */}
         {loading && (
@@ -372,7 +372,7 @@ export default function ProjectGallery() {
                       />
                     </div>
                     <div className="project-content">
-                      <h3 className="project-title font-great-vibes">{project.title}</h3>
+                      <h3 className="project-title font-koolegant">{project.title}</h3>
                     </div>
                   </div>
                 </div>
@@ -384,7 +384,7 @@ export default function ProjectGallery() {
         {/* Message si aucun projet */}
         {!loading && !error && allItems.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-600 font-poppins">Aucun projet disponible pour le moment.</p>
+            <p className="text-gray-600">Aucun projet disponible pour le moment.</p>
           </div>
         )}
       </div>

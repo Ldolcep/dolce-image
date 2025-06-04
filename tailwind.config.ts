@@ -59,16 +59,9 @@ const config: Config = {
         ring: "hsl(var(--ring))",
       },
       fontFamily: {
-        // Nouvelle configuration des polices
-        'sans': ['var(--font-montserrat)', 'sans-serif'],        // Pour le corps du texte (Montserrat)
-        'serif-display': ['var(--font-dm-serif-display)', 'serif'], // Pour les titres (DM Serif Display)
-
-        // Si vous voulez toujours utiliser les anciennes clés avec les nouvelles polices
-        // pour une transition plus douce dans votre CSS/classes, vous pouvez faire :
-        // "great-vibes": ['var(--font-dm-serif-display)', 'serif'], // Remplace l'ancien great-vibes par DM Serif Display
-        // poppins: ['var(--font-montserrat)', 'sans-serif'],      // Remplace l'ancien poppins par Montserrat
-        // Sinon, supprimez les anciennes clés si vous ne les utilisez plus directement
-        // et que vous passez par `font-sans` et `font-serif-display` dans votre CSS.
+        // et ajouter les fallbacks standards de Tailwind pour la robustesse.
+        sans: ['"Cocogoose Pro"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+        koolegant: ['Koolegant', 'Georgia', 'Times New Roman', 'serif'], 
       },
       borderRadius: {
         lg: "var(--radius)",

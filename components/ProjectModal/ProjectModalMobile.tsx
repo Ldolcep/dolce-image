@@ -193,9 +193,8 @@ export default function ProjectModalMobile({
         </button>
         
         <h2 
-          className="flex-1 text-center text-black font-semibold truncate mx-3"
+          className="flex-1 text-center text-black font-semibold truncate mx-3 font-koolegant"
           style={{ 
-            fontFamily: 'Montserrat, sans-serif',
             fontSize: '1.4rem',
             letterSpacing: '0.01em',
             lineHeight: '1.2'
@@ -362,7 +361,6 @@ export default function ProjectModalMobile({
             <span 
               className="font-semibold text-gray-600 uppercase tracking-wider"
               style={{ 
-                fontFamily: 'Montserrat, sans-serif',
                 fontSize: '1rem',
                 lineHeight: '1'
               }}
@@ -402,7 +400,6 @@ export default function ProjectModalMobile({
               target="_blank" 
               rel="noopener noreferrer" 
               className="block mt-6 text-blue-600 hover:underline text-sm font-medium"
-              style={{ fontFamily: 'Montserrat, sans-serif' }}
             >
               Visiter le site du projet →
             </a>
