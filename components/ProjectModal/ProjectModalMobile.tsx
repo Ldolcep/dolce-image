@@ -377,11 +377,11 @@ export default function ProjectModalMobile({
             touchAction: 'pan-y'
           }}
         >
-          <div 
-            className={`space-y-4 pt-2 transition-opacity duration-300 prose prose-sm ${
-              isPanelExpanded ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
+        <div 
+          className={`space-y-4 pt-2 transition-opacity duration-300 prose prose-sm prose-slate max-w-none sm:max-w-full ${
+            isPanelExpanded ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
             {Array.isArray(project.description) 
               ? project.description.map((markdownContent, i) => (
                   <ReactMarkdown key={i}>{markdownContent}</ReactMarkdown>
