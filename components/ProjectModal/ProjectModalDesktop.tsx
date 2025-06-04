@@ -267,8 +267,9 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           </div>
         </div>
         <div 
-          className="w-full md:w-1/2 p-8 custom-scrollbar"
+          className="w-full md:w-1/2 p-8 custom-scrollbar overflow-y-auto"
           ref={descriptionColumnRef}
+          style={{maxHeight: 'inherit'}}
         >
           <h2 
             id={`modal-title-${project.id}`} 
