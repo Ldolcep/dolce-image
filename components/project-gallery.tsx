@@ -25,7 +25,7 @@ interface FillerItem {
 }
 
 // Définir les données des projets
-const projectsData = {
+const hardcodedProjectsData = {
   projects: [
     {
       id: "1",
@@ -189,14 +189,14 @@ export default function ProjectGallery() {
         }
         
         // Utiliser les fillers du JSON ou un tableau vide par défaut
-        const fillers = projectsData.fillers || []
+        const fallbackfillers = hardcodedProjectsData.fillers || []
         
-        const interleavedItems = interleaveItems(
-          projectsData.projects, 
-          fillers
+        const fallbackinterleavedItems = interleaveItems(
+          hardcodedProjectsData.projects, 
+          fallbackfillers
         )
         
-        setAllItems(interleavedItems)
+        setAllItems(fallbackinterleavedItems)
         
       } catch (err) {
         console.error('Erreur lors du chargement des projets:', err)

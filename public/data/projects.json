@@ -42,14 +42,21 @@
     },
     {
       "id": "4",
-      "title": "Dolce",
-      "mainVisual": "/images/projects/dolce-main.jpg",
+      "title": "DOLCE",
+      "mainVisual": "/images/projects/dolce/dolce-main.jpg",
       "additionalVisuals": [
-        "/images/projects/social-media-1.jpg",
-        "/images/projects/social-media-2.jpg",
-        "/images/projects/social-media-3.jpg"
+        "/images/projects/dolce/dolce-gallery-2.jpg",
+        "/images/projects/dolce/dolce-gallery-3.jpg",
+        "/images/projects/dolce/dolce-gallery-4.jpg",
+        "/images/projects/dolce/dolce-gallery-5.jpg",
+        "/images/projects/dolce/dolce-gallery-6.jpg",
+        "/images/projects/dolce/dolce-gallery-7.jpg"
       ],
-      "description": "A social media strategy that increased engagement by 78% and followers by 45% across all platforms within 3 months.",
+      "description": [
+        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l’élégance intemporelle de la French Riviera des années 60 et l’art de vivre de la Dolce Vita",
+        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre "O" crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
+        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
+    ],
       "link": "https://example.com/social-media"
     },
     {
