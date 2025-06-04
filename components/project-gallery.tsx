@@ -1,3 +1,5 @@
+// --- START OF FILE project-gallery.tsx ---
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -11,7 +13,7 @@ interface Project {
   title: string
   mainVisual: string
   additionalVisuals: string[]
-  description: string | string[]
+  description: string | string[] // Conservez ce type, car ReactMarkdown peut gérer les deux
   link: string
 }
 
@@ -24,8 +26,14 @@ interface FillerItem {
   isFiller: boolean
 }
 
-// Définir les données des projets
-const hardcodedProjectsData = {
+// Structure attendue pour les données des projets (utilisée pour typer la réponse JSON)
+interface ProjectsData {
+  projects: Project[];
+  fillers?: FillerItem[]; // fillers est optionnel dans le JSON
+}
+
+// Définir les données des projets codées en dur (utilisées comme fallback)
+const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohérence
   projects: [
     {
       id: "1",
@@ -38,12 +46,11 @@ const hardcodedProjectsData = {
         "/images/projects/Le Boudoir de Miadana/le-boudoir-miadana-gallery-4.jpg",
       ],
       description: [
-
         "Situé à Toulon, Le Boudoir Miadana est un salon de beauté du regard spécialisé dans les extensions de cils, offrant une expérience chaleureuse et sensorielle.",
         "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
         "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
       ],
-      link: "https://ellipse-real-estate.com/",
+      link: "https://ellipse-real-estate.com/", // Mettez à jour ce lien si nécessaire
     },
     {
       id: "2",
@@ -87,10 +94,10 @@ const hardcodedProjectsData = {
       ],
       description: [ 
         "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l’élégance intemporelle de la French Riviera des années 60 et l’art de vivre de la Dolce Vita",
-        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre 'O' crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
+        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre “O” crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
         "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
       ],
-      link: "https://example.com/social-media",
+      link: "https://example.com/social-media", // Mettez à jour ce lien si nécessaire
     },
     {
       id: "5",
@@ -129,8 +136,6 @@ const hardcodedProjectsData = {
       link: "https://example.com/content",
     },
   ],
-  
-  // Fillers mise à jour (sans textContent)
   fillers: [
     {
       id: "filler_1",
@@ -157,136 +162,141 @@ const hardcodedProjectsData = {
 };
 
 export default function ProjectGallery() {
-  const [allItems, setAllItems] = useState<(Project | FillerItem)[]>([])
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [allItems, setAllItems] = useState<(Project | FillerItem)[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Charger les données depuis public/data/projects.json
     const loadProjectsData = async () => {
       try {
-        setLoading(true)
-        setError(null)
+        setLoading(true);
+        setError(null);
         
         const response = await fetch('/data/projects.json', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-        })
+        });
         
         if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`)
+          throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
         }
         
-        const projectsData: ProjectsData = await response.json()
+        const fetchedProjectsData: ProjectsData = await response.json();
         
-        // Valider la structure des données
-        if (!projectsData.projects || !Array.isArray(projectsData.projects)) {
-          throw new Error('Format de données invalide: projects manquant ou invalide')
+        if (!fetchedProjectsData.projects || !Array.isArray(fetchedProjectsData.projects)) {
+          throw new Error('Format de données invalide: projects manquant ou invalide');
         }
         
-        // Utiliser les fillers du JSON ou un tableau vide par défaut
-        const fallbackfillers = hardcodedProjectsData.fillers || []
+        // Utiliser les données du JSON si le fetch a réussi
+        const projectsFromJson = fetchedProjectsData.projects;
+        const fillersFromJson = fetchedProjectsData.fillers || []; 
         
-        const fallbackinterleavedItems = interleaveItems(
-          hardcodedProjectsData.projects, 
-          fallbackfillers
-        )
+        const interleavedItems = interleaveItems(
+          projectsFromJson,
+          fillersFromJson
+        );
         
-        setAllItems(fallbackinterleavedItems)
+        setAllItems(interleavedItems);
         
       } catch (err) {
-        console.error('Erreur lors du chargement des projets:', err)
-        const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue lors du chargement'
-        setError(errorMessage)
+        console.error('Erreur lors du chargement des projets:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue lors du chargement';
+        setError(errorMessage);
         
-        // En cas d'erreur, utiliser des données par défaut pour éviter un écran blanc
-        setAllItems([])
+        // En cas d'erreur, utiliser les données hardcodées comme fallback
+        console.warn("Utilisation des données de secours (hardcodées) car le chargement du JSON a échoué.");
+        const fallbackFillers = hardcodedProjectsData.fillers || [];
+        const fallbackInterleavedItems = interleaveItems(
+          hardcodedProjectsData.projects,
+          fallbackFillers
+        );
+        setAllItems(fallbackInterleavedItems);
         
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadProjectsData()
-  }, [])
+    loadProjectsData();
+  }, []);
 
   // Logique d'entrelacement (inchangée)
-  const interleaveItems = (projects: Project[], fillers: FillerItem[]) => {
-    const total = projects.length + fillers.length
-    const result: (Project | FillerItem)[] = []
+  const interleaveItems = (projects: Project[], fillers: FillerItem[]): (Project | FillerItem)[] => {
+    const total = projects.length + fillers.length;
+    const result: (Project | FillerItem)[] = [];
     
-    const fillerPositions = calculateFillerPositions(projects.length, fillers.length)
+    const fillerPositions = calculateFillerPositions(projects.length, fillers.length);
     
-    let fillerIndex = 0
-    let projectIndex = 0
+    let fillerIndex = 0;
+    let projectIndex = 0;
     
     for (let i = 0; i < total; i++) {
       if (fillerPositions.includes(i) && fillerIndex < fillers.length) {
-        result.push(fillers[fillerIndex])
-        fillerIndex++
+        result.push(fillers[fillerIndex]);
+        fillerIndex++;
       } else if (projectIndex < projects.length) {
-        result.push(projects[projectIndex])
-        projectIndex++
+        result.push(projects[projectIndex]);
+        projectIndex++;
       }
     }
 
     // Gestion des éléments restants
     while (projectIndex < projects.length) {
-      result.push(projects[projectIndex])
-      projectIndex++
+        result.push(projects[projectIndex]);
+        projectIndex++;
     }
     while (fillerIndex < fillers.length) {
-      result.push(fillers[fillerIndex])
-      fillerIndex++
+        result.push(fillers[fillerIndex]);
+        fillerIndex++;
     }
 
-    return result
-  }
+    return result;
+  };
   
   // Fonction pour calculer les positions (inchangée)
   const calculateFillerPositions = (projectCount: number, fillerCount: number): number[] => {
-    const positions: number[] = []
-    if (fillerCount <= 0) return positions
+    const positions: number[] = [];
+    if (fillerCount <= 0) return positions;
 
-    const spacing = Math.ceil(projectCount / (fillerCount + 1))
+    const spacing = Math.ceil(projectCount / (fillerCount + 1));
     
     for (let i = 0; i < fillerCount; i++) {
-      const position = (i + 1) * spacing
+      const position = (i + 1) * spacing;
       if (position <= projectCount + fillerCount) { 
-        positions.push(position)
+        positions.push(position);
       }
     }
     
-    return positions
-  }
+    return positions;
+  };
 
   const openModal = (project: Project) => {
-    setSelectedProject(project)
-    setIsModalOpen(true)
-    document.body.style.overflow = "hidden"
-  }
+    setSelectedProject(project);
+    setIsModalOpen(true);
+    document.body.style.overflow = "hidden";
+  };
 
   const closeModal = () => {
-    setIsModalOpen(false)
-    setSelectedProject(null)
-    document.body.style.overflow = "auto"
-  }
+    setIsModalOpen(false);
+    setSelectedProject(null);
+    document.body.style.overflow = "auto";
+  };
 
   // Gérer les événements clavier pour l'accessibilité
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
-        closeModal()
+        closeModal();
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isModalOpen])
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
 
   return (
     <section id="projects" className="py-16 md:py-24">
@@ -308,7 +318,7 @@ export default function ProjectGallery() {
               <p className="text-red-600 font-poppins mb-4">Erreur: {error}</p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="btn-primary"
+                className="btn-primary" // Assurez-vous que cette classe est définie
               >
                 Réessayer
               </button>
@@ -320,9 +330,9 @@ export default function ProjectGallery() {
         {!loading && !error && allItems.length > 0 && (
           <div className="masonry-grid">
             {allItems.map((item) => {
-              // Rendu pour les Fillers (visibles uniquement sur tablette et desktop)
+              // Rendu pour les Fillers
               if ('isFiller' in item) {
-                const filler = item as FillerItem
+                const filler = item as FillerItem;
                 return (
                   <div 
                     key={`filler-${filler.id}`} 
@@ -335,11 +345,11 @@ export default function ProjectGallery() {
                       aspectRatio={filler.aspectRatio}
                     />
                   </div>
-                )
+                );
               }
               
-              // Rendu pour les Projets (structure originale conservée)
-              const project = item as Project
+              // Rendu pour les Projets
+              const project = item as Project;
               return (
                 <div
                   key={project.id}
@@ -358,7 +368,7 @@ export default function ProjectGallery() {
                         width={600}
                         height={400}
                         className="project-img"
-                        priority={project.id === "1"}
+                        priority={project.id === "1"} // Peut-être ajuster la logique de priorité
                       />
                     </div>
                     <div className="project-content">
@@ -366,7 +376,7 @@ export default function ProjectGallery() {
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -388,5 +398,6 @@ export default function ProjectGallery() {
          />
       )}
     </section>
-  )
+  );
 }
+// --- END OF FILE project-gallery.tsx ---
