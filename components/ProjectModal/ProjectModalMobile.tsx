@@ -340,7 +340,7 @@ export default function ProjectModalMobile({
       {/* Panel Description - Largeur étendue avec coins arrondis */}
       <div 
         ref={panelRef}
-        className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40 w-[92%] mx-auto sm:w-[85%] md:w-[80%]"
+        className="absolute left-0 right-0 bottom-0 bg-white shadow-2xl touch-none z-40"
         style={{
           height: '38vh',
           transform: `translateY(${isPanelExpanded ? 0 : 'calc(100% - 6vh)'})`
@@ -371,7 +371,7 @@ export default function ProjectModalMobile({
         {/* Contenu avec scrollbar stylée */}
         <div 
           ref={contentRef}
-          className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto custom-scrollbar"
+          className="px-6 pb-6 h-[calc(100%-6vh)] overflow-y-auto custom-scrollbar px-[2.5vw] sm:px-[1.5vw]"
           style={{ 
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y'
