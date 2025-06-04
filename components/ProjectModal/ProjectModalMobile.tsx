@@ -4,6 +4,7 @@
 
 "use client";
 
+import ReactMarkdown from 'react-markdown';
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -381,20 +382,16 @@ export default function ProjectModalMobile({
           }}
         >
           <div 
-            className={`space-y-4 pt-2 transition-opacity duration-300 ${
+            className={`space-y-4 pt-2 transition-opacity duration-300 prose  prose-sm ${
               isPanelExpanded ? 'opacity-100' : 'opacity-0'
             }`}
           >
             {Array.isArray(project.description) 
-              ? project.description.map((p, i) => (
-                  <p key={i} className="text-gray-700 text-sm leading-relaxed">
-                    {p}
-                  </p>
+              ? project.description.map((markdownContent, i) => (
+                  <ReactMarkdown key={i}>{markdownContent}</ReactMarkdown>
                 ))
               : (
-                  <p className="text-gray-700 text-sm leading-relaxed">
-                    {project.description}
-                  </p>
+                  <ReactMarkdown>{project.description}</ReactMarkdown>
                 )
             }
           </div>

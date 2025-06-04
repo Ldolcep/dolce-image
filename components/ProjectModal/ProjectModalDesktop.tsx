@@ -253,11 +253,15 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           >
             {project.title}
           </h2>
-          <div className="font-poppins text-base text-gray-700 leading-relaxed">
+          <div className="font-poppins text-base text-gray-700 leading-relaxed prose lg:prose-base">
             {Array.isArray(project.description) ? (
-              project.description.map((p, i) => <p key={i} className="mb-4 last:mb-0">{p}</p>)
+              // Cas où project.description EST un tableau
+              project.description.map((markdownContent, i) => (
+                <ReactMarkdown key={i}>{markdownContent}</ReactMarkdown>
+              ))
             ) : (
-              <p>{project.description}</p>
+              // Cas où project.description N'EST PAS un tableau (c'est une chaîne unique)
+              <ReactMarkdown>{project.description}</ReactMarkdown>
             )}
           </div>
           {project.link && (
