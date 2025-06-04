@@ -35,7 +35,7 @@
     {
       "id": "3",
       "title": "Ellipse Groupe",
-      "mainVisual": "/images/projects/Ellipse Group/ellipse-groupe-main.jpg",
+      "mainVisual": "/images/projects/Ellipse Group/ellipse-group-main.jpg",
       "additionalVisuals": [
         "/images/projects/Ellipse Group/ellipse-group-gallery-2.jpg",
         "/images/projects/Ellipse Group/ellipse-group-gallery-3.jpg",
@@ -139,7 +139,7 @@
     {
       "id": "9",
       "title": "Podium",
-      "mainVisual": "/images/projects/Podium/pickup-main.jpg",
+      "mainVisual": "/images/projects/Podium/podium-main.jpg",
       "additionalVisuals": [
         "/images/projects/Podium/podium-gallery-2.jpg",
         "/images/projects/Podium/podium-gallery-3.jpg",
@@ -171,6 +171,13 @@
       "id": "filler_3",
       "backgroundImage": "/images/fillers/filler_3_bg.jpg",
       "textImage": "/images/fillers/filler_3_text.png",
+      "aspectRatio": "4/3",
+      "isFiller": true
+    },
+    {
+      "id": "filler_4",
+      "backgroundImage": "/images/fillers/filler_4_bg.jpg",
+      "textImage": "/images/fillers/filler_4_text.png",
       "aspectRatio": "4/3",
       "isFiller": true
     }
