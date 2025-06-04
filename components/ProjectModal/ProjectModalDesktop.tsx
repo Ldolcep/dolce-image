@@ -269,7 +269,6 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
         <div 
           className="w-full md:w-1/2 p-8 custom-scrollbar"
           ref={descriptionColumnRef}
-          style={{ overflowY: 'hidden' }}
         >
           <h2 
             id={`modal-title-${project.id}`} 
