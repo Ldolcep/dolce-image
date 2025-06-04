@@ -1,5 +1,6 @@
 "use client"
 
+import ReactMarkdown from 'react-markdown';
 import type React from "react"
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Image from "next/image"
