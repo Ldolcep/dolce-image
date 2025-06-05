@@ -18,6 +18,7 @@
   /* Font Squirrel a mis 'normal', c'est OK pour une seule graisse */
   font-style: normal;
   font-display: swap;
+  letter-spacing: 0.025em;
   /* Ajouté pour de meilleures performances */
 }
 
