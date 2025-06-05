@@ -106,8 +106,6 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     preloadAllImages();
   }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
 
-  // --- EVENT LISTENERS ---
-  // Close modal on click outside
   useEffect(() => {
     if (!isMounted || !isOpen) return;
     
@@ -162,10 +160,11 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
       aria-modal="true" 
       aria-labelledby={`modal-title-${project.id}`}
     >
-      <div className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl" 
+      <div 
+        ref={modalRef} 
+        className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl" 
         style={{ transform: isAnimating ? 'scale(1)' : 'scale(0.95)', opacity: isAnimating ? 1 : 0 }}
       >
-        {/* Colonne Image - Hauteur basée sur l'image */}
         <div className="w-full md:w-1/2 relative" ref={imageColumnRef}>
           <div className="relative" style={{ aspectRatio: '4/5' }}>
             {allVisuals[currentImageIndex] && (
@@ -216,13 +215,11 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             )}
           </div>
         </div>
-        {/* Colonne Description - Scrollable si nécessaire */}
         <div 
-          className="w-full md:w-1/2 p-8 custom-scrollbar flex flex-col"
+          className="w-full md:w-1/2 p-8 custom-scrollbar overflow-y-auto"
           ref={descriptionColumnRef}
           style={{
-            maxHeight: imageColumnRef.current?.clientHeight || 'auto',
-            overflowY: 'auto'
+            maxHeight: imageColumnRef.current?.clientHeight || 'auto'
           }}
         >
           <h2 
