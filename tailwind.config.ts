@@ -67,6 +67,8 @@ const config: Config = {
             // ... vous pouvez ajouter d'autres variables de couleur prose si nécessaire
 
             // Style de base pour le corps du texte dans .prose
+            fontFamily: theme('fontFamily.cocogoose'),
+            fontSize: '1rem', // Taille de police par défaut, ajustez si nécessaire
             color: 'var(--tw-prose-body)',
             fontWeight: '400', // <<< Correction clé : Forcer la graisse regular pour le texte de base
 
