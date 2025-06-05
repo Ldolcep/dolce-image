@@ -25,157 +25,89 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   const allVisuals = useMemo(() => [project.mainVisual, ...project.additionalVisuals].filter(Boolean), [project]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
   const [isMounted, setIsMounted] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageColumnRef = useRef<HTMLDivElement>(null);
-  const descriptionColumnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
 
-  const prevIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex - 1 + allVisuals.length) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
-  const nextIndex = useMemo(() => allVisuals.length > 0 ? (currentImageIndex + 1) % allVisuals.length : 0, [currentImageIndex, allVisuals.length]);
-
   const handleNext = useCallback(() => {
     if (allVisuals.length <= 1) return;
-    const newIndex = (currentImageIndex + 1) % allVisuals.length;
-    setCurrentImageIndex(newIndex);
-  }, [currentImageIndex, allVisuals.length]);
+    setCurrentImageIndex((prev) => (prev + 1) % allVisuals.length);
+  }, [allVisuals.length]);
 
   const handlePrevious = useCallback(() => {
     if (allVisuals.length <= 1) return;
-    const newIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
-    setCurrentImageIndex(newIndex);
-  }, [currentImageIndex, allVisuals.length]);
-  
-  // --- EFFECTS ---
+    setCurrentImageIndex((prev) => (prev - 1 + allVisuals.length) % allVisuals.length);
+  }, [allVisuals.length]);
+
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(0);
-      setImagesLoaded({});
     }
   }, [project, isOpen]);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
-    if (isOpen && isMounted) { 
-      timeoutId = setTimeout(() => setIsAnimating(true), 50); 
-    }
-    else { 
-      setIsAnimating(false); 
-    }
-    return () => { if (timeoutId) clearTimeout(timeoutId); };
+    const timer = isOpen && isMounted ? setTimeout(() => setIsAnimating(true), 50) : undefined;
+    return () => {
+      if (timer) clearTimeout(timer);
+      setIsAnimating(false);
+    };
   }, [isOpen, isMounted]);
-
-  useEffect(() => {
-    if (!isMounted || !isOpen || !allVisuals?.length) return;
-    
-    const preloadImage = (src: string): Promise<void> => {
-        if (imagesLoaded[src]) return Promise.resolve();
-        return new Promise((resolve) => {
-            if (typeof window === 'undefined' || typeof window.Image === 'undefined') { 
-              resolve(); 
-              return; 
-            }
-            const img = new window.Image();
-            img.onload = () => { 
-              setImagesLoaded(prev => ({ ...prev, [src]: true })); 
-              resolve(); 
-            };
-            img.onerror = () => { 
-              console.error(`Preload error: ${src}`); 
-              resolve(); 
-            };
-            img.src = src;
-        });
-    };
-    
-    const preloadAllImages = async () => {
-        try {
-            const priorityIndices = [...new Set([currentImageIndex, nextIndex, prevIndex])];
-            await Promise.all(priorityIndices.map(idx => allVisuals[idx] ? preloadImage(allVisuals[idx]) : Promise.resolve()));
-            
-            const otherImages = allVisuals.filter((_, i) => !priorityIndices.includes(i));
-            Promise.all(otherImages.map(src => src ? preloadImage(src) : Promise.resolve()));
-        } catch (error) { 
-          console.error("Preload error:", error); 
-        }
-    };
-    
-    preloadAllImages();
-  }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
-
-  useEffect(() => {
-    if (!isMounted || !isOpen) return;
-    
-    const handleClickOutside = (event: MouseEvent) => {
-        try { 
-          if (modalRef.current && !modalRef.current.contains(event.target as Node)) onClose(); 
-        }
-        catch (error) { 
-          console.error("Click outside error:", error); 
-          onClose(); 
-        }
-    };
-    
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onClose, isMounted]);
 
   useEffect(() => {
     if (!isMounted || !isOpen) return;
     
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (!isOpen) return;
-        if (e.key === "Escape") { 
-          onClose(); 
-        }
-        else if (allVisuals.length > 1) {
-            if (e.key === "ArrowRight") { 
-              handleNext(); 
-            }
-            else if (e.key === "ArrowLeft") { 
-              handlePrevious(); 
-            }
-        }
+      if (e.key === "Escape") onClose();
+      else if (allVisuals.length > 1) {
+        if (e.key === "ArrowRight") handleNext();
+        else if (e.key === "ArrowLeft") handlePrevious();
+      }
     };
     
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, isMounted, onClose, allVisuals.length, handleNext, handlePrevious]);
 
-  // --- RENDER FALLBACK ---
-  if (!isMounted) {
-    if (!isOpen) return null;
-    return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>;
-  }
-  if (!isOpen) return null;
+  if (!isMounted || !isOpen) return null;
 
   return (
     <div 
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300" 
-      style={{ opacity: isAnimating ? 1 : 0 }} 
-      role="dialog" 
-      aria-modal="true" 
-      aria-labelledby={`modal-title-${project.id}`}
+      style={{ opacity: isAnimating ? 1 : 0 }}
     >
       <div 
-        ref={modalRef} 
-        className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl" 
-        style={{ transform: isAnimating ? 'scale(1)' : 'scale(0.95)', opacity: isAnimating ? 1 : 0 }}
+        ref={modalRef}
+        className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
+        style={{ 
+          transform: isAnimating ? 'scale(1)' : 'scale(0.95)', 
+          opacity: isAnimating ? 1 : 0,
+          maxHeight: '90vh'
+        }}
       >
-        <div className="w-full md:w-1/2 relative" ref={imageColumnRef}>
-          <div className="relative" style={{ aspectRatio: '4/5' }}>
+        <div 
+          className="w-full md:w-1/2 relative flex-shrink-0" 
+          ref={imageColumnRef}
+          style={{ 
+            maxHeight: '90vh',
+            overflow: 'hidden'
+          }}
+        >
+          <div className="relative w-full h-full">
             {allVisuals[currentImageIndex] && (
               <Image 
                 src={allVisuals[currentImageIndex]} 
                 alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} 
-                fill 
-                className="object-contain" 
+                fill
+                className="object-contain"
+                style={{
+                  maxHeight: '90vh',
+                  objectFit: 'contain'
+                }}
                 sizes="(max-width: 768px) 100vw, 50vw" 
                 priority={currentImageIndex === 0} 
-                key={allVisuals[currentImageIndex]} 
               />
             )}
             {allVisuals.length > 1 && (
@@ -206,8 +138,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
                       className={`w-2 h-2 rounded-full transition-all duration-300 ${
                         currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'
                       }`} 
-                      aria-label={`Aller à l'image ${index + 1}`} 
-                      aria-current={currentImageIndex === index ? "step" : undefined}
+                      aria-label={`Aller à l'image ${index + 1}`}
                     />
                   ))}
                 </div>
@@ -215,17 +146,15 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             )}
           </div>
         </div>
+
         <div 
-          className="w-full md:w-1/2 p-8 custom-scrollbar overflow-y-auto"
-          ref={descriptionColumnRef}
+          className="w-full md:w-1/2 p-8 custom-scrollbar flex flex-col"
           style={{
-            maxHeight: imageColumnRef.current?.clientHeight || 'auto'
+            maxHeight: '90vh',
+            overflowY: 'auto'
           }}
         >
-          <h2 
-            id={`modal-title-${project.id}`} 
-            className="font-koolegant text-2xl md:text-3xl font-medium mb-4"
-          >
+          <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">
             {project.title}
           </h2>
           <div className="text-base text-gray-700 leading-relaxed prose lg:prose-base">
@@ -248,6 +177,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             </a>
           )}
         </div>
+
         <button 
           className="absolute -top-5 -right-5 z-20 bg-primary-orange text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-orange/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-orange" 
           onClick={onClose} 
