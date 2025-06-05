@@ -61,18 +61,29 @@ const config: Config = {
           css: {
             '--tw-prose-body': theme('colors.foreground / 1'), 
             '--tw-prose-headings': theme('colors.foreground / 1'),
-            '--tw-prose-links': theme('colors.primary-blue / 1'), // Exemple de couleur de lien
-            // Vous pouvez ajouter d'autres variables de couleur prose ici au besoin
-            // Pour que les titres Hx dans .prose utilisent Koolegant :
+            '--tw-prose-links': theme('colors.primary-blue / 1'),
+            // Forcer Cocogoose Pro pour le corps du texte dans prose
+            fontFamily: theme('fontFamily.sans'),
+            'p, span, div, li, ul, ol': {
+              fontFamily: theme('fontFamily.sans'),
+              fontWeight: '400', // Forcer regular
+            },
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
             },
+            // Désactiver les styles de poids par défaut de prose
+            'strong, b': {
+              fontWeight: '700', // Bold seulement pour strong/b
+            }
           },
         },
-        // Ajoutez des modificateurs pour prose-sm, prose-lg si vous les utilisez
-        // et que vous voulez le même comportement pour les titres.
         sm: {
-           css: {
+          css: {
+            fontFamily: theme('fontFamily.sans'),
+            'p, span, div, li, ul, ol': {
+              fontFamily: theme('fontFamily.sans'),
+              fontWeight: '400',
+            },
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
             },
@@ -80,6 +91,11 @@ const config: Config = {
         },
         lg: { 
           css: {
+            fontFamily: theme('fontFamily.sans'),
+            'p, span, div, li, ul, ol': {
+              fontFamily: theme('fontFamily.sans'),
+              fontWeight: '400',
+            },
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
             },

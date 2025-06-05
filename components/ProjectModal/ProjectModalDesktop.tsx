@@ -228,7 +228,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           >
             {project.title}
           </h2>
-          <div className="text-base text-gray-400 leading-relaxed prose lg:prose-base">
+          <div className="text-base text-gray-700 leading-relaxed prose lg:prose-base">
             {Array.isArray(project.description) ? (
               project.description.map((markdownContent, i) => (
                 <ReactMarkdown key={i}>{markdownContent}</ReactMarkdown>
