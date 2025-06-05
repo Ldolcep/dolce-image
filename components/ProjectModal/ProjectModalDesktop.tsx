@@ -29,6 +29,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageColumnRef = useRef<HTMLDivElement>(null);
+  const descriptionColumnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
 
@@ -42,12 +43,14 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     setCurrentImageIndex((prev) => (prev - 1 + allVisuals.length) % allVisuals.length);
   }, [allVisuals.length]);
 
+  // Reset index quand le projet change
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(0);
     }
   }, [project, isOpen]);
 
+  // Animation d'ouverture
   useEffect(() => {
     const timer = isOpen && isMounted ? setTimeout(() => setIsAnimating(true), 50) : undefined;
     return () => {
@@ -56,6 +59,44 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     };
   }, [isOpen, isMounted]);
 
+  // Synchronisation des hauteurs avec ResizeObserver
+  useEffect(() => {
+    if (!isOpen || !isMounted || !imageColumnRef.current || !descriptionColumnRef.current) return;
+
+    const syncHeights = () => {
+      const imageColumn = imageColumnRef.current;
+      const descriptionColumn = descriptionColumnRef.current;
+
+      if (imageColumn && descriptionColumn) {
+        // Obtenir la hauteur réelle de la colonne image
+        const imageHeight = imageColumn.offsetHeight;
+        
+        // Appliquer cette hauteur comme max-height à la colonne description
+        descriptionColumn.style.maxHeight = `${imageHeight}px`;
+        descriptionColumn.style.height = `${imageHeight}px`;
+      }
+    };
+
+    // Synchroniser immédiatement
+    syncHeights();
+
+    // Observer les changements de taille
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(syncHeights);
+    });
+
+    resizeObserver.observe(imageColumnRef.current);
+
+    // Aussi observer les changements de fenêtre
+    window.addEventListener('resize', syncHeights);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', syncHeights);
+    };
+  }, [isOpen, currentImageIndex, isMounted]);
+
+  // Gestion du clavier
   useEffect(() => {
     if (!isMounted || !isOpen) return;
     
@@ -83,33 +124,35 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
         className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
         style={{ 
           transform: isAnimating ? 'scale(1)' : 'scale(0.95)', 
-          opacity: isAnimating ? 1 : 0,
-          maxHeight: '90vh'
+          opacity: isAnimating ? 1 : 0
         }}
       >
+        {/* Colonne image - détermine la hauteur */}
         <div 
           className="w-full md:w-1/2 relative flex-shrink-0" 
           ref={imageColumnRef}
-          style={{ 
-            maxHeight: '90vh',
-            overflow: 'hidden'
-          }}
         >
-          <div className="relative w-full h-full">
-            {allVisuals[currentImageIndex] && (
-              <Image 
-                src={allVisuals[currentImageIndex]} 
-                alt={`Image ${currentImageIndex + 1} du projet ${project.title}`} 
-                fill
-                className="object-contain"
-                style={{
-                  maxHeight: '90vh',
-                  objectFit: 'contain'
-                }}
-                sizes="(max-width: 768px) 100vw, 50vw" 
-                priority={currentImageIndex === 0} 
-              />
-            )}
+          <div className="relative">
+            {/* L'image avec une hauteur maximale */}
+            <img
+              src={allVisuals[currentImageIndex]}
+              alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
+              className="w-full h-auto block"
+              style={{
+                maxHeight: '90vh',
+                objectFit: 'contain'
+              }}
+              onLoad={() => {
+                // Re-synchroniser après le chargement de l'image
+                if (imageColumnRef.current && descriptionColumnRef.current) {
+                  const imageHeight = imageColumnRef.current.offsetHeight;
+                  descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
+                  descriptionColumnRef.current.style.height = `${imageHeight}px`;
+                }
+              }}
+            />
+            
+            {/* Navigation */}
             {allVisuals.length > 1 && (
               <>
                 <button 
@@ -128,6 +171,8 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
                 </button>
               </>
             )}
+            
+            {/* Indicateurs */}
             {allVisuals.length > 1 && (
               <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center">
                 <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
@@ -147,11 +192,13 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           </div>
         </div>
 
+        {/* Colonne description - hauteur synchronisée */}
         <div 
+          ref={descriptionColumnRef}
           className="w-full md:w-1/2 p-8 custom-scrollbar flex flex-col"
           style={{
-            maxHeight: '90vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            transition: 'max-height 0.3s ease'
           }}
         >
           <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">
