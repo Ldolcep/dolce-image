@@ -37,7 +37,7 @@
 @font-face {
   font-family: 'Cocogoose Pro';
   /* <<< Même nom de famille pour la version bold */
-  src: url('/fonts/cocogoose-pro-bold-trial-webfont.woff2') format('woff2');
+  src: url('/fonts/cocogoosepro-regular.woff2') format('woff2');
   font-weight: 700;
   /* 'bold' ou 700 pour bold */
   font-style: normal;
