@@ -9,36 +9,39 @@
  * FONT DECLARATIONS
  * ========================================
  */
-
 /* Koolegant pour les titres */
 @font-face {
   font-family: 'Koolegant';
-  src: url('/fonts/Koolegant.woff2') format('woff2');
-  /* Adaptez si vous convertissez en .woff2 */
+  /* <<< Nom de famille simplifié et cohérent */
+  src: url('/fonts/koolegant-webfont.woff2') format('woff2');
   font-weight: normal;
-  /* Supposons que c'est un poids normal/regular */
+  /* Font Squirrel a mis 'normal', c'est OK pour une seule graisse */
   font-style: normal;
   font-display: swap;
+  /* Ajouté pour de meilleures performances */
 }
 
 /* Cocogoose pour le corps du texte */
 @font-face {
   font-family: 'Cocogoose Pro';
-  /* J'utilise "Cocogoose Pro" pour correspondre aux noms de fichiers */
-  src: url('/fonts/Cocogoose-Pro-Regular-trial.woff2') format('woff2');
+  /* <<< Nom de famille simplifié et cohérent */
+  src: url('/fonts/cocogoose-pro-regular-trial-webfont.woff2') format('woff2');
   font-weight: 400;
-  /* Normal/Regular */
+  /* 'normal' ou 400 pour regular */
   font-style: normal;
   font-display: swap;
+  /* Ajouté */
 }
 
 @font-face {
   font-family: 'Cocogoose Pro';
-  src: url('/fonts/Cocogoose-Pro-Bold-trial.woff2') format('woff2');
+  /* <<< Même nom de famille pour la version bold */
+  src: url('/fonts/cocogoose-pro-bold-trial-webfont.woff2') format('woff2');
   font-weight: 700;
-  /* Bold */
+  /* 'bold' ou 700 pour bold */
   font-style: normal;
   font-display: swap;
+  /* Ajouté */
 }
 
 /* 
