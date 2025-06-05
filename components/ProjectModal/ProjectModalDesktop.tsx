@@ -26,20 +26,23 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
-  const imageColumnRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const descriptionColumnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
 
   const handleNext = useCallback(() => {
     if (allVisuals.length <= 1) return;
+    setImageLoaded(false);
     setCurrentImageIndex((prev) => (prev + 1) % allVisuals.length);
   }, [allVisuals.length]);
 
   const handlePrevious = useCallback(() => {
     if (allVisuals.length <= 1) return;
+    setImageLoaded(false);
     setCurrentImageIndex((prev) => (prev - 1 + allVisuals.length) % allVisuals.length);
   }, [allVisuals.length]);
 
@@ -47,6 +50,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(0);
+      setImageLoaded(false);
     }
   }, [project, isOpen]);
 
@@ -59,42 +63,50 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     };
   }, [isOpen, isMounted]);
 
-  // Synchronisation des hauteurs avec ResizeObserver
+  // Synchronisation des hauteurs
+  const syncHeights = useCallback(() => {
+    if (!imageRef.current || !descriptionColumnRef.current || !modalRef.current) return;
+
+    // Obtenir la hauteur naturelle de l'image
+    const imageHeight = imageRef.current.offsetHeight;
+    
+    // Définir cette hauteur sur le modal entier
+    modalRef.current.style.height = `${imageHeight}px`;
+    
+    // La colonne description prend cette hauteur
+    descriptionColumnRef.current.style.height = `${imageHeight}px`;
+  }, []);
+
+  // Synchroniser quand l'image est chargée
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    // Petit délai pour s'assurer que le rendu est terminé
+    requestAnimationFrame(() => {
+      requestAnimationFrame(syncHeights);
+    });
+  };
+
+  // Observer les changements de taille
   useEffect(() => {
-    if (!isOpen || !isMounted || !imageColumnRef.current || !descriptionColumnRef.current) return;
+    if (!isOpen || !isMounted || !imageLoaded) return;
 
-    const syncHeights = () => {
-      const imageColumn = imageColumnRef.current;
-      const descriptionColumn = descriptionColumnRef.current;
-
-      if (imageColumn && descriptionColumn) {
-        // Obtenir la hauteur réelle de la colonne image
-        const imageHeight = imageColumn.offsetHeight;
-        
-        // Appliquer cette hauteur comme max-height à la colonne description
-        descriptionColumn.style.maxHeight = `${imageHeight}px`;
-        descriptionColumn.style.height = `${imageHeight}px`;
-      }
-    };
-
-    // Synchroniser immédiatement
     syncHeights();
 
-    // Observer les changements de taille
     const resizeObserver = new ResizeObserver(() => {
       requestAnimationFrame(syncHeights);
     });
 
-    resizeObserver.observe(imageColumnRef.current);
+    if (imageRef.current) {
+      resizeObserver.observe(imageRef.current);
+    }
 
-    // Aussi observer les changements de fenêtre
     window.addEventListener('resize', syncHeights);
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', syncHeights);
     };
-  }, [isOpen, currentImageIndex, isMounted]);
+  }, [isOpen, isMounted, imageLoaded, syncHeights]);
 
   // Gestion du clavier
   useEffect(() => {
@@ -121,84 +133,77 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     >
       <div 
         ref={modalRef}
-        className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl"
+        className="bg-white w-full max-w-5xl relative transition-transform duration-300 shadow-xl"
         style={{ 
           transform: isAnimating ? 'scale(1)' : 'scale(0.95)', 
-          opacity: isAnimating ? 1 : 0
+          opacity: isAnimating ? 1 : 0,
+          display: 'flex',
+          flexDirection: 'row',
+          overflow: 'hidden'
         }}
       >
         {/* Colonne image - détermine la hauteur */}
         <div 
-          className="w-full md:w-1/2 relative flex-shrink-0" 
-          ref={imageColumnRef}
+          className="w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50"
         >
-          <div className="relative">
-            {/* L'image avec une hauteur maximale */}
-            <img
-              src={allVisuals[currentImageIndex]}
-              alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-              className="w-full h-auto block"
-              style={{
-                maxHeight: '90vh',
-                objectFit: 'contain'
-              }}
-              onLoad={() => {
-                // Re-synchroniser après le chargement de l'image
-                if (imageColumnRef.current && descriptionColumnRef.current) {
-                  const imageHeight = imageColumnRef.current.offsetHeight;
-                  descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
-                  descriptionColumnRef.current.style.height = `${imageHeight}px`;
-                }
-              }}
-            />
-            
-            {/* Navigation */}
-            {allVisuals.length > 1 && (
-              <>
-                <button 
-                  onClick={handlePrevious} 
-                  className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
-                  aria-label="Image précédente"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button 
-                  onClick={handleNext} 
-                  className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
-                  aria-label="Image suivante"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </>
-            )}
-            
-            {/* Indicateurs */}
-            {allVisuals.length > 1 && (
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center">
-                <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                  {allVisuals.map((_, index) => (
-                    <button 
-                      key={index} 
-                      onClick={() => setCurrentImageIndex(index)} 
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                        currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'
-                      }`} 
-                      aria-label={`Aller à l'image ${index + 1}`}
-                    />
-                  ))}
-                </div>
+          <img
+            ref={imageRef}
+            src={allVisuals[currentImageIndex]}
+            alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
+            className="block w-full h-auto"
+            style={{
+              maxHeight: '90vh',
+              objectFit: 'contain'
+            }}
+            onLoad={handleImageLoad}
+          />
+          
+          {/* Navigation */}
+          {allVisuals.length > 1 && (
+            <>
+              <button 
+                onClick={handlePrevious} 
+                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
+                aria-label="Image précédente"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={handleNext} 
+                className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
+                aria-label="Image suivante"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
+          
+          {/* Indicateurs */}
+          {allVisuals.length > 1 && (
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center">
+              <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                {allVisuals.map((_, index) => (
+                  <button 
+                    key={index} 
+                    onClick={() => setCurrentImageIndex(index)} 
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'
+                    }`} 
+                    aria-label={`Aller à l'image ${index + 1}`}
+                  />
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Colonne description - hauteur synchronisée */}
+        {/* Colonne description - hauteur fixée par JS */}
         <div 
           ref={descriptionColumnRef}
-          className="w-full md:w-1/2 p-8 custom-scrollbar flex flex-col"
+          className="w-full md:w-1/2 p-8 custom-scrollbar"
           style={{
             overflowY: 'auto',
-            transition: 'max-height 0.3s ease'
+            overflowX: 'hidden'
           }}
         >
           <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">
