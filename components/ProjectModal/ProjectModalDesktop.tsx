@@ -106,57 +106,8 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     preloadAllImages();
   }, [isOpen, allVisuals, currentImageIndex, nextIndex, prevIndex, isMounted, imagesLoaded]);
 
-  // Gestion améliorée de la hauteur et du scroll
-
-  useEffect(() => {
-    if (!isMounted || !isOpen) {
-      if (descriptionColumnRef.current) {
-        descriptionColumnRef.current.style.maxHeight = '';
-        descriptionColumnRef.current.style.overflowY = 'hidden';
-      }
-      return;
-    }
-  
-    const adjustHeightAndScroll = () => {
-      if (imageColumnRef.current && descriptionColumnRef.current) {
-        const imageHeight = imageColumnRef.current.offsetHeight;
-        descriptionColumnRef.current.style.maxHeight = `${imageHeight}px`;
-        
-        // Toujours activer le scroll pour la cohérence visuelle
-        descriptionColumnRef.current.style.overflowY = 'auto';
-        
-        // Vérifier si le contenu dépasse pour afficher ou non la scrollbar
-        if (descriptionColumnRef.current.scrollHeight > imageHeight) {
-          // Le contenu dépasse, la scrollbar sera visible
-          descriptionColumnRef.current.classList.add('has-overflow');
-        } else {
-          // Le contenu ne dépasse pas, mais on garde overflow:auto
-          descriptionColumnRef.current.classList.remove('has-overflow');
-        }
-      }
-    };
-  
-    adjustHeightAndScroll();
-    const timerId = setTimeout(adjustHeightAndScroll, 150);
-  
-    const resizeObserver = new ResizeObserver(adjustHeightAndScroll);
-    if (descriptionColumnRef.current) {
-      resizeObserver.observe(descriptionColumnRef.current);
-    }
-  
-    window.addEventListener('resize', adjustHeightAndScroll);
-  
-    return () => {
-      clearTimeout(timerId);
-      window.removeEventListener('resize', adjustHeightAndScroll);
-      resizeObserver.disconnect();
-      if (descriptionColumnRef.current) {
-        descriptionColumnRef.current.style.maxHeight = '';
-        descriptionColumnRef.current.style.overflowY = 'hidden';
-      }
-    };
-  }, [isOpen, currentImageIndex, allVisuals, isMounted, project.description]);
-
+  // --- EVENT LISTENERS ---
+  // Close modal on click outside
   useEffect(() => {
     if (!isMounted || !isOpen) return;
     
@@ -211,11 +162,10 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
       aria-modal="true" 
       aria-labelledby={`modal-title-${project.id}`}
     >
-      <div 
-        ref={modalRef} 
-        className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl" 
+      <div className="bg-white w-full max-w-5xl flex flex-col md:flex-row relative transition-transform duration-300 shadow-xl" 
         style={{ transform: isAnimating ? 'scale(1)' : 'scale(0.95)', opacity: isAnimating ? 1 : 0 }}
       >
+        {/* Colonne Image - Hauteur basée sur l'image */}
         <div className="w-full md:w-1/2 relative" ref={imageColumnRef}>
           <div className="relative" style={{ aspectRatio: '4/5' }}>
             {allVisuals[currentImageIndex] && (
@@ -266,10 +216,14 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             )}
           </div>
         </div>
+        {/* Colonne Description - Scrollable si nécessaire */}
         <div 
-          className="w-full md:w-1/2 p-8 custom-scrollbar overflow-y-auto"
+          className="w-full md:w-1/2 p-8 custom-scrollbar flex flex-col"
           ref={descriptionColumnRef}
-          style={{maxHeight: 'inherit'}}
+          style={{
+            maxHeight: imageColumnRef.current?.clientHeight || 'auto',
+            overflowY: 'auto'
+          }}
         >
           <h2 
             id={`modal-title-${project.id}`} 
