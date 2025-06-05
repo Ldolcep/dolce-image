@@ -26,7 +26,7 @@
 @font-face {
   font-family: 'Cocogoose Pro';
   /* <<< Nom de famille simplifié et cohérent */
-  src: url('/fonts/cocogoose-pro-ultralight-trial.woff2') format('woff2');
+  src: url('/fonts/cocogoosepro-ultralight.woff2') format('woff2');
   font-weight: 400;
   /* 'normal' ou 400 pour regular */
   font-style: normal;
