@@ -17,7 +17,7 @@ const config: Config = {
       screens: {
         'xxl': '1700px',
       },
-      colors: { // Vos couleurs sont correctes
+      colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
         "primary-orange": "#F7A520",
@@ -38,75 +38,87 @@ const config: Config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
       },
-      fontFamily: { // VOTRE CONFIGURATION fontFamily EST CORRECTE
+      fontFamily: { // Cette section est correcte pour définir les polices disponibles
         sans: ['"Cocogoose Pro"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
         koolegant: ['Koolegant', 'Georgia', 'Times New Roman', 'serif'], 
       },
-      borderRadius: { // Votre configuration borderRadius est correcte
+      borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      keyframes: { // Votre configuration keyframes est correcte
+      keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
         "accordion-up": { from: { height: "var(--radix-accordion-content-height)" }, to: { height: "0" } },
       },
-      animation: { // Votre configuration animation est correcte
+      animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-      // ▼▼▼ AJOUT DE LA CONFIGURATION TYPOGRAPHY (SI NÉCESSAIRE POUR LES TITRES DANS .PROSE) ▼▼▼
+      // ▼▼▼ SECTION TYPOGRAPHY AJUSTÉE ▼▼▼
       typography: ({ theme }) => ({
         DEFAULT: { 
           css: {
+            // Variables de couleur pour prose (bon à garder pour la cohérence)
             '--tw-prose-body': theme('colors.foreground / 1'), 
             '--tw-prose-headings': theme('colors.foreground / 1'),
             '--tw-prose-links': theme('colors.primary-blue / 1'),
-            // Forcer Cocogoose Pro pour le corps du texte dans prose
-            fontFamily: theme('fontFamily.sans'),
-            'p, span, div, li, ul, ol': {
-              fontFamily: theme('fontFamily.sans'),
-              fontWeight: '400', // Forcer regular
-            },
+            '--tw-prose-bold': theme('colors.foreground / 1'),
+            // ... vous pouvez ajouter d'autres variables de couleur prose si nécessaire
+
+            // Style de base pour le corps du texte dans .prose
+            color: 'var(--tw-prose-body)',
+            fontWeight: '400', // <<< Correction clé : Forcer la graisse regular pour le texte de base
+
+            // Styles pour les titres dans .prose
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
+              color: 'var(--tw-prose-headings)',
+              fontWeight: '700', // Ou le poids désiré pour Koolegant (souvent bold)
             },
-            // Désactiver les styles de poids par défaut de prose
-            'strong, b': {
-              fontWeight: '700', // Bold seulement pour strong/b
+
+            // Styles pour les éléments en gras dans .prose
+            strong: {
+              fontWeight: '700', // Assure que la graisse 700 (bold) est utilisée
+              color: 'var(--tw-prose-bold)',
+            },
+            b: { // Au cas où Markdown génère <b>
+              fontWeight: '700',
+              color: 'var(--tw-prose-bold)',
             }
           },
         },
-        sm: {
-          css: {
-            fontFamily: theme('fontFamily.sans'),
-            'p, span, div, li, ul, ol': {
-              fontFamily: theme('fontFamily.sans'),
-              fontWeight: '400',
-            },
+        // Appliquer des corrections similaires pour les modificateurs de taille
+        sm: { // Pour prose-sm (utilisé sur mobile)
+           css: {
+            color: 'var(--tw-prose-body)', // Hérite de DEFAULT ou spécifiez ici si différent
+            fontWeight: '400', // <<< Correction clé
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
+              fontWeight: '700',
             },
+            strong: { fontWeight: '700' },
+            b: { fontWeight: '700' },
           },
         },
-        lg: { 
+        lg: { // Pour prose-lg (utilisé sur desktop)
           css: {
-            fontFamily: theme('fontFamily.sans'),
-            'p, span, div, li, ul, ol': {
-              fontFamily: theme('fontFamily.sans'),
-              fontWeight: '400',
-            },
+            color: 'var(--tw-prose-body)', // Hérite de DEFAULT ou spécifiez ici si différent
+            fontWeight: '400', // <<< Correction clé
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
+              fontWeight: '700',
             },
+            strong: { fontWeight: '700' },
+            b: { fontWeight: '700' },
           }
         }
       }),
-      // ▲▲▲ FIN DE L'AJOUT TYPOGRAPHY ▲▲▲
+      // ▲▲▲ FIN DE LA SECTION TYPOGRAPHY AJUSTÉE ▲▲▲
     },
   },
   plugins: [
-    require('@tailwindcss/typography') // Nécessaire pour la classe `prose`
+    require('@tailwindcss/typography')
   ],
 }
 export default config
