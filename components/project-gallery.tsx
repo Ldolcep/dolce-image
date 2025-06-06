@@ -1,4 +1,4 @@
-// --- START OF FILE project-gallery.tsx ---
+// --- START OF FILE project-gallery.tsx (MODIFIED) ---
 
 "use client"
 
@@ -13,7 +13,7 @@ interface Project {
   title: string
   mainVisual: string
   additionalVisuals: string[]
-  description: string | string[] // Conservez ce type, car ReactMarkdown peut gérer les deux
+  description: string | string[]
   link: string
 }
 
@@ -26,14 +26,14 @@ interface FillerItem {
   isFiller: boolean
 }
 
-// Structure attendue pour les données des projets (utilisée pour typer la réponse JSON)
+// Structure attendue pour les données des projets
 interface ProjectsData {
   projects: Project[];
-  fillers?: FillerItem[]; // fillers est optionnel dans le JSON
+  fillers?: FillerItem[];
 }
 
 // Définir les données des projets codées en dur (utilisées comme fallback)
-const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohérence
+const hardcodedProjectsData: ProjectsData = {
   projects: [
     {
       id: "1",
@@ -50,7 +50,7 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
         "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
         "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
       ],
-      link: "https://ellipse-real-estate.com/", // Mettez à jour ce lien si nécessaire
+      link: "https://ellipse-real-estate.com/",
     },
     {
       id: "2",
@@ -97,7 +97,7 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
         "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre “O” crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
         "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
       ],
-      link: "https://example.com/social-media", // Mettez à jour ce lien si nécessaire
+      link: "https://example.com/social-media",
     },
     {
       id: "5",
@@ -175,7 +175,6 @@ export default function ProjectGallery() {
 
   // Effet parallaxe avec optimisations pour les performances
   useEffect(() => {
-    // Désactiver le parallaxe sur mobile pour les performances
     const checkMobile = () => {
       setIsParallaxEnabled(window.innerWidth > 768);
     };
@@ -183,14 +182,13 @@ export default function ProjectGallery() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Fonction de scroll optimisée avec RAF
     let ticking = false;
     const handleScroll = () => {
       if (!ticking && isParallaxEnabled) {
         window.requestAnimationFrame(() => {
           if (sectionRef.current) {
             const rect = sectionRef.current.getBoundingClientRect();
-            const speed = 0.5; // Vitesse du parallaxe
+            const speed = 0.5;
             const yPos = rect.top * speed;
             setParallaxOffset(yPos);
           }
@@ -202,7 +200,7 @@ export default function ProjectGallery() {
 
     if (isParallaxEnabled) {
       window.addEventListener('scroll', handleScroll, { passive: true });
-      handleScroll(); // Appel initial
+      handleScroll();
     }
 
     return () => {
@@ -234,7 +232,6 @@ export default function ProjectGallery() {
           throw new Error('Format de données invalide: projects manquant ou invalide');
         }
         
-        // Utiliser les données du JSON si le fetch a réussi
         const projectsFromJson = fetchedProjectsData.projects;
         const fillersFromJson = fetchedProjectsData.fillers || []; 
         
@@ -250,7 +247,6 @@ export default function ProjectGallery() {
         const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue lors du chargement';
         setError(errorMessage);
         
-        // En cas d'erreur, utiliser les données hardcodées comme fallback
         console.warn("Utilisation des données de secours (hardcodées) car le chargement du JSON a échoué.");
         const fallbackFillers = hardcodedProjectsData.fillers || [];
         const fallbackInterleavedItems = interleaveItems(
@@ -267,7 +263,6 @@ export default function ProjectGallery() {
     loadProjectsData();
   }, []);
 
-  // Logique d'entrelacement (inchangée)
   const interleaveItems = (projects: Project[], fillers: FillerItem[]): (Project | FillerItem)[] => {
     const total = projects.length + fillers.length;
     const result: (Project | FillerItem)[] = [];
@@ -287,7 +282,6 @@ export default function ProjectGallery() {
       }
     }
 
-    // Gestion des éléments restants
     while (projectIndex < projects.length) {
         result.push(projects[projectIndex]);
         projectIndex++;
@@ -300,7 +294,6 @@ export default function ProjectGallery() {
     return result;
   };
   
-  // Fonction pour calculer les positions (inchangée)
   const calculateFillerPositions = (projectCount: number, fillerCount: number): number[] => {
     const positions: number[] = [];
     if (fillerCount <= 0) return positions;
@@ -329,7 +322,6 @@ export default function ProjectGallery() {
     document.body.style.overflow = "auto";
   };
 
-  // Gérer les événements clavier pour l'accessibilité
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
@@ -356,7 +348,7 @@ export default function ProjectGallery() {
           {/* Image de fond */}
           <div className="absolute inset-0 -top-20 -bottom-20">
             <Image
-              src="/images/gallery-background.jpg" // Vous devrez ajouter cette image
+              src="/images/gallery-background.jpg"
               alt=""
               fill
               quality={85}
@@ -366,10 +358,8 @@ export default function ProjectGallery() {
             />
           </div>
           
-          {/* Overlay sombre avec effet de grain */}
           <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
           
-          {/* Effet de grain subtil */}
           <div 
             className="absolute inset-0 opacity-10"
             style={{
@@ -378,7 +368,6 @@ export default function ProjectGallery() {
             }}
           />
           
-          {/* Gradient pour améliorer la lisibilité */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent" />
         </div>
       )}
@@ -389,7 +378,6 @@ export default function ProjectGallery() {
           Our Projects
         </h2>
 
-        {/* État de chargement */}
         {loading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-orange"></div>
@@ -397,7 +385,6 @@ export default function ProjectGallery() {
           </div>
         )}
 
-        {/* État d'erreur */}
         {error && !loading && (
           <div className="text-center py-12">
             <div className="max-w-md mx-auto">
@@ -412,7 +399,6 @@ export default function ProjectGallery() {
           </div>
         )}
 
-        {/* Grille masonry avec fond blanc/transparent pour les cartes */}
         {!loading && !error && allItems.length > 0 && (
           <div className="masonry-grid">
             {allItems.map((item) => {
@@ -420,11 +406,17 @@ export default function ProjectGallery() {
               if ('isFiller' in item) {
                 const filler = item as FillerItem;
                 return (
+                  // BLOC MODIFIÉ : Le wrapper blanc a été supprimé.
                   <div 
                     key={`filler-${filler.id}`} 
                     className="masonry-item hidden md:block"
                   > 
-                    </div>
+                    <FillerCard
+                      id={filler.id}
+                      backgroundImage={filler.backgroundImage}
+                      textImage={filler.textImage}
+                      aspectRatio={filler.aspectRatio}
+                    />
                   </div>
                 );
               }
@@ -462,7 +454,6 @@ export default function ProjectGallery() {
           </div>
         )}
 
-        {/* Message si aucun projet */}
         {!loading && !error && allItems.length === 0 && (
           <div className="text-center py-12">
             <p className="text-white drop-shadow">Aucun projet disponible pour le moment.</p>
@@ -470,7 +461,6 @@ export default function ProjectGallery() {
         )}
       </div>
 
-      {/* Project Modal */}
       {isModalOpen && selectedProject && (
          <ProjectModal 
              project={selectedProject} 
@@ -481,4 +471,4 @@ export default function ProjectGallery() {
     </section>
   );
 }
-// --- END OF FILE project-gallery.tsx ---
+// --- END OF FILE project-gallery.tsx (MODIFIED) ---
