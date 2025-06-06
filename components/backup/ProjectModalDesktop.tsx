@@ -1,5 +1,3 @@
-// --- START OF FILE ProjectModalDesktop.tsx (MODIFIED) ---
-
 "use client"
 
 import ReactMarkdown from 'react-markdown';
@@ -206,26 +204,10 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   if (!isMounted || !isOpen) return null;
 
   return (
-    // MODIFIED: Remplacement de l'ancien fond par la nouvelle structure
     <div 
-      className="fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300" 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300" 
       style={{ opacity: isAnimating ? 1 : 0 }}
-      onClick={onClose} // Ferme la modale si on clique sur le fond
     >
-      {/* NOUVEAU: Conteneur pour l'image de fond et l'overlay */}
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src="/images/gallery-background.jpg"
-          alt=""
-          fill
-          quality={80} // Qualité légèrement réduite pour la performance
-          sizes="100vw"
-          className="object-cover"
-        />
-        {/* Overlay plus sombre et blur plus fort, comme recommandé */}
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
-      </div>
-      
       <div 
         ref={modalRef}
         className="bg-white w-full max-w-5xl relative transition-transform duration-300 shadow-xl"
@@ -234,9 +216,8 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           opacity: isAnimating ? 1 : 0,
           display: 'flex',
           flexDirection: 'row',
-          overflow: 'visible' // Permet au bouton de dépasser
+          overflow: 'visible' // Changé de 'hidden' à 'visible' pour permettre au bouton de dépasser
         }}
-        onClick={(e) => e.stopPropagation()} // Empêche la fermeture au clic sur la modale
       >
         {/* Colonne image - détermine la hauteur */}
         <div 
@@ -367,5 +348,3 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     </div>
   );
 }
-
-// --- END OF FILE ProjectModalDesktop.tsx (MODIFIED) ---
