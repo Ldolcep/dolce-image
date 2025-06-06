@@ -108,6 +108,39 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     };
   }, [isOpen, isMounted, imageLoaded, syncHeights]);
 
+  // Gestion de l'affichage temporaire de la scrollbar lors du scroll
+  useEffect(() => {
+    if (!isOpen || !descriptionColumnRef.current) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+    const descriptionElement = descriptionColumnRef.current;
+
+    const handleScroll = () => {
+      // Montrer la scrollbar
+      descriptionElement.style.scrollbarColor = '#f7a520 #fff3e0';
+      descriptionElement.classList.add('scrolling');
+      
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        // Cacher la scrollbar après 1 seconde d'inactivité
+        descriptionElement.classList.remove('scrolling');
+        if (!descriptionElement.matches(':hover')) {
+          descriptionElement.style.scrollbarColor = 'transparent transparent';
+        }
+      }, 1000);
+    };
+
+    // Initialement cacher la scrollbar
+    descriptionElement.style.scrollbarColor = 'transparent transparent';
+    
+    descriptionElement.addEventListener('scroll', handleScroll);
+
+    return () => {
+      descriptionElement.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [isOpen]);
+
   // Gestion du clavier
   useEffect(() => {
     if (!isMounted || !isOpen) return;
@@ -139,7 +172,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           opacity: isAnimating ? 1 : 0,
           display: 'flex',
           flexDirection: 'row',
-          overflow: 'hidden'
+          overflow: 'visible' // Changé de 'hidden' à 'visible' pour permettre au bouton de dépasser
         }}
       >
         {/* Colonne image - détermine la hauteur */}
@@ -203,7 +236,17 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           className="w-full md:w-1/2 p-8 custom-scrollbar"
           style={{
             overflowY: 'auto',
-            overflowX: 'hidden'
+            overflowX: 'hidden',
+            scrollbarColor: 'transparent transparent',
+            transition: 'scrollbar-color 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.scrollbarColor = '#f7a520 #fff3e0';
+          }}
+          onMouseLeave={(e) => {
+            if (!e.currentTarget.classList.contains('scrolling')) {
+              e.currentTarget.style.scrollbarColor = 'transparent transparent';
+            }
           }}
         >
           <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">
@@ -231,9 +274,19 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
         </div>
 
         <button 
-          className="absolute -top-5 -right-5 z-20 bg-primary-orange text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-orange/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-orange" 
+          className="absolute -top-5 -right-5 z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2" 
+          style={{
+            backgroundColor: 'rgb(98, 137, 181)',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+          }}
           onClick={onClose} 
           aria-label="Fermer"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)';
+          }}
         >
           <X size={20} />
         </button>
