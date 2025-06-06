@@ -142,7 +142,7 @@ export default function ProjectModalMobile({
       {/* NOUVEAU: Conteneur pour l'image de fond et l'overlay */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/images/gallery-background.jpg"
+          src="/images/gallery-background-mobile.jpg"
           alt=""
           fill
           quality={75}

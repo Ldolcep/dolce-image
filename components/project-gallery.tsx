@@ -47,8 +47,8 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
       ],
       description: [
         "Situé à Toulon, Le Boudoir Miadana est un salon de beauté du regard spécialisé dans les extensions de cils, offrant une expérience chaleureuse et sensorielle.",
-        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre "a" dans le nom du salon et symbolise la métamorphose, la beauté et l'élégance.",
-        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd'hui une image forte et différenciante, capable de séduire une clientèle en quête d'une expérience esthétique singulière."
+        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
+        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
       ],
       link: "https://ellipse-real-estate.com/", // Mettez à jour ce lien si nécessaire
     },
@@ -93,9 +93,9 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
         "/images/projects/Dolce/dolce-gallery-7.jpg"
       ],
       description: [ 
-        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l'élégance intemporelle de la French Riviera des années 60 et l'art de vivre de la Dolce Vita",
-        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre "O" crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l'inspiration marine.",
-        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l'élégance propre à l'esprit DOLCE."
+        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l’élégance intemporelle de la French Riviera des années 60 et l’art de vivre de la Dolce Vita",
+        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre “O” crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
+        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
       ],
       link: "https://example.com/social-media", // Mettez à jour ce lien si nécessaire
     },
@@ -130,7 +130,7 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
         "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
         "Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.",
         "La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.",
-        "L'élément graphique représentant l'icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
+        "L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
         "Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature."
       ],
       link: "https://example.com/content",
