@@ -424,13 +424,6 @@ export default function ProjectGallery() {
                     key={`filler-${filler.id}`} 
                     className="masonry-item hidden md:block"
                   > 
-                    <div className="bg-white/95 backdrop-blur-sm rounded-sm shadow-xl">
-                      <FillerCard
-                        id={filler.id}
-                        backgroundImage={filler.backgroundImage}
-                        textImage={filler.textImage}
-                        aspectRatio={filler.aspectRatio}
-                      />
                     </div>
                   </div>
                 );
