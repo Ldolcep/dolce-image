@@ -47,8 +47,8 @@ const hardcodedProjectsData: ProjectsData = {
       ],
       description: [
         "Situé à Toulon, Le Boudoir Miadana est un salon de beauté du regard spécialisé dans les extensions de cils, offrant une expérience chaleureuse et sensorielle.",
-        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
-        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
+        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre "a" dans le nom du salon et symbolise la métamorphose, la beauté et l'élégance.",
+        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd'hui une image forte et différenciante, capable de séduire une clientèle en quête d'une expérience esthétique singulière."
       ],
       link: "https://ellipse-real-estate.com/",
     },
@@ -93,9 +93,9 @@ const hardcodedProjectsData: ProjectsData = {
         "/images/projects/Dolce/dolce-gallery-7.jpg"
       ],
       description: [ 
-        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l’élégance intemporelle de la French Riviera des années 60 et l’art de vivre de la Dolce Vita",
-        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre “O” crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
-        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
+        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l'élégance intemporelle de la French Riviera des années 60 et l'art de vivre de la Dolce Vita",
+        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre "O" crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l'inspiration marine.",
+        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l'élégance propre à l'esprit DOLCE."
       ],
       link: "https://example.com/social-media",
     },
@@ -130,7 +130,7 @@ const hardcodedProjectsData: ProjectsData = {
         "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
         "Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.",
         "La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.",
-        "L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
+        "L'élément graphique représentant l'icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
         "Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature."
       ],
       link: "https://example.com/content",
@@ -167,47 +167,8 @@ export default function ProjectGallery() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [parallaxOffset, setParallaxOffset] = useState(0);
-  const [isParallaxEnabled, setIsParallaxEnabled] = useState(true);
   
   const sectionRef = useRef<HTMLElement>(null);
-  const parallaxRef = useRef<HTMLDivElement>(null);
-
-  // Effet parallaxe avec optimisations pour les performances
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsParallaxEnabled(window.innerWidth > 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking && isParallaxEnabled) {
-        window.requestAnimationFrame(() => {
-          if (sectionRef.current) {
-            const rect = sectionRef.current.getBoundingClientRect();
-            const speed = 0.5;
-            const yPos = rect.top * speed;
-            setParallaxOffset(yPos);
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    if (isParallaxEnabled) {
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      handleScroll();
-    }
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [isParallaxEnabled]);
 
   useEffect(() => {
     const loadProjectsData = async () => {
@@ -334,43 +295,39 @@ export default function ProjectGallery() {
   }, [isModalOpen]);
 
   return (
-    <section ref={sectionRef} id="projects" className="relative py-16 md:py-24 overflow-hidden">
-      {/* Fond parallaxe - seulement sur desktop */}
-      {isParallaxEnabled && (
-        <div 
-          ref={parallaxRef}
-          className="absolute inset-0 z-0"
+    <section ref={sectionRef} id="projects" className="relative py-16 md:py-24 min-h-screen">
+      {/* Fond fixe - fonctionne sur tous les appareils */}
+      <div className="fixed inset-0 -z-10">
+        {/* Image de fond */}
+        <Image
+          src="/images/gallery-background.jpg"
+          alt=""
+          fill
+          quality={90}
+          sizes="100vw"
+          className="object-cover object-center"
           style={{
-            transform: `translateY(${parallaxOffset}px)`,
-            willChange: 'transform'
+            // Pour éviter un zoom excessif, vous pouvez ajuster le scale
+            transform: 'scale(1)' // Changez à scale(0.9) si l'image est trop zoomée
           }}
-        >
-          {/* Image de fond */}
-          <div className="absolute inset-0 -top-20 -bottom-20">
-            <Image
-              src="/images/gallery-background.jpg"
-              alt=""
-              fill
-              quality={85}
-              sizes="100vw"
-              className="object-cover"
-              priority
-            />
-          </div>
-          
-          <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
-          
-          <div 
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-              filter: 'contrast(200%) brightness(100%)'
-            }}
-          />
-          
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent" />
-        </div>
-      )}
+          priority
+        />
+        
+        {/* Overlay sombre */}
+        <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
+        
+        {/* Effet de grain subtil */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            filter: 'contrast(200%) brightness(100%)'
+          }}
+        />
+        
+        {/* Gradient pour améliorer la lisibilité */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent" />
+      </div>
 
       {/* Contenu principal */}
       <div className="container mx-auto px-4 relative z-10">
@@ -406,7 +363,6 @@ export default function ProjectGallery() {
               if ('isFiller' in item) {
                 const filler = item as FillerItem;
                 return (
-                  // BLOC MODIFIÉ : Le wrapper blanc a été supprimé.
                   <div 
                     key={`filler-${filler.id}`} 
                     className="masonry-item hidden md:block"
