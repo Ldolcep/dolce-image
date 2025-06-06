@@ -1,0 +1,801 @@
+/* globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * ========================================
+ * FONT DECLARATIONS
+ * ========================================
+ */
+/* Koolegant pour les titres */
+@font-face {
+  font-family: 'Koolegant';
+  /* <<< Nom de famille simplifié et cohérent */
+  src: url('/fonts/koolegant-webfont.woff2') format('woff2');
+  font-weight: normal;
+  /* Font Squirrel a mis 'normal', c'est OK pour une seule graisse */
+  font-style: normal;
+  font-display: swap;
+  letter-spacing: 0.025em;
+  /* Ajouté pour de meilleures performances */
+}
+
+/* Cocogoose pour le corps du texte */
+@font-face {
+  font-family: 'Cocogoose Pro';
+  /* <<< Nom de famille simplifié et cohérent */
+  src: url('/fonts/cocogoosepro-ultralight.woff2') format('woff2');
+  font-weight: 400;
+  /* 'normal' ou 400 pour regular */
+  font-style: normal;
+  font-display: swap;
+  /* Ajouté */
+}
+
+@font-face {
+  font-family: 'Cocogoose Pro';
+  /* <<< Même nom de famille pour la version bold */
+  src: url('/fonts/cocogoosepro-regular.woff2') format('woff2');
+  font-weight: 700;
+  /* 'bold' ou 700 pour bold */
+  font-style: normal;
+  font-display: swap;
+  /* Ajouté */
+}
+
+/* 
+  Ajoutez ici d'autres @font-face pour les variations de Cocogoose Pro 
+  que vous souhaitez utiliser (Light, Italic, etc.), en ajustant 
+  font-weight et font-style en conséquence. Par exemple :
+
+@font-face {
+  font-family: 'Cocogoose Pro';
+  src: url('/fonts/Cocogoose-Pro-Light-trial.ttf') format('truetype');
+  font-weight: 300; // Light 
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cocogoose Pro';
+  src: url('/fonts/Cocogoose-Pro-Italic-trial.ttf') format('truetype');
+  font-weight: 400; // Regular Italic
+  font-style: italic;
+  font-display: swap;
+}
+*/
+
+
+/**
+ * ========================================
+ * VARIABLES & ROOT SETTINGS
+ * ========================================
+ */
+:root {
+  /* Primary Colors */
+  --color-primary-orange: #f7a520;
+  --color-primary-blue: #09478e;
+  --color-primary-black: #000000;
+
+  /* Secondary Colors */
+  --color-secondary-orange: #f9af3f;
+  --color-secondary-cream-1: #efe4e4;
+  --color-secondary-cream-2: #f0e9e6;
+  --color-secondary-cream-3: #faf7f7;
+
+  /* Background */
+  --background: #faf7f7;
+  --foreground: #000000;
+
+  /* Définition des familles de polices pour une utilisation facile (optionnel mais propre) */
+  --font-koolegant: 'Koolegant', Georgia, serif;
+  /* Fallback pour Koolegant */
+  --font-cocogoose: 'Cocogoose Pro', 'Helvetica Neue', Arial, sans-serif;
+  /* Fallback pour Cocogoose */
+}
+
+/**
+ * ========================================
+ * BASE STYLES & TYPOGRAPHY
+ * ========================================
+ */
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-cocogoose);
+    font-weight: 400;
+    /* Appliquer Cocogoose comme police de corps par défaut */
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    /* @apply font-serif-display; */
+    /* Supprimé car on va utiliser Tailwind ou une variable CSS */
+    font-family: var(--font-koolegant);
+    /* Appliquer Koolegant aux titres par défaut */
+  }
+
+  /* 
+    Les styles pour p, span, a, etc. hériteront de la police du body (Cocogoose) 
+    grâce à la configuration de Tailwind plus bas. 
+    On peut supprimer la directive @apply font-sans ici si on gère via Tailwind.
+  */
+  /*
+  p,
+  span,
+  a,
+  button,
+  input,
+  textarea {
+    @apply font-sans; 
+  }
+  */
+
+  /* Smooth scrolling for anchor links */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus styles for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-orange);
+    outline-offset: 2px;
+  }
+}
+
+/* ... Reste de votre fichier globals.css (COMPONENTS, MASONRY, etc.) inchangé ... */
+
+/**
+ * ========================================
+ * COMPONENT STYLES
+ * ========================================
+ */
+@layer components {
+  .btn-primary {
+    @apply bg-primary-orange text-white px-6 py-3 transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2;
+    font-family: var(--font-cocogoose);
+    /* Assurer que les boutons utilisent Cocogoose s'ils ne l'héritent pas */
+  }
+
+  .btn-secondary {
+    @apply bg-primary-blue text-white px-6 py-3 transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2;
+    font-family: var(--font-cocogoose);
+    /* Idem */
+  }
+}
+
+/**
+ * ========================================
+ * MASONRY GRID LAYOUT
+ * ========================================
+ */
+/* Styles spécifiques pour le masonry grid */
+@layer utilities {
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+}
+
+/* Permettre que la hauteur des images varie naturellement */
+.aspect-random {
+  aspect-ratio: var(--aspect-ratio, 1);
+}
+
+/* Masonry Grid avec CSS Columns - simple et fiable */
+.masonry-grid {
+  column-count: 1;
+  column-gap: 60px;
+}
+
+@media (min-width: 640px) {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1280px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 60px;
+  position: relative;
+}
+
+/**
+ * ========================================
+ * PROJECT CARD STYLES
+ * ========================================
+ */
+/* Standard project cards */
+.project-card {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 4rem;
+  cursor: pointer;
+  transition: all 300ms;
+  position: relative;
+}
+
+.project-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.project-card-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.project-card-title {
+  /* font-family: var(--font-great-vibes); */
+  /* Remplacé par Koolegant via les styles Hx globaux ou classe Tailwind */
+  font-family: var(--font-koolegant);
+  /* Ou appliquer spécifiquement si besoin de surcharger */
+  font-size: 2rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* Card container styles */
+.card-container {
+  border-radius: 2px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.img-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.project-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.5s ease;
+}
+
+.card-container:hover .project-img {
+  transform: scale(1.05);
+}
+
+/* Project content styles */
+.project-content {
+  padding: 15px 8px;
+  text-align: center;
+}
+
+.project-title {
+  /* Sera affecté par les styles Hx globaux pour Koolegant si c'est un h3 */
+  font-size: 1.7rem;
+  margin: 0;
+  line-height: 1.2;
+  color: #000;
+}
+
+.project-description {
+  /* Héritera de Cocogoose Pro du body */
+  font-size: 14px;
+  margin-top: 5px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  opacity: 0;
+  height: 0;
+  transition: opacity 0.3s, height 0.3s;
+}
+
+.card-container:hover .project-description {
+  opacity: 1;
+  height: auto;
+}
+
+/**
+ * ========================================
+ * 3D FILLER CARD STYLES
+ * ========================================
+ */
+/* Animation de brillance pour les filler cards */
+@keyframes shine3DSmooth {
+  0% {
+    background-position: -100% 0;
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.3;
+  }
+
+  40% {
+    opacity: 0.7;
+  }
+
+  60% {
+    opacity: 0.7;
+  }
+
+  85% {
+    opacity: 0.3;
+  }
+
+  100% {
+    background-position: 200% 0;
+    opacity: 0;
+  }
+}
+
+/* Style de base pour les filler cards */
+.filler-card-container {
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  perspective: 1000px;
+  cursor: default;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  will-change: transform, box-shadow;
+}
+
+.filler-card-container:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Styles pour l'image d'arrière-plan */
+.filler-card-container .background-layer {
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Styles pour l'overlay de texte */
+.filler-card-container .text-layer {
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backface-visibility: hidden;
+  z-index: 2;
+  will-change: transform;
+}
+
+/* Effet de brillance au survol - pseudo-élément before */
+.filler-card-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.filler-card-container:hover::before {
+  animation: shine3DSmooth 2.5s infinite cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+/* Effet de glow au survol - pseudo-élément after */
+.filler-card-container::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle at center, rgba(247, 165, 32, 0.3), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0, 0, 0.2, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.filler-card-container:hover::after {
+  opacity: 0.5;
+}
+
+/**
+ * ========================================
+ * MODAL STYLES
+ * ========================================
+ */
+/* Modal animations */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 400ms ease;
+  padding: 1rem;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  max-width: 56rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  border-radius: 2px;
+}
+
+.modal-content.open {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* ===============================
+   🎨 SWIPER MODAL MOBILE - ANIMATION FLUIDE TEMPS RÉEL
+   ===============================*/
+
+/* 🔧 Scrollbar orange pour modal mobile et desktop */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  /* Plus large pour desktop */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #fff3e0;
+  /* Fond crème clair assorti à votre palette */
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #f7a520;
+  /* Votre couleur orange principale */
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #e89410;
+  /* Orange plus foncé au survol */
+  box-shadow: 0 0 6px rgba(247, 165, 32, 0.4);
+}
+
+/* Support Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #f7a520 #fff3e0;
+}
+
+/* Ajustement mobile - scrollbar plus fine */
+@media (max-width: 768px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
+/* 🎨 ANIMATION ÉVENTAIL FLUIDE - Suit le mouvement du doigt */
+.swiper-card-fan {
+  overflow: visible !important;
+  position: relative;
+  perspective: 800px;
+  transform-style: preserve-3d;
+}
+
+.swiper-card-fan .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  will-change: transform !important;
+  transform-style: preserve-3d;
+}
+
+.swiper-card-fan .swiper-slide {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  position: relative !important;
+  border-radius: 0px !important;
+  overflow: hidden !important;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transform-origin: bottom center;
+
+  /* 🎨 Animation fluide basée sur la progression du swipe */
+  transition: transform 0.1s linear, opacity 0.1s linear !important;
+}
+
+/* 🎨 CARTE ACTIVE - Animation progressive selon swipe */
+.swiper-card-fan .swiper-slide-active {
+  z-index: 15 !important;
+
+  /* 🎨 Animation qui suit le swipe en temps réel */
+  transform:
+    translateZ(calc(20px + var(--swipe-progress, 0) * 10px)) translateY(calc(-10px + var(--swipe-progress, 0) * -5px)) scale(calc(0.98 + var(--swipe-progress, 0) * 0.02)) rotate(calc(var(--swipe-progress, 0) * -3deg)) !important;
+
+  box-shadow:
+    0 calc(12px + var(--swipe-progress, 0) * 8px) calc(40px + var(--swipe-progress, 0) * 20px) rgba(0, 0, 0, calc(0.25 + var(--swipe-progress, 0) * 0.1)) !important;
+}
+
+/* 🎨 CARTE SUIVANTE - Sort progressivement de l'éventail */
+.swiper-card-fan .swiper-slide-next {
+  z-index: 12 !important;
+
+  transform:
+    translateZ(calc(8px + var(--swipe-progress, 0) * 12px)) translateY(calc(-1px + var(--swipe-progress, 0) * -9px)) scale(calc(0.94 + var(--swipe-progress, 0) * 0.04)) rotate(calc(10deg + var(--swipe-progress, 0) * -10deg)) !important;
+
+  opacity: calc(0.88 + var(--swipe-progress, 0) * 0.12) !important;
+}
+
+/* 🎨 CARTE PRÉCÉDENTE - Rentre progressivement dans l'éventail */
+.swiper-card-fan .swiper-slide-prev {
+  z-index: 8 !important;
+
+  transform:
+    translateZ(calc(12px + var(--swipe-progress, 0) * -4px)) translateY(calc(-2px + var(--swipe-progress, 0) * 2px)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.02)) rotate(calc(-10deg + var(--swipe-progress, 0) * -5deg)) !important;
+
+  opacity: calc(0.9 + var(--swipe-progress, 0) * -0.2) !important;
+}
+
+/* 🎨 CARTES EN ÉVENTAIL - Positions dynamiques selon progression */
+.swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
+  transform:
+    translateZ(calc(5px + var(--swipe-progress, 0) * -2px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) rotate(calc(-12deg + var(--swipe-progress, 0) * -3deg)) scale(calc(0.94 + var(--swipe-progress, 0) * -0.02)) !important;
+  z-index: 7 !important;
+  opacity: calc(0.85 + var(--swipe-progress, 0) * -0.15) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
+  transform:
+    translateZ(calc(8px + var(--swipe-progress, 0) * -1px)) translateY(0px) rotate(calc(-6deg + var(--swipe-progress, 0) * -2deg)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) !important;
+  z-index: 8 !important;
+  opacity: calc(0.88 + var(--swipe-progress, 0) * -0.1) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
+  transform:
+    translateZ(calc(8px + var(--swipe-progress, 0) * -1px)) translateY(0px) rotate(calc(6deg + var(--swipe-progress, 0) * 2deg)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) !important;
+  z-index: 8 !important;
+  opacity: calc(0.88 + var(--swipe-progress, 0) * -0.1) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
+  transform:
+    translateZ(calc(5px + var(--swipe-progress, 0) * -2px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) rotate(calc(12deg + var(--swipe-progress, 0) * 3deg)) scale(calc(0.94 + var(--swipe-progress, 0) * -0.02)) !important;
+  z-index: 7 !important;
+  opacity: calc(0.85 + var(--swipe-progress, 0) * -0.15) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(n+6):not(.swiper-slide-active):not(.swiper-slide-next):not(.swiper-slide-prev) {
+  transform:
+    translateZ(calc(2px + var(--swipe-progress, 0) * -1px)) rotate(calc(15deg + var(--swipe-progress, 0) * 5deg)) scale(calc(0.92 + var(--swipe-progress, 0) * -0.02)) !important;
+  z-index: 5 !important;
+  opacity: calc(0.7 + var(--swipe-progress, 0) * -0.2) !important;
+}
+
+/* 🎨 Animation de finalisation après swipe */
+.swiper-card-fan[data-transitioning="true"] .swiper-slide {
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+/* 🎨 Effet de texture carte avec reflets */
+.swiper-card-fan .swiper-slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+    linear-gradient(45deg, transparent 60%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 0px;
+}
+
+/* 🎨 Bordure subtile de carte */
+.swiper-card-fan .swiper-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 🔧 Configuration globale */
+.swiper {
+  --swiper-theme-color: #f97316;
+  --swiper-navigation-size: 18px;
+}
+
+.swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  will-change: transform !important;
+  cursor: grab !important;
+}
+
+.swiper-wrapper:active {
+  cursor: grabbing !important;
+}
+
+/* 🔧 Swiper slide base */
+.swiper-slide {
+  backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  will-change: transform, opacity !important;
+}
+
+/* 🔧 BOUTONS NAVIGATION avec états grisés */
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+  width: 44px !important;
+  height: 44px !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 25 !important;
+}
+
+.swiper-button-prev-custom:not([disabled]),
+.swiper-button-next-custom:not([disabled]) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+}
+
+.swiper-button-prev-custom:not([disabled]):hover,
+.swiper-button-next-custom:not([disabled]):hover {
+  background: rgba(255, 255, 255, 1) !important;
+  color: #f97316 !important;
+  transform: scale(1.05) !important;
+}
+
+.swiper-button-prev-custom[disabled],
+.swiper-button-next-custom[disabled] {
+  background: rgba(200, 200, 200, 0.5) !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.4 !important;
+}
+
+/* 🔧 Masquer navigation par défaut */
+.swiper-button-next,
+.swiper-button-prev {
+  display: none !important;
+}
+
+/* 🔧 Performance optimizations */
+.swiper-card-fan .swiper-slide {
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
+}
+
+/* 🔧 Responsive mobile */
+@media (max-width: 768px) {
+  .swiper {
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  /* 🎨 Réduction des effets pour performance mobile */
+  .swiper-card-fan {
+    perspective: 600px !important;
+  }
+
+  /* 🎨 Ajustements spécifiques mobile pour animation fluide */
+  .swiper-card-fan .swiper-slide-active {
+    transform:
+      translateZ(calc(15px + var(--swipe-progress, 0) * 5px)) translateY(calc(-8px + var(--swipe-progress, 0) * -2px)) scale(calc(0.96 + var(--swipe-progress, 0) * 0.02)) rotate(calc(var(--swipe-progress, 0) * -2deg)) !important;
+  }
+
+  .swiper-card-fan .swiper-slide-next {
+    transform:
+      translateZ(calc(5px + var(--swipe-progress, 0) * 8px)) translateY(calc(0px + var(--swipe-progress, 0) * -6px)) scale(calc(0.94 + var(--swipe-progress, 0) * 0.02)) rotate(calc(8deg + var(--swipe-progress, 0) * -8deg)) !important;
+  }
+
+  .swiper-card-fan .swiper-slide-prev {
+    transform:
+      translateZ(calc(8px + var(--swipe-progress, 0) * -3px)) translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) rotate(calc(-8deg + var(--swipe-progress, 0) * -3deg)) !important;
+  }
+
+  /* 🔧 Éventail très compact pour mobile */
+  .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(-1px) rotate(-12deg) scale(0.94) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
+    transform: translateZ(8px) translateY(0px) rotate(-6deg) scale(0.96) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(3):not(.swiper-slide-active) {
+    transform: translateZ(10px) translateY(0px) rotate(-3deg) scale(0.97) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active) {
+    transform: translateZ(10px) translateY(0px) rotate(3deg) scale(0.97) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+    transform: translateZ(8px) translateY(0px) rotate(6deg) scale(0.96) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(-1px) rotate(12deg) scale(0.94) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(n+7):not(.swiper-slide-active) {
+    transform: translateZ(2px) rotate(15deg) scale(0.92) !important;
+  }
+}
+
+/* 🔧 Ajustements pour très petits écrans */
+@media (max-width: 480px) {
+  .swiper-card-fan {
+    perspective: 600px !important;
+  }
+
+  .swiper-card-fan .swiper-slide-active {
+    transform: translateZ(15px) translateY(-8px) scale(0.96) rotate(0deg) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active),
+  .swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+    transform: translateZ(3px) translateY(0px) rotate(var(--rotation, 10deg)) scale(0.95) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active),
+  .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(0px) rotate(var(--rotation, 5deg)) scale(0.97) !important;
+  }
+}
+
+/* 🔧 Support reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .swiper,
+  .swiper-slide,
+  .swiper-button-prev-custom,
+  .swiper-button-next-custom {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .swiper-card-fan .swiper-slide {
+    transition: transform 0.2s ease !important;
+  }
+}

@@ -1,7 +1,7 @@
 // hooks/use-mobile.tsx - CORRIGÉ POUR SSR/HYDRATATION
 import * as React from "react" // ou import { useState, useEffect } from "react";
 
-const MOBILE_BREAKPOINT = 768 // Vous pouvez ajuster ce breakpoint si nécessaire
+const MOBILE_BREAKPOINT = 1024 // Vous pouvez ajuster ce breakpoint si nécessaire
 
 export function useIsMobile(): boolean {
   // Commencer par une valeur par défaut (par exemple, false pour desktop-first).

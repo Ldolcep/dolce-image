@@ -1,26 +1,25 @@
+// --- START OF FILE layout.tsx ---
+
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Great_Vibes, Poppins } from "next/font/google"
+// Importez les nouvelles polices
+import { DM_Serif_Display, Montserrat } from "next/font/google"
 import "./globals.css"
 
-// Import Google Fonts
-const greatVibes = Great_Vibes({
-  weight: "400",
+// Configuration pour DM Serif Display
+const dmSerifDisplay = DM_Serif_Display({
+  weight: "400", // DM Serif Display a généralement un seul poids normal
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-great-vibes",
+  variable: "--font-dm-serif-display", // Variable CSS pour les titres
 })
 
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600"],
+// Configuration pour Montserrat
+const montserrat = Montserrat({
+  weight: ["300", "400", "500", "600", "700"], // Choisissez les poids nécessaires
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-poppins",
-})
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-montserrat", // Variable CSS pour le corps du texte
 })
 
 export const metadata: Metadata = {
@@ -36,10 +35,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} ${greatVibes.variable} ${poppins.variable} antialiased`}>{children}</body>
+      {/* Appliquez les variables des nouvelles polices au body */}
+      <body className={`${dmSerifDisplay.variable} ${montserrat.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   )
 }
-
 
 import './globals.css'

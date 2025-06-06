@@ -130,7 +130,7 @@ export default function Hero() {
   }, [isMobile, showVolumeControl, volumeContainerRef]);
 
   return (
-    <section className="w-full relative pt-[64px] md:pt-[72px]">
+    <section id="hero-section" className="w-full relative">
       {/* Video Full Screen */}
       <div className="w-full h-full">
         <video

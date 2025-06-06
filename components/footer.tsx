@@ -7,12 +7,12 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="relative h-16 w-16 mb-4 md:mb-0">
-            <Image src="/images/DOLCE_LOGO_SECONDAIRE.png" alt="Dolce" fill className="object-contain" />
+            <Image src="/images/DOLCE_LOGO_SHORT.png" alt="Dolce" fill className="object-contain" />
           </div>
 
           <div className="flex space-x-6">
             <Link
-              href="https://instagram.com/dolce"
+              href="https://instagram.com/groupedolce"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -20,12 +20,12 @@ export default function Footer() {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="35"
+                height="35"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
@@ -35,48 +35,26 @@ export default function Footer() {
               </svg>
             </Link>
             <Link
-              href="https://linkedin.com/company/dolce"
+              href="https://tiktok.com/@groupedolce"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="LinkedIn"
+              aria-label="TikTok"
               className="text-black hover:text-primary-orange transition-colors"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="35"
+                height="35"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                <rect x="2" y="9" width="4" height="12"></rect>
-                <circle cx="4" cy="4" r="2"></circle>
-              </svg>
-            </Link>
-            <Link
-              href="https://dribbble.com/dolce"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Dribbble"
-              className="text-black hover:text-primary-orange transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"></path>
+                <g transform="translate(13.7 10.5) scale(1.15) translate(-13.3385 -10.662)">
+                  <path d="M6.977,15.532a2.791,2.791,0,0,0,2.791,2.792,2.859,2.859,0,0,0,2.9-2.757L12.7,3h2.578A4.8,4.8,0,0,0,19.7,7.288v2.995h0c-.147.014-.295.022-.443.022a4.8,4.8,0,0,1-4.02-2.172v7.4a5.469,5.469,0,1,1-5.469-5.469c.114,0,.226.01.338.017v2.7a2.909,2.909,0,0,0-.338-.034A2.791,2.791,0,0,0,6.977,15.532Z"></path>
+                </g>
               </svg>
             </Link>
           </div>
