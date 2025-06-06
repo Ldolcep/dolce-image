@@ -27,6 +27,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imagesPreloaded, setImagesPreloaded] = useState<Set<string>>(new Set());
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -36,13 +37,11 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
 
   const handleNext = useCallback(() => {
     if (allVisuals.length <= 1) return;
-    setImageLoaded(false);
     setCurrentImageIndex((prev) => (prev + 1) % allVisuals.length);
   }, [allVisuals.length]);
 
   const handlePrevious = useCallback(() => {
     if (allVisuals.length <= 1) return;
-    setImageLoaded(false);
     setCurrentImageIndex((prev) => (prev - 1 + allVisuals.length) % allVisuals.length);
   }, [allVisuals.length]);
 
@@ -51,6 +50,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     if (isOpen) {
       setCurrentImageIndex(0);
       setImageLoaded(false);
+      setImagesPreloaded(new Set());
     }
   }, [project, isOpen]);
 
@@ -62,6 +62,50 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
       setIsAnimating(false);
     };
   }, [isOpen, isMounted]);
+
+  // Préchargement intelligent des images
+  useEffect(() => {
+    if (!isOpen || allVisuals.length === 0) return;
+    
+    const preloadImages = async () => {
+      // Toujours précharger l'image actuelle et les adjacentes
+      const indicesToPreload = [
+        currentImageIndex,
+        (currentImageIndex + 1) % allVisuals.length,
+        (currentImageIndex - 1 + allVisuals.length) % allVisuals.length
+      ];
+      
+      const promises = indicesToPreload.map(index => {
+        const src = allVisuals[index];
+        if (imagesPreloaded.has(src)) return Promise.resolve();
+        
+        return new Promise<void>((resolve) => {
+          const img = new window.Image();
+          img.onload = () => {
+            setImagesPreloaded(prev => new Set(prev).add(src));
+            resolve();
+          };
+          img.onerror = () => resolve();
+          img.src = src;
+        });
+      });
+      
+      await Promise.all(promises);
+      
+      // Précharger le reste en arrière-plan
+      setTimeout(() => {
+        allVisuals.forEach((src, index) => {
+          if (!imagesPreloaded.has(src) && !indicesToPreload.includes(index)) {
+            const img = new window.Image();
+            img.onload = () => setImagesPreloaded(prev => new Set(prev).add(src));
+            img.src = src;
+          }
+        });
+      }, 100);
+    };
+    
+    preloadImages();
+  }, [currentImageIndex, allVisuals, isOpen, imagesPreloaded]);
 
   // Synchronisation des hauteurs
   const syncHeights = useCallback(() => {
@@ -179,31 +223,41 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
         <div 
           className="w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50"
         >
-          <img
-            ref={imageRef}
-            src={allVisuals[currentImageIndex]}
-            alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-            className="block w-full h-auto"
-            style={{
-              maxHeight: '90vh',
-              objectFit: 'contain'
-            }}
-            onLoad={handleImageLoad}
-          />
+          <div className="relative w-full h-full">
+            {/* Toutes les images sont dans le DOM mais une seule est visible */}
+            {allVisuals.map((visual, index) => (
+              <img
+                key={visual}
+                ref={index === currentImageIndex ? imageRef : undefined}
+                src={visual}
+                alt={`Image ${index + 1} du projet ${project.title}`}
+                className={`absolute inset-0 w-full h-auto transition-opacity duration-300 ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+                style={{
+                  maxHeight: '90vh',
+                  objectFit: 'contain',
+                  visibility: index === currentImageIndex ? 'visible' : 'hidden'
+                }}
+                onLoad={index === currentImageIndex ? handleImageLoad : undefined}
+                loading={index <= 1 ? 'eager' : 'lazy'}
+              />
+            ))}
+          </div>
           
           {/* Navigation */}
           {allVisuals.length > 1 && (
             <>
               <button 
                 onClick={handlePrevious} 
-                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
+                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow z-10" 
                 aria-label="Image précédente"
               >
                 <ChevronLeft size={20} />
               </button>
               <button 
                 onClick={handleNext} 
-                className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow" 
+                className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow z-10" 
                 aria-label="Image suivante"
               >
                 <ChevronRight size={20} />
@@ -213,7 +267,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           
           {/* Indicateurs */}
           {allVisuals.length > 1 && (
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center">
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center z-10">
               <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
                 {allVisuals.map((_, index) => (
                   <button 
