@@ -690,3 +690,25 @@
     transition: transform 0.2s ease !important;
   }
 }
+/* Ajoutez ceci à la fin de votre globals.css */
+
+/**
+ * ========================================
+ * SAFARI COMPATIBILITY FIXES
+ * ========================================
+ */
+
+/* 
+ * Force la promotion sur une couche composite pour les éléments utilisant backdrop-filter.
+ * Cela stabilise le rendu sur WebKit (Safari) et prévient les bugs de "disparition".
+*/
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+
+  .backdrop-blur-sm,
+  .backdrop-blur,
+  .backdrop-blur-md,
+  .backdrop-blur-lg {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
