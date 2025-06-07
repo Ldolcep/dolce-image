@@ -1,0 +1,28 @@
+/* Safari Fixes */
+@supports (-webkit-appearance: none) {
+    /* Fix backdrop filters */
+    .backdrop-blur-sm { -webkit-backdrop-filter: blur(4px); }
+    .backdrop-blur { -webkit-backdrop-filter: blur(8px); }
+    .backdrop-blur-md { -webkit-backdrop-filter: blur(12px); }
+    .backdrop-blur-lg { -webkit-backdrop-filter: blur(16px); }
+    
+    /* Fix transforms */
+    .masonry-item,
+    .card-container,
+    .filler-card-container {
+      -webkit-transform: translateZ(0);
+      -webkit-transform-style: preserve-3d;
+      -webkit-backface-visibility: hidden;
+    }
+    
+    /* Fix position fixed + transform */
+    .fixed {
+      -webkit-transform: none !important;
+    }
+    
+    /* Disable mix-blend-mode si problématique */
+    .mix-blend-multiply {
+      mix-blend-mode: normal;
+      opacity: 0.6;
+    }
+    
