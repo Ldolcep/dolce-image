@@ -357,7 +357,7 @@ export default function ProjectGallery() {
                   role="button"
                   aria-label={`View ${project.title} project details`}
                 >
-                  <div className="card-container bg-white/80 backdrop-blur-sm">
+                  <div className="card-container bg-white/40 backdrop-blur-sm">
                     <div className="img-container">
                       <Image
                         src={project.mainVisual || "/placeholder.svg"}
