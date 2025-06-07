@@ -1,9 +1,10 @@
-// --- START OF FILE project-gallery.tsx (MODIFIED) ---
+// --- START OF FILE project-gallery.tsx (FINAL VERSION) ---
 
 "use client"
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
+import Masonry from 'react-masonry-css' // <-- 1. IMPORTATION DE LA BIBLIOTHÈQUE
 import ProjectModal from "./ProjectModal" 
 import FillerCard from "./filler-card"
 
@@ -33,7 +34,7 @@ interface ProjectsData {
 }
 
 // Définir les données des projets codées en dur (utilisées comme fallback)
-const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohérence
+const hardcodedProjectsData: ProjectsData = {
   projects: [
     {
       id: "1",
@@ -50,7 +51,7 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
         "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
         "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
       ],
-      link: "https://ellipse-real-estate.com/", // Mettez à jour ce lien si nécessaire
+      link: "https://ellipse-real-estate.com/",
     },
     {
       id: "2",
@@ -97,7 +98,7 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
         "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre “O” crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
         "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
       ],
-      link: "https://example.com/social-media", // Mettez à jour ce lien si nécessaire
+      link: "https://example.com/social-media",
     },
     {
       id: "5",
@@ -137,28 +138,18 @@ const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohéren
     },
   ],
   fillers: [
-    {
-      id: "filler_1",
-      backgroundImage: "/images/fillers/filler_1_bg.jpg",
-      textImage: "/images/fillers/filler_1_text.png", 
-      aspectRatio: "4/3",
-      isFiller: true
-    },
-    {
-      id: "filler_2",
-      backgroundImage: "/images/fillers/filler_2_bg.jpg",
-      textImage: "/images/fillers/filler_2_text.png",
-      aspectRatio: "3/2",
-      isFiller: true
-    },
-    {
-      id: "filler_3",
-      backgroundImage: "/images/fillers/filler_3_bg.jpg",
-      textImage: "/images/fillers/filler_3_text.png",
-      aspectRatio: "4/3",
-      isFiller: true
-    },
+    { id: "filler_1", backgroundImage: "/images/fillers/filler_1_bg.jpg", textImage: "/images/fillers/filler_1_text.png", aspectRatio: "4/3", isFiller: true },
+    { id: "filler_2", backgroundImage: "/images/fillers/filler_2_bg.jpg", textImage: "/images/fillers/filler_2_text.png", aspectRatio: "3/2", isFiller: true },
+    { id: "filler_3", backgroundImage: "/images/fillers/filler_3_bg.jpg", textImage: "/images/fillers/filler_3_text.png", aspectRatio: "4/3", isFiller: true },
   ]
+};
+
+// 2. DÉFINITION DES POINTS DE RUPTURE POUR LES COLONNES
+const breakpointColumns = {
+  default: 3,    // 3 colonnes par défaut
+  1024: 3,       // 3 colonnes à partir de 1024px
+  768: 2,        // 2 colonnes à partir de 768px
+  640: 1         // 1 colonne en dessous de 640px
 };
 
 export default function ProjectGallery() {
@@ -170,6 +161,9 @@ export default function ProjectGallery() {
   
   const sectionRef = useRef<HTMLElement>(null);
 
+  // NOTE: Le code du parallaxe JS a été supprimé pour garantir la stabilité sur Safari.
+  // Il est remplacé par un fond fixe CSS pur, beaucoup plus simple et performant.
+
   useEffect(() => {
     const loadProjectsData = async () => {
       try {
@@ -178,9 +172,7 @@ export default function ProjectGallery() {
         
         const response = await fetch('/data/projects.json', {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
         
         if (!response.ok) {
@@ -196,11 +188,7 @@ export default function ProjectGallery() {
         const projectsFromJson = fetchedProjectsData.projects;
         const fillersFromJson = fetchedProjectsData.fillers || []; 
         
-        const interleavedItems = interleaveItems(
-          projectsFromJson,
-          fillersFromJson
-        );
-        
+        const interleavedItems = interleaveItems(projectsFromJson, fillersFromJson);
         setAllItems(interleavedItems);
         
       } catch (err) {
@@ -210,10 +198,7 @@ export default function ProjectGallery() {
         
         console.warn("Utilisation des données de secours (hardcodées) car le chargement du JSON a échoué.");
         const fallbackFillers = hardcodedProjectsData.fillers || [];
-        const fallbackInterleavedItems = interleaveItems(
-          hardcodedProjectsData.projects,
-          fallbackFillers
-        );
+        const fallbackInterleavedItems = interleaveItems(hardcodedProjectsData.projects, fallbackFillers);
         setAllItems(fallbackInterleavedItems);
         
       } finally {
@@ -296,41 +281,22 @@ export default function ProjectGallery() {
 
   return (
     <section ref={sectionRef} id="projects" className="relative py-16 md:py-24 min-h-screen">
-      {/* Fond fixe - fonctionne sur tous les appareils */}
+      
+      {/* 3. FOND FIXE CSS PUR : simple, stable et performant */}
       <div className="fixed inset-0 -z-10">
-        {/* Image de fond */}
         <Image
           src="/images/gallery-background.jpg"
           alt=""
           fill
           quality={90}
           sizes="100vw"
-          className="object-cover object-center"
-          style={{
-            // Pour éviter un zoom excessif, vous pouvez ajuster le scale
-            transform: 'scale(1)' // Changez à scale(0.9) si l'image est trop zoomée
-          }}
+          className="object-cover"
           priority
         />
-        
-        {/* Overlay sombre */}
-        <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
-        
-        {/* Effet de grain subtil */}
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            filter: 'contrast(200%) brightness(100%)'
-          }}
-        />
-        
-        {/* Gradient pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      {/* Contenu principal */}
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 relative">
         <h2 className="font-koolegant text-4xl md:text-5xl mb-16 text-center text-white drop-shadow-lg">
           Our Projects
         </h2>
@@ -341,7 +307,6 @@ export default function ProjectGallery() {
             <p className="mt-4 text-white font-cocogoose drop-shadow">Chargement des projets...</p>
           </div>
         )}
-
         {error && !loading && (
           <div className="text-center py-12">
             <div className="max-w-md mx-auto">
@@ -357,16 +322,19 @@ export default function ProjectGallery() {
         )}
 
         {!loading && !error && allItems.length > 0 && (
-          <div className="masonry-grid">
+          // 4. REMPLACEMENT DE LA GRILLE PAR LE COMPOSANT MASONRY
+          <Masonry
+            breakpointCols={breakpointColumns}
+            className="masonry-grid-js"       // Classe pour le conteneur principal
+            columnClassName="masonry-column"  // Classe pour chaque colonne
+          >
             {allItems.map((item) => {
               // Rendu pour les Fillers
               if ('isFiller' in item) {
                 const filler = item as FillerItem;
                 return (
-                  <div 
-                    key={`filler-${filler.id}`} 
-                    className="masonry-item hidden md:block"
-                  > 
+                  // La div wrapper .masonry-item est gérée par la bibliothèque
+                  <div key={`filler-${filler.id}`} className="hidden md:block">
                     <FillerCard
                       id={filler.id}
                       backgroundImage={filler.backgroundImage}
@@ -380,16 +348,16 @@ export default function ProjectGallery() {
               // Rendu pour les Projets
               const project = item as Project;
               return (
+                // La div wrapper .masonry-item est gérée par la bibliothèque
                 <div
                   key={project.id}
-                  className="masonry-item"
                   onClick={() => openModal(project)}
                   onKeyDown={(e) => e.key === "Enter" && openModal(project)}
                   tabIndex={0}
                   role="button"
                   aria-label={`View ${project.title} project details`}
                 >
-                  <div className="card-container bg-white/95 backdrop-blur-sm rounded-sm shadow-xl hover:bg-white transition-all duration-300">
+                  <div className="card-container bg-white/80 backdrop-blur-sm">
                     <div className="img-container">
                       <Image
                         src={project.mainVisual || "/placeholder.svg"}
@@ -407,7 +375,7 @@ export default function ProjectGallery() {
                 </div>
               );
             })}
-          </div>
+          </Masonry>
         )}
 
         {!loading && !error && allItems.length === 0 && (
@@ -427,4 +395,4 @@ export default function ProjectGallery() {
     </section>
   );
 }
-// --- END OF FILE project-gallery.tsx (MODIFIED) ---
+// --- END OF FILE project-gallery.tsx (FINAL VERSION) ---

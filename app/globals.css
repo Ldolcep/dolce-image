@@ -112,55 +112,41 @@
 
 /**
  * ========================================
- * PROJECT GALLERY & CARDS  <- MODIFIED SECTION
+ * PROJECT GALLERY & CARDS
+ * (Utilise les styles pour react-masonry-css)
  * ========================================
  */
 
-/* Grille Masonry (utilisant des colonnes CSS pour un agencement simple et robuste) */
-.masonry-grid {
-  column-count: 1;
-  column-gap: 1.5rem;
-  /* 24px */
+/* NOUVEAU : Styles pour le conteneur de la grille react-masonry-css */
+.masonry-grid-js {
+  display: flex;
+  gap: 1.5rem;
+  /* Espace horizontal entre les colonnes */
+  width: auto;
 }
 
-@media (min-width: 768px) {
-
-  /* md */
-  .masonry-grid {
-    column-count: 2;
-  }
+/* NOUVEAU : Styles pour chaque colonne générée par la bibliothèque */
+.masonry-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  /* Espace vertical entre les cartes DANS une colonne */
+  background-clip: padding-box;
 }
 
-@media (min-width: 1024px) {
+/* NOTE : Les anciennes classes .masonry-grid et .masonry-item ont été supprimées */
 
-  /* lg */
-  .masonry-grid {
-    column-count: 3;
-  }
-}
-
-/* Conteneur de chaque carte dans la grille */
-.masonry-item {
-  break-inside: avoid;
-  /* Empêche une carte d'être coupée par un saut de colonne */
-  margin-bottom: 1.5rem;
-  /* 24px - Espace vertical entre les cartes */
-  position: relative;
-  /* Contexte de positionnement pour les éléments enfants */
-}
 
 /* Style de la carte de projet (utilisé sur la div qui enveloppe l'image et le texte) */
 .card-container {
-  /* Le fond, le flou et l'ombre sont gérés par Tailwind dans le .tsx */
-  /* Ici, on gère les transitions et les effets de survol globaux */
   border-radius: 2px;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* L'ombre et le fond sont maintenant gérés directement dans le composant .tsx */
 }
 
 .card-container:hover {
   transform: translateY(-8px);
-  /* Ombre plus prononcée au survol pour donner un effet de lévitation */
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
@@ -169,8 +155,7 @@
   position: relative;
   overflow: hidden;
   width: 100%;
-  aspect-ratio: auto;
-  /* Ratio d'aspect pour des images homogènes */
+  aspect-ratio: 4 / 3;
 }
 
 .project-img {
@@ -178,32 +163,25 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Assure que l'image remplit l'espace sans se déformer */
   transition: transform 0.5s ease;
 }
 
 .card-container:hover .project-img {
   transform: scale(1.05);
-  /* Effet de zoom subtil au survol */
 }
 
 /* Contenu textuel de la carte */
 .project-content {
   padding: 1.25rem 1rem;
-  /* 20px 16px */
   text-align: center;
 }
 
 .project-title {
-  /* La police Koolegant est appliquée par la règle de base sur `h3` */
   font-size: 1.7rem;
   line-height: 1.2;
   color: #1a1a1a;
-  /* Couleur de texte sombre pour un bon contraste sur fond clair */
   margin: 0;
 }
-
-
 /**
  * ========================================
  * 3D FILLER CARD STYLES (UNCHANGED)
@@ -690,41 +668,25 @@
     transition: transform 0.2s ease !important;
   }
 }
-
-/* --- REMPLACEZ L'ANCIEN BLOC SAFARI PAR CELUI-CI À LA FIN DE globals.css --- */
+/* Ajoutez ceci à la fin de votre globals.css */
 
 /**
  * ========================================
- * SAFARI-SPECIFIC LAYOUT OVERRIDE (ROBUST)
+ * SAFARI COMPATIBILITY FIXES
  * ========================================
- *
- * Utilise une astuce CSS simple et fiable pour cibler Safari.
  */
-@supports (background: -webkit-named-color(ignore)) and (font: -apple-system-body) and (max-height: 100vh) {
 
-  /* On cible directement la classe de la grille */
-  .masonry-grid {
-    /* On force l'application de ces règles en utilisant une spécificité plus élevée,
-       juste pour être sûr qu'elles ne sont pas surchargées. */
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
-    gap: 1.5rem !important;
+/* 
+ * Force la promotion sur une couche composite pour les éléments utilisant backdrop-filter.
+ * Cela stabilise le rendu sur WebKit (Safari) et prévient les bugs de "disparition".
+*/
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
 
-    /* On annule les anciennes propriétés. */
-    column-count: auto !important;
-  }
-
-  /* On annule les styles des items qui ne sont plus nécessaires. */
-  .masonry-item {
-    break-inside: auto !important;
-    margin-bottom: 0 !important;
-  }
-
-  /* On ajoute le fix pour le rendu des cartes à l'intérieur de la même règle */
-  .card-container,
-  .filler-card-container {
+  .backdrop-blur-sm,
+  .backdrop-blur,
+  .backdrop-blur-md,
+  .backdrop-blur-lg {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }
 }
-
