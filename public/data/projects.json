@@ -167,12 +167,5 @@
       "aspectRatio": "4/3",
       "isFiller": true
     },
-    {
-      "id": "filler_4",
-      "backgroundImage": "/images/fillers/filler_4_bg.jpg",
-      "textImage": "/images/fillers/filler_4_text.png",
-      "aspectRatio": "4/3",
-      "isFiller": true
-    }
   ]
 }

@@ -120,7 +120,7 @@
 /* NOUVEAU : Styles pour le conteneur de la grille react-masonry-css */
 .masonry-grid-js {
   display: flex;
-  gap: 1.5rem;
+  gap: 3rem;
   /* Espace horizontal entre les colonnes */
   width: auto;
 }
@@ -129,7 +129,7 @@
 .masonry-column {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 3rem;
   /* Espace vertical entre les cartes DANS une colonne */
   background-clip: padding-box;
 }
