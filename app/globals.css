@@ -691,54 +691,40 @@
   }
 }
 
+/* --- REMPLACEZ L'ANCIEN BLOC SAFARI PAR CELUI-CI À LA FIN DE globals.css --- */
+
 /**
  * ========================================
- * SAFARI-SPECIFIC LAYOUT & RENDER OVERRIDE (FINAL)
+ * SAFARI-SPECIFIC LAYOUT OVERRIDE (ROBUST)
  * ========================================
  *
- * Cible uniquement Safari pour corriger à la fois le bug de la grille
- * masonry et le bug de rendu des cartes incomplètes.
+ * Utilise une astuce CSS simple et fiable pour cibler Safari.
  */
-@media not all and (min-resolution:.001dpcm) {
-  @supports (-webkit-appearance:none) and (stroke-color:transparent) {
+@supports (background: -webkit-named-color(ignore)) and (font: -apple-system-body) and (max-height: 100vh) {
 
-    /*
-     * CORRECTIF n°1 : Mise en page de la Grille
-     * On remplace `column-count` (instable) par `display: grid` (stable).
-    */
-    .masonry-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
+  /* On cible directement la classe de la grille */
+  .masonry-grid {
+    /* On force l'application de ces règles en utilisant une spécificité plus élevée,
+       juste pour être sûr qu'elles ne sont pas surchargées. */
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: 1.5rem !important;
 
-      /* NOUVEAU ET CRUCIAL : On aligne les items en haut de leur cellule.
-         Cela empêche l'étirement vertical et aide à résoudre les bugs de
-         calcul de hauteur qui coupaient le contenu des cartes. */
-      align-items: start;
+    /* On annule les anciennes propriétés. */
+    column-count: auto !important;
+  }
 
-      /* Réinitialisation des propriétés de l'ancienne méthode */
-      column-count: auto;
-    }
+  /* On annule les styles des items qui ne sont plus nécessaires. */
+  .masonry-item {
+    break-inside: auto !important;
+    margin-bottom: 0 !important;
+  }
 
-    /* 
-     * Réinitialisation des styles des items, inutiles avec la nouvelle grille.
-    */
-    .masonry-item {
-      break-inside: auto;
-      margin-bottom: 0;
-    }
-
-    /*
-     * CORRECTIF n°2 : Rendu des Cartes
-     * On force les cartes sur leur propre couche de rendu GPU.
-     * CELA RÉSOUDRA LE PROBLÈME DES CARTES INCOMPLÈTES.
-     * Safari sera forcé de calculer correctement leurs dimensions avant de les afficher.
-    */
-    .card-container,
-    .filler-card-container {
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
+  /* On ajoute le fix pour le rendu des cartes à l'intérieur de la même règle */
+  .card-container,
+  .filler-card-container {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 }
 
