@@ -690,53 +690,54 @@
     transition: transform 0.2s ease !important;
   }
 }
-/* --- AJOUTEZ CE BLOC À LA FIN DE VOTRE FICHIER globals.css --- */
 
 /**
  * ========================================
- * SAFARI-SPECIFIC LAYOUT OVERRIDE
+ * SAFARI-SPECIFIC LAYOUT & RENDER OVERRIDE (FINAL)
  * ========================================
  *
- * Cible uniquement Safari pour corriger le bug de la grille masonry.
- * Les autres navigateurs ne seront pas affectés.
- *
- * Problème : `column-count` est instable sur Safari lorsqu'il est combiné
- * avec des transformations CSS (comme l'effet parallaxe).
- *
- * Solution : Pour Safari uniquement, nous remplaçons la mise en page `column-count`
- * par une grille CSS standard (`display: grid`), qui est 100% stable.
+ * Cible uniquement Safari pour corriger à la fois le bug de la grille
+ * masonry et le bug de rendu des cartes incomplètes.
  */
 @media not all and (min-resolution:.001dpcm) {
   @supports (-webkit-appearance:none) and (stroke-color:transparent) {
 
     /*
-     * Étape 1 : Transformer la grille masonry en grille standard pour Safari.
+     * CORRECTIF n°1 : Mise en page de la Grille
+     * On remplace `column-count` (instable) par `display: grid` (stable).
     */
     .masonry-grid {
-      /* On active la grille CSS standard. */
       display: grid;
-
-      /* On définit des colonnes responsives. Chaque colonne fera au minimum
-         320px et s'étirera pour occuper l'espace disponible. */
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-
-      /* On utilise 'gap' pour l'espacement, qui remplace 'column-gap'. */
       gap: 1.5rem;
 
-      /* On désactive explicitement 'column-count' pour éviter tout conflit. */
+      /* NOUVEAU ET CRUCIAL : On aligne les items en haut de leur cellule.
+         Cela empêche l'étirement vertical et aide à résoudre les bugs de
+         calcul de hauteur qui coupaient le contenu des cartes. */
+      align-items: start;
+
+      /* Réinitialisation des propriétés de l'ancienne méthode */
       column-count: auto;
     }
 
     /* 
-     * Étape 2 : Réinitialiser les styles des items de la grille.
-     * Ces styles n'étaient utiles que pour `column-count`.
+     * Réinitialisation des styles des items, inutiles avec la nouvelle grille.
     */
     .masonry-item {
-      /* Cette propriété n'a plus de sens avec `display: grid`. */
       break-inside: auto;
-
-      /* L'espacement est maintenant géré par la propriété `gap` de la grille. */
       margin-bottom: 0;
+    }
+
+    /*
+     * CORRECTIF n°2 : Rendu des Cartes
+     * On force les cartes sur leur propre couche de rendu GPU.
+     * CELA RÉSOUDRA LE PROBLÈME DES CARTES INCOMPLÈTES.
+     * Safari sera forcé de calculer correctement leurs dimensions avant de les afficher.
+    */
+    .card-container,
+    .filler-card-container {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
   }
 }
