@@ -727,5 +727,18 @@
       break-inside: auto;
       margin-bottom: 0;
     }
+
+    /*
+     * CORRECTIF n°2 : Rendu des Cartes
+     * On force les cartes sur leur propre couche de rendu GPU.
+     * CELA RÉSOUDRA LE PROBLÈME DES CARTES INCOMPLÈTES.
+     * Safari sera forcé de calculer correctement leurs dimensions avant de les afficher.
+    */
+    .card-container,
+    .filler-card-container {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    }
   }
 }
+
