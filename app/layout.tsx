@@ -5,7 +5,6 @@ import type { Metadata } from "next"
 // Importez les nouvelles polices
 import { DM_Serif_Display, Montserrat } from "next/font/google"
 import "./globals.css"
-import "./safari-fixes.css"
 
 // Configuration pour DM Serif Display
 const dmSerifDisplay = DM_Serif_Display({

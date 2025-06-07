@@ -690,25 +690,53 @@
     transition: transform 0.2s ease !important;
   }
 }
-/* Ajoutez ceci à la fin de votre globals.css */
+/* --- AJOUTEZ CE BLOC À LA FIN DE VOTRE FICHIER globals.css --- */
 
 /**
  * ========================================
- * SAFARI COMPATIBILITY FIXES
+ * SAFARI-SPECIFIC LAYOUT OVERRIDE
  * ========================================
+ *
+ * Cible uniquement Safari pour corriger le bug de la grille masonry.
+ * Les autres navigateurs ne seront pas affectés.
+ *
+ * Problème : `column-count` est instable sur Safari lorsqu'il est combiné
+ * avec des transformations CSS (comme l'effet parallaxe).
+ *
+ * Solution : Pour Safari uniquement, nous remplaçons la mise en page `column-count`
+ * par une grille CSS standard (`display: grid`), qui est 100% stable.
  */
+@media not all and (min-resolution:.001dpcm) {
+  @supports (-webkit-appearance:none) and (stroke-color:transparent) {
 
-/* 
- * Force la promotion sur une couche composite pour les éléments utilisant backdrop-filter.
- * Cela stabilise le rendu sur WebKit (Safari) et prévient les bugs de "disparition".
-*/
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    /*
+     * Étape 1 : Transformer la grille masonry en grille standard pour Safari.
+    */
+    .masonry-grid {
+      /* On active la grille CSS standard. */
+      display: grid;
 
-  .backdrop-blur-sm,
-  .backdrop-blur,
-  .backdrop-blur-md,
-  .backdrop-blur-lg {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+      /* On définit des colonnes responsives. Chaque colonne fera au minimum
+         320px et s'étirera pour occuper l'espace disponible. */
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+
+      /* On utilise 'gap' pour l'espacement, qui remplace 'column-gap'. */
+      gap: 1.5rem;
+
+      /* On désactive explicitement 'column-count' pour éviter tout conflit. */
+      column-count: auto;
+    }
+
+    /* 
+     * Étape 2 : Réinitialiser les styles des items de la grille.
+     * Ces styles n'étaient utiles que pour `column-count`.
+    */
+    .masonry-item {
+      /* Cette propriété n'a plus de sens avec `display: grid`. */
+      break-inside: auto;
+
+      /* L'espacement est maintenant géré par la propriété `gap` de la grille. */
+      margin-bottom: 0;
+    }
   }
 }
