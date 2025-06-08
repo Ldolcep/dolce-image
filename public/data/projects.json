@@ -157,14 +157,14 @@
       "id": "filler_2",
       "backgroundImage": "/images/fillers/filler_2_bg.jpg",
       "textImage": "/images/fillers/filler_2_text.png",
-      "aspectRatio": "1/1",
+      "aspectRatio": "5/4",
       "isFiller": true
     },
     {
       "id": "filler_3",
       "backgroundImage": "/images/fillers/filler_3_bg.jpg",
       "textImage": "/images/fillers/filler_3_text.png",
-      "aspectRatio": "2/3",
+      "aspectRatio": "1/1",
       "isFiller": true
     },
     {
