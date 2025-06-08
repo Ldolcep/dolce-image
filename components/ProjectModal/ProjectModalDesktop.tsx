@@ -102,30 +102,34 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   const modalRef = useRef<HTMLDivElement>(null);
   const descriptionColumnRef = useRef<HTMLDivElement>(null);
 
-  // Préchargement des images
+  // Préchargement des images simplifié
   useEffect(() => {
     if (!isOpen) return;
-
-    const loadImages = async () => {
-      const imagePromises = allVisuals.map((src) => {
-        return new Promise<void>((resolve) => {
-          const img = new Image();
-          img.src = src;
-          img.onload = () => {
-            setImagesLoaded(prev => new Set(prev).add(src));
-            resolve();
-          };
-          img.onerror = () => {
-            console.error(`Failed to load image: ${src}`);
-            resolve(); // Continuer même en cas d'erreur
-          };
+    
+    // Reset des images chargées
+    setImagesLoaded(new Set());
+    
+    // Précharger toutes les images
+    allVisuals.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        setImagesLoaded(prev => {
+          const newSet = new Set(prev);
+          newSet.add(src);
+          return newSet;
         });
-      });
-
-      await Promise.all(imagePromises);
-    };
-
-    loadImages();
+      };
+      img.onerror = () => {
+        console.error(`Failed to load image: ${src}`);
+        // Marquer comme chargée même en cas d'erreur pour éviter le blocage
+        setImagesLoaded(prev => {
+          const newSet = new Set(prev);
+          newSet.add(src);
+          return newSet;
+        });
+      };
+    });
   }, [allVisuals, isOpen]);
 
   // Reset quand le projet change
@@ -166,27 +170,111 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, handleNext, handlePrevious, onClose, allVisuals.length]);
 
+  // Synchronisation des hauteurs entre les colonnes
+  const syncHeights = useCallback(() => {
+    if (!modalRef.current || !descriptionColumnRef.current) return;
+    
+    const modalElement = modalRef.current;
+    const descElement = descriptionColumnRef.current;
+    
+    // Réinitialiser les hauteurs pour mesurer correctement
+    modalElement.style.height = 'auto';
+    descElement.style.height = 'auto';
+    descElement.style.maxHeight = 'none';
+    
+    // Attendre que l'image soit complètement rendue
+    requestAnimationFrame(() => {
+      const imageContainer = modalElement.querySelector('.image-column');
+      if (imageContainer) {
+        const imageHeight = imageContainer.getBoundingClientRect().height;
+        const maxHeight = Math.min(imageHeight, window.innerHeight * 0.9);
+        
+        modalElement.style.height = `${maxHeight}px`;
+        descElement.style.height = `${maxHeight}px`;
+        descElement.style.maxHeight = `${maxHeight}px`;
+      }
+    });
+  }, []);
+
+  // Appliquer la synchronisation quand l'image change ou se charge
+  useEffect(() => {
+    if (isOpen && isCurrentImageLoaded) {
+      // Délai pour s'assurer que l'image est rendue
+      const timeoutId = setTimeout(syncHeights, 100);
+      
+      // Observer les changements de taille
+      const resizeObserver = new ResizeObserver(syncHeights);
+      const imageElement = modalRef.current?.querySelector('.image-column img');
+      if (imageElement) {
+        resizeObserver.observe(imageElement);
+      }
+      
+      window.addEventListener('resize', syncHeights);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        resizeObserver.disconnect();
+        window.removeEventListener('resize', syncHeights);
+      };
+    }
+  }, [isOpen, isCurrentImageLoaded, currentImageIndex, syncHeights]);
+
   // Gestion de la scrollbar personnalisée
   useEffect(() => {
     if (!isOpen || !descriptionColumnRef.current) return;
 
-    let scrollTimeout: NodeJS.Timeout;
     const descriptionElement = descriptionColumnRef.current;
+    let scrollTimeout: NodeJS.Timeout;
+
+    // Fonction pour gérer la visibilité de la scrollbar
+    const updateScrollbarVisibility = () => {
+      const hasScroll = descriptionElement.scrollHeight > descriptionElement.clientHeight;
+      if (hasScroll) {
+        descriptionElement.style.scrollbarColor = '#f7a520 #fff3e0';
+      } else {
+        descriptionElement.style.scrollbarColor = 'transparent transparent';
+      }
+    };
 
     const handleScroll = () => {
+      updateScrollbarVisibility();
       descriptionElement.classList.add('scrolling');
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         descriptionElement.classList.remove('scrolling');
+        if (!descriptionElement.matches(':hover')) {
+          descriptionElement.style.scrollbarColor = 'transparent transparent';
+        }
       }, 1000);
     };
 
+    const handleMouseEnter = () => {
+      updateScrollbarVisibility();
+    };
+
+    const handleMouseLeave = () => {
+      if (!descriptionElement.classList.contains('scrolling')) {
+        const hasScroll = descriptionElement.scrollHeight > descriptionElement.clientHeight;
+        if (!hasScroll) {
+          descriptionElement.style.scrollbarColor = 'transparent transparent';
+        }
+      }
+    };
+
+    // Initialiser la scrollbar
+    updateScrollbarVisibility();
+    
     descriptionElement.addEventListener('scroll', handleScroll);
+    descriptionElement.addEventListener('mouseenter', handleMouseEnter);
+    descriptionElement.addEventListener('mouseleave', handleMouseLeave);
+    
     return () => {
       descriptionElement.removeEventListener('scroll', handleScroll);
+      descriptionElement.removeEventListener('mouseenter', handleMouseEnter);
+      descriptionElement.removeEventListener('mouseleave', handleMouseLeave);
       clearTimeout(scrollTimeout);
     };
-  }, [isOpen]);
+  }, [isOpen, currentImageIndex]);
 
   const currentImageSrc = allVisuals[currentImageIndex];
   const isCurrentImageLoaded = imagesLoaded.has(currentImageSrc);
@@ -227,7 +315,7 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
             onClick={(e) => e.stopPropagation()}
           >
             {/* Colonne image */}
-            <div className="w-full md:w-1/2 relative flex-shrink-0 bg-gray-100 min-h-[300px] md:min-h-[500px] flex items-center justify-center">
+            <div className="image-column w-full md:w-1/2 relative flex-shrink-0 bg-gray-100 min-h-[300px] md:min-h-[500px] flex items-center justify-center">
               <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
                   key={currentImageIndex}
@@ -239,11 +327,14 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
                   className="absolute inset-0 flex items-center justify-center p-4"
                 >
                   {isCurrentImageLoaded ? (
-                    <img
+                    <Image
                       src={currentImageSrc}
                       alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-                      className="max-w-full max-h-full object-contain"
-                      style={{ maxHeight: '85vh' }}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={currentImageIndex === 0}
+                      quality={90}
                     />
                   ) : (
                     <div className="flex items-center justify-center">
@@ -300,9 +391,9 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
               ref={descriptionColumnRef} 
               className="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto custom-scrollbar"
               style={{
-                maxHeight: '90vh',
                 scrollbarWidth: 'thin',
-                scrollbarColor: 'transparent transparent'
+                scrollbarColor: 'transparent transparent',
+                transition: 'scrollbar-color 0.3s ease'
               }}
             >
               <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">

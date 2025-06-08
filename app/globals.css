@@ -320,93 +320,53 @@
   opacity: 0.5;
 }
 
-/**
- * ========================================
- * MODAL & SWIPER STYLES (UNCHANGED)
- * ========================================
- */
-
-/* ... Le reste de votre fichier, de .modal-overlay à la fin, est conservé tel quel ... */
-
-/* Modal animations */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 400ms ease;
-  padding: 1rem;
-}
-
-.modal-overlay.open {
-  opacity: 1;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 2rem;
-  max-width: 56rem;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  transform: scale(0.95);
-  opacity: 0;
-  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  border-radius: 2px;
-  transform: scale(0.95) translateZ(0);
-}
-
-.modal-content.open {
-  transform: scale(1) translateZ(0);
-  opacity: 1;
-}
-
 /* ===============================
    🎨 SWIPER MODAL MOBILE - ANIMATION FLUIDE TEMPS RÉEL
    ===============================*/
 
-/* 🔧 Scrollbar orange pour modal mobile et desktop */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  /* Cachée par défaut sur Firefox */
+  transition: scrollbar-color 0.3s ease;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  /* Plus large pour desktop */
+  width: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #fff3e0;
-  /* Fond crème clair assorti à votre palette */
-  border-radius: 3px;
+  background: transparent;
+  /* Pas de fond pour la piste */
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #f7a520;
-  /* Votre couleur orange principale */
-  border-radius: 3px;
-  transition: all 0.3s ease;
+  background: transparent;
+  /* Cachée par défaut */
+  border-radius: 4px;
+  border: 2px solid transparent;
+  /* Astuce pour le padding */
+  background-clip: padding-box;
+  transition: background-color 0.3s ease;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #e89410;
-  /* Orange plus foncé au survol */
-  box-shadow: 0 0 6px rgba(247, 165, 32, 0.4);
+/* Scrollbar visible au survol du conteneur */
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #f7a520;
 }
 
-/* Support Firefox */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #f7a520 #fff3e0;
+.custom-scrollbar:hover {
+  scrollbar-color: #f7a520 #f0e9e6;
+  /* Orange sur fond crème pour Firefox */
 }
 
-/* Ajustement mobile - scrollbar plus fine */
-@media (max-width: 768px) {
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
+/* Scrollbar visible pendant le scroll (via classe JS) */
+.custom-scrollbar.scrolling::-webkit-scrollbar-thumb {
+  background-color: #f7a520;
 }
+
+.custom-scrollbar.scrolling {
+  scrollbar-color: #f7a520 #f0e9e6; }
 
 /* 🎨 ANIMATION ÉVENTAIL FLUIDE - Suit le mouvement du doigt */
 .swiper-card-fan {
@@ -704,24 +664,10 @@
   }
 }
 
-/* Scrollbar personnalisée pour le modal */
-.custom-scrollbar.scrolling::-webkit-scrollbar-thumb {
-  background: #f7a520;
-}
-
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: #f7a520;
-}
-
 /* Animation du spinner */
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-spin {
