@@ -1,4 +1,4 @@
-// --- START OF FILE ProjectModalDesktop.tsx (MODIFIED) ---
+// --- START OF FILE ProjectModalDesktop.tsx (OPTIMIZED VERSION) ---
 
 "use client"
 
@@ -26,121 +26,114 @@ interface ProjectModalDesktopProps {
 export default function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopProps) {
   const allVisuals = useMemo(() => [project.mainVisual, ...project.additionalVisuals].filter(Boolean), [project]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // États d'animation simplifiés
+  const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imagesPreloaded, setImagesPreloaded] = useState<Set<string>>(new Set());
+  const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set());
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const descriptionColumnRef = useRef<HTMLDivElement>(null);
+  const preloadedImages = useRef<Map<string, HTMLImageElement>>(new Map());
 
-  useEffect(() => { setIsMounted(true); }, []);
-
-  const handleNext = useCallback(() => {
-    if (allVisuals.length <= 1) return;
-    setCurrentImageIndex((prev) => (prev + 1) % allVisuals.length);
-  }, [allVisuals.length]);
-
-  const handlePrevious = useCallback(() => {
-    if (allVisuals.length <= 1) return;
-    setCurrentImageIndex((prev) => (prev - 1 + allVisuals.length) % allVisuals.length);
-  }, [allVisuals.length]);
-
-  // Reset index quand le projet change
+  // Préchargement des images
   useEffect(() => {
-    if (isOpen) {
-      setCurrentImageIndex(0);
-      setImageLoaded(false);
-      setImagesPreloaded(new Set());
-    }
-  }, [project, isOpen]);
+    if (!isOpen) return;
 
-  // Animation d'ouverture
+    const preloadImage = (src: string, index: number) => {
+      if (preloadedImages.current.has(src)) {
+        setImagesLoaded(prev => new Set(prev).add(index));
+        return;
+      }
+
+      const img = new Image();
+      img.src = src;
+      
+      img.onload = () => {
+        preloadedImages.current.set(src, img);
+        setImagesLoaded(prev => new Set(prev).add(index));
+      };
+      
+      img.onerror = () => {
+        console.error(`Failed to load image: ${src}`);
+        setImagesLoaded(prev => new Set(prev).add(index));
+      };
+    };
+
+    // Précharger toutes les images
+    allVisuals.forEach((visual, index) => {
+      preloadImage(visual, index);
+    });
+
+    return () => {
+      // Nettoyage si nécessaire
+    };
+  }, [allVisuals, isOpen]);
+
+  // Gestion de l'ouverture/fermeture avec délai pour éviter le flash
   useEffect(() => {
-    if (isOpen && isMounted) {
+    if (isOpen && imagesLoaded.has(0)) {
+      // Rendre d'abord visible, puis animer
+      setIsVisible(true);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setIsAnimating(true);
         });
       });
-    } else {
+    } else if (!isOpen) {
+      // Animer la fermeture, puis cacher
       setIsAnimating(false);
+      const timeout = setTimeout(() => {
+        setIsVisible(false);
+        setImagesLoaded(new Set());
+      }, 300); // Durée de l'animation
+      return () => clearTimeout(timeout);
     }
-  }, [isOpen, isMounted]);
+  }, [isOpen, imagesLoaded]);
 
-  // Préchargement intelligent des images
+  // Reset quand le projet change
   useEffect(() => {
-    if (!isOpen || allVisuals.length === 0) return;
+    if (isOpen) {
+      setCurrentImageIndex(0);
+      setImagesLoaded(new Set());
+    }
+  }, [project.id, isOpen]);
+
+  const handleNext = useCallback(() => {
+    if (allVisuals.length <= 1) return;
+    const nextIndex = (currentImageIndex + 1) % allVisuals.length;
     
-    const preloadImages = async () => {
-      // Toujours précharger l'image actuelle et les adjacentes
-      const indicesToPreload = [
-        currentImageIndex,
-        (currentImageIndex + 1) % allVisuals.length,
-        (currentImageIndex - 1 + allVisuals.length) % allVisuals.length
-      ];
-      
-      const promises = indicesToPreload.map(index => {
-        const src = allVisuals[index];
-        if (imagesPreloaded.has(src)) return Promise.resolve();
-        
-        return new Promise<void>((resolve) => {
-          const img = new window.Image();
-          img.onload = () => {
-            setImagesPreloaded(prev => new Set(prev).add(src));
-            resolve();
-          };
-          img.onerror = () => resolve();
-          img.src = src;
-        });
-      });
-      
-      await Promise.all(promises);
-      
-      // Précharger le reste en arrière-plan
-      setTimeout(() => {
-        allVisuals.forEach((src, index) => {
-          if (!imagesPreloaded.has(src) && !indicesToPreload.includes(index)) {
-            const img = new window.Image();
-            img.onload = () => setImagesPreloaded(prev => new Set(prev).add(src));
-            img.src = src;
-          }
-        });
-      }, 100);
-    };
+    // Attendre que l'image suivante soit chargée
+    if (imagesLoaded.has(nextIndex)) {
+      setCurrentImageIndex(nextIndex);
+    }
+  }, [allVisuals.length, currentImageIndex, imagesLoaded]);
+
+  const handlePrevious = useCallback(() => {
+    if (allVisuals.length <= 1) return;
+    const prevIndex = (currentImageIndex - 1 + allVisuals.length) % allVisuals.length;
     
-    preloadImages();
-  }, [currentImageIndex, allVisuals, isOpen, imagesPreloaded]);
+    // Attendre que l'image précédente soit chargée
+    if (imagesLoaded.has(prevIndex)) {
+      setCurrentImageIndex(prevIndex);
+    }
+  }, [allVisuals.length, currentImageIndex, imagesLoaded]);
 
   // Synchronisation des hauteurs
   const syncHeights = useCallback(() => {
     if (!imageRef.current || !descriptionColumnRef.current || !modalRef.current) return;
-
-    // Obtenir la hauteur naturelle de l'image
+    
     const imageHeight = imageRef.current.offsetHeight;
-    
-    // Définir cette hauteur sur le modal entier
     modalRef.current.style.height = `${imageHeight}px`;
-    
-    // La colonne description prend cette hauteur
     descriptionColumnRef.current.style.height = `${imageHeight}px`;
   }, []);
 
-  // Synchroniser quand l'image est chargée
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-    // Petit délai pour s'assurer que le rendu est terminé
-    requestAnimationFrame(() => {
-      requestAnimationFrame(syncHeights);
-    });
-  };
-
   // Observer les changements de taille
   useEffect(() => {
-    if (!isOpen || !isMounted || !imageLoaded) return;
+    if (!isVisible || !imagesLoaded.has(currentImageIndex)) return;
 
-    syncHeights();
+    const timeoutId = setTimeout(syncHeights, 50);
 
     const resizeObserver = new ResizeObserver(() => {
       requestAnimationFrame(syncHeights);
@@ -153,26 +146,25 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
     window.addEventListener('resize', syncHeights);
 
     return () => {
+      clearTimeout(timeoutId);
       resizeObserver.disconnect();
       window.removeEventListener('resize', syncHeights);
     };
-  }, [isOpen, isMounted, imageLoaded, syncHeights]);
+  }, [isVisible, currentImageIndex, syncHeights, imagesLoaded]);
 
-  // Gestion de l'affichage temporaire de la scrollbar lors du scroll
+  // Gestion de la scrollbar
   useEffect(() => {
-    if (!isOpen || !descriptionColumnRef.current) return;
+    if (!isVisible || !descriptionColumnRef.current) return;
 
     let scrollTimeout: NodeJS.Timeout;
     const descriptionElement = descriptionColumnRef.current;
 
     const handleScroll = () => {
-      // Montrer la scrollbar
       descriptionElement.style.scrollbarColor = '#f7a520 #fff3e0';
       descriptionElement.classList.add('scrolling');
       
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        // Cacher la scrollbar après 1 seconde d'inactivité
         descriptionElement.classList.remove('scrolling');
         if (!descriptionElement.matches(':hover')) {
           descriptionElement.style.scrollbarColor = 'transparent transparent';
@@ -180,126 +172,150 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
       }, 1000);
     };
 
-    // Initialement cacher la scrollbar
     descriptionElement.style.scrollbarColor = 'transparent transparent';
-    
     descriptionElement.addEventListener('scroll', handleScroll);
 
     return () => {
       descriptionElement.removeEventListener('scroll', handleScroll);
       clearTimeout(scrollTimeout);
     };
-  }, [isOpen]);
+  }, [isVisible]);
 
   // Gestion du clavier
   useEffect(() => {
-    if (!isMounted || !isOpen) return;
-    
+    if (!isVisible) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      else if (allVisuals.length > 1) {
+      if (e.key === "Escape") {
+        onClose();
+      } else if (allVisuals.length > 1) {
         if (e.key === "ArrowRight") handleNext();
         else if (e.key === "ArrowLeft") handlePrevious();
       }
     };
-    
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isMounted, onClose, allVisuals.length, handleNext, handlePrevious]);
+  }, [isVisible, onClose, allVisuals.length, handleNext, handlePrevious]);
 
-  if (!isMounted || !isOpen) return null;
+  // Fonction pour changer d'image avec vérification du chargement
+  const handleImageChange = useCallback((index: number) => {
+    if (imagesLoaded.has(index)) {
+      setCurrentImageIndex(index);
+    }
+  }, [imagesLoaded]);
+
+  if (!isVisible) return null;
 
   return (
-    // MODIFIED: Remplacement de l'ancien fond par la nouvelle structure
     <div 
-      className="fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50 transition-opacity duration-300" 
-      style={{ opacity: isAnimating ? 1 : 0 }}
-      onClick={onClose} // Ferme la modale si on clique sur le fond
+      className="fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50"
+      style={{ 
+        opacity: isAnimating ? 1 : 0,
+        transition: 'opacity 300ms ease-in-out',
+        pointerEvents: isAnimating ? 'auto' : 'none'
+      }}
+      onClick={onClose}
     >
-      {/* NOUVEAU: Conteneur pour l'image de fond et l'overlay */}
       <div className="absolute inset-0 -z-10">
-        <Image
-          src="/images/gallery-background.jpg"
-          alt=""
-          fill
-          quality={80} // Qualité légèrement réduite pour la performance
-          sizes="100vw"
-          className="object-cover"
+        <Image 
+          src="/images/gallery-background.jpg" 
+          alt="" 
+          fill 
+          quality={80} 
+          sizes="100vw" 
+          className="object-cover" 
+          priority
         />
-        {/* Overlay plus sombre et blur plus fort, comme recommandé */}
         <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
       </div>
       
       <div 
         ref={modalRef}
-        className="bg-white w-full max-w-5xl relative transition-transform duration-300 shadow-xl"
+        className="bg-white w-full max-w-5xl relative shadow-xl"
         style={{ 
-          transform: isAnimating ? 'scale(1)' : 'scale(0.95)', 
+          transform: isAnimating ? 'scale(1)' : 'scale(0.95)',
           opacity: isAnimating ? 1 : 0,
+          transition: 'all 300ms ease-in-out',
           display: 'flex',
           flexDirection: 'row',
-          overflow: 'visible' // Permet au bouton de dépasser
+          overflow: 'visible'
         }}
-        onClick={(e) => e.stopPropagation()} // Empêche la fermeture au clic sur la modale
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Colonne image - détermine la hauteur */}
-        <div 
-          className="w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50"
-        >
+        <div className="w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50">
           <div className="relative w-full h-full">
-            {/* Toutes les images sont dans le DOM mais une seule est visible */}
-            {allVisuals.map((visual, index) => (
-              <img
-                key={visual}
-                ref={index === currentImageIndex ? imageRef : undefined}
-                src={visual}
-                alt={`Image ${index + 1} du projet ${project.title}`}
-                className={`absolute inset-0 w-full h-auto transition-opacity duration-300 ${
-                  index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-                style={{
-                  maxHeight: '90vh',
-                  objectFit: 'contain',
-                  visibility: index === currentImageIndex ? 'visible' : 'hidden'
-                }}
-                onLoad={index === currentImageIndex ? handleImageLoad : undefined}
-                loading={index <= 1 ? 'eager' : 'lazy'}
-              />
-            ))}
+            {allVisuals.map((visual, index) => {
+              const isCurrentImage = index === currentImageIndex;
+              const isImageLoaded = imagesLoaded.has(index);
+              
+              return (
+                <div
+                  key={`${project.id}-${visual}`}
+                  className={`absolute inset-0 transition-opacity duration-300 ${
+                    isCurrentImage && isImageLoaded ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                >
+                  {(isCurrentImage || Math.abs(index - currentImageIndex) <= 1) && (
+                    <img
+                      ref={isCurrentImage ? imageRef : undefined}
+                      src={visual}
+                      alt={`Image ${index + 1} du projet ${project.title}`}
+                      className="w-full h-auto object-contain"
+                      style={{ maxHeight: '90vh' }}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  )}
+                </div>
+              );
+            })}
+            
+            {/* Indicateur de chargement */}
+            {!imagesLoaded.has(currentImageIndex) && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-orange"></div>
+              </div>
+            )}
           </div>
           
-          {/* Navigation */}
           {allVisuals.length > 1 && (
             <>
               <button 
                 onClick={handlePrevious} 
-                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow z-10" 
+                className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow z-10 disabled:opacity-50 disabled:cursor-not-allowed" 
                 aria-label="Image précédente"
+                disabled={!imagesLoaded.has((currentImageIndex - 1 + allVisuals.length) % allVisuals.length)}
               >
                 <ChevronLeft size={20} />
               </button>
               <button 
                 onClick={handleNext} 
-                className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow z-10" 
+                className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-white/70 hover:bg-white/90 transition-colors shadow z-10 disabled:opacity-50 disabled:cursor-not-allowed" 
                 aria-label="Image suivante"
+                disabled={!imagesLoaded.has((currentImageIndex + 1) % allVisuals.length)}
               >
                 <ChevronRight size={20} />
               </button>
             </>
           )}
           
-          {/* Indicateurs */}
           {allVisuals.length > 1 && (
             <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center z-10">
               <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
                 {allVisuals.map((_, index) => (
                   <button 
                     key={index} 
-                    onClick={() => setCurrentImageIndex(index)} 
+                    onClick={() => handleImageChange(index)} 
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'
+                      currentImageIndex === index 
+                        ? 'bg-white scale-125' 
+                        : imagesLoaded.has(index) 
+                          ? 'bg-white/60 hover:bg-white/80' 
+                          : 'bg-white/30 cursor-not-allowed'
                     }`} 
                     aria-label={`Aller à l'image ${index + 1}`}
+                    disabled={!imagesLoaded.has(index)}
                   />
                 ))}
               </div>
@@ -307,23 +323,22 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
           )}
         </div>
 
-        {/* Colonne description - hauteur fixée par JS */}
         <div 
           ref={descriptionColumnRef}
           className="w-full md:w-1/2 p-8 custom-scrollbar"
-          style={{
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            scrollbarColor: 'transparent transparent',
-            transition: 'scrollbar-color 0.3s ease'
+          style={{ 
+            overflowY: 'auto', 
+            overflowX: 'hidden', 
+            scrollbarColor: 'transparent transparent', 
+            transition: 'scrollbar-color 0.3s ease' 
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.scrollbarColor = '#f7a520 #fff3e0';
+          onMouseEnter={(e) => { 
+            e.currentTarget.style.scrollbarColor = '#f7a520 #fff3e0'; 
           }}
-          onMouseLeave={(e) => {
-            if (!e.currentTarget.classList.contains('scrolling')) {
-              e.currentTarget.style.scrollbarColor = 'transparent transparent';
-            }
+          onMouseLeave={(e) => { 
+            if (!e.currentTarget.classList.contains('scrolling')) { 
+              e.currentTarget.style.scrollbarColor = 'transparent transparent'; 
+            } 
           }}
         >
           <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">
@@ -352,17 +367,17 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
 
         <button 
           className="absolute -top-5 -right-5 z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2" 
-          style={{
-            backgroundColor: 'rgb(98, 137, 181)',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+          style={{ 
+            backgroundColor: 'rgb(98, 137, 181)', 
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)' 
           }}
           onClick={onClose} 
           aria-label="Fermer"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)';
+          onMouseEnter={(e) => { 
+            e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)'; 
           }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)';
+          onMouseLeave={(e) => { 
+            e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)'; 
           }}
         >
           <X size={20} />
@@ -372,4 +387,4 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
   );
 }
 
-// --- END OF FILE ProjectModalDesktop.tsx (MODIFIED) ---
+// --- END OF FILE ProjectModalDesktop.tsx (OPTIMIZED VERSION) ---
