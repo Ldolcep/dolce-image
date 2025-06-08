@@ -1,10 +1,10 @@
-// --- START OF FILE project-gallery.tsx (FINAL VERSION) ---
+// --- START OF FILE project-gallery.tsx (FIXED VERSION) ---
 
 "use client"
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
-import Masonry from 'react-masonry-css' // <-- 1. IMPORTATION DE LA BIBLIOTHÈQUE
+import Masonry from 'react-masonry-css'
 import ProjectModal from "./ProjectModal" 
 import FillerCard from "./filler-card"
 
@@ -48,8 +48,8 @@ const hardcodedProjectsData: ProjectsData = {
       ],
       description: [
         "Situé à Toulon, Le Boudoir Miadana est un salon de beauté du regard spécialisé dans les extensions de cils, offrant une expérience chaleureuse et sensorielle.",
-        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
-        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
+        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre "a" dans le nom du salon et symbolise la métamorphose, la beauté et l'élégance.",
+        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd'hui une image forte et différenciante, capable de séduire une clientèle en quête d'une expérience esthétique singulière."
       ],
       link: "https://ellipse-real-estate.com/",
     },
@@ -94,9 +94,9 @@ const hardcodedProjectsData: ProjectsData = {
         "/images/projects/Dolce/dolce-gallery-7.jpg"
       ],
       description: [ 
-        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l’élégance intemporelle de la French Riviera des années 60 et l’art de vivre de la Dolce Vita",
-        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre “O” crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
-        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
+        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l'élégance intemporelle de la French Riviera des années 60 et l'art de vivre de la Dolce Vita",
+        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre "O" crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l'inspiration marine.",
+        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l'élégance propre à l'esprit DOLCE."
       ],
       link: "https://example.com/social-media",
     },
@@ -113,7 +113,7 @@ const hardcodedProjectsData: ProjectsData = {
       ],
       description: [
         "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
-        "Nous avons conçu un logotype moderne et dynamique, reflétant la nature technologique et innovante de l'application.",
+        "Nous avons conçu un logotype moderne et dynamique, reflètant la nature technologique et innovante de l'application.",
         "L'identité visuelle s'accompagne d'un système graphique cohérent qui a été décliné sur l'ensemble des supports de communication."
       ],
       link: "https://example.com/ui-ux",
@@ -131,7 +131,7 @@ const hardcodedProjectsData: ProjectsData = {
         "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
         "Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.",
         "La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.",
-        "L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
+        "L'élément graphique représentant l'icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
         "Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature."
       ],
       link: "https://example.com/content",
@@ -139,14 +139,56 @@ const hardcodedProjectsData: ProjectsData = {
   ],
   fillers: [
     { id: "filler_1", backgroundImage: "/images/fillers/filler_1_bg.jpg", textImage: "/images/fillers/filler_1_text.png", aspectRatio: "4/3", isFiller: true },
-    { id: "filler_2", backgroundImage: "/images/fillers/filler_2_bg.jpg", textImage: "/images/fillers/filler_2_text.png", aspectRatio: "3/2", isFiller: true },
+    { id: "filler_2", backgroundImage: "/images/fillers/filler_2_bg.jpg", textImage: "/images/fillers/filler_2_text.png", aspectRatio: "4/3", isFiller: true },
     { id: "filler_3", backgroundImage: "/images/fillers/filler_3_bg.jpg", textImage: "/images/fillers/filler_3_text.png", aspectRatio: "4/3", isFiller: true },
   ]
 };
 
-// 2. DÉFINITION DES POINTS DE RUPTURE POUR LES COLONNES
+const prepareStrategicItems = (
+  projects: Project[], 
+  fillers: FillerItem[], 
+  numColumns: number
+): (Project | FillerItem)[] => {
+  // S'il n'y a pas de fillers ou de projets, on retourne simplement les projets.
+  if (fillers.length === 0 || projects.length === 0) {
+    return projects;
+  }
+
+  // On s'assure de ne pas utiliser plus de fillers qu'il n'y a de colonnes.
+  // C'est une sécurité pour garantir un design équilibré.
+  const useableFillers = fillers.slice(0, numColumns);
+
+  const numFillers = useableFillers.length;
+  const numProjects = projects.length;
+  const result: (Project | FillerItem)[] = [];
+
+  // On divise la liste de projets en (nombre de fillers + 1) groupes.
+  const numGroups = numFillers + 1;
+  const projectsPerGroup = Math.ceil(numProjects / numGroups);
+
+  let projectIndex = 0;
+
+  for (let i = 0; i < numFillers; i++) {
+    // 1. Ajouter un groupe de projets
+    const group = projects.slice(projectIndex, projectIndex + projectsPerGroup);
+    result.push(...group);
+    projectIndex += projectsPerGroup;
+
+    // 2. Ajouter un filler après le groupe
+    result.push(useableFillers[i]);
+  }
+
+  // 3. Ajouter le dernier groupe de projets restant
+  const remainingProjects = projects.slice(projectIndex);
+  result.push(...remainingProjects);
+
+  return result;
+};
+
+// Définition des points de rupture pour les colonnes
 const breakpointColumns = {
   default: 3,    // 3 colonnes par défaut
+  1440: 4,       // 4 colonnes pour les grands écrans
   1024: 3,       // 3 colonnes à partir de 1024px
   768: 2,        // 2 colonnes à partir de 768px
   640: 1         // 1 colonne en dessous de 640px
@@ -160,9 +202,6 @@ export default function ProjectGallery() {
   const [error, setError] = useState<string | null>(null);
   
   const sectionRef = useRef<HTMLElement>(null);
-
-  // NOTE: Le code du parallaxe JS a été supprimé pour garantir la stabilité sur Safari.
-  // Il est remplacé par un fond fixe CSS pur, beaucoup plus simple et performant.
 
   useEffect(() => {
     const loadProjectsData = async () => {
@@ -185,77 +224,44 @@ export default function ProjectGallery() {
           throw new Error('Format de données invalide: projects manquant ou invalide');
         }
         
-        const projectsFromJson = fetchedProjectsData.projects;
-        const fillersFromJson = fetchedProjectsData.fillers || []; 
+        // FIX: Déclaration correcte des variables
+        const projects = fetchedProjectsData.projects;
+        const fillers = fetchedProjectsData.fillers || [];
         
-        const interleavedItems = interleaveItems(projectsFromJson, fillersFromJson);
-        setAllItems(interleavedItems);
-        
+        // Préparation des items avec les données récupérées
+        const preparedItems = prepareStrategicItems(
+          projects, 
+          fillers, 
+          breakpointColumns.default
+        );
+        setAllItems(preparedItems);
+         
       } catch (err) {
         console.error('Erreur lors du chargement des projets:', err);
         const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue lors du chargement';
         setError(errorMessage);
         
         console.warn("Utilisation des données de secours (hardcodées) car le chargement du JSON a échoué.");
-        const fallbackFillers = hardcodedProjectsData.fillers || [];
-        const fallbackInterleavedItems = interleaveItems(hardcodedProjectsData.projects, fallbackFillers);
-        setAllItems(fallbackInterleavedItems);
         
+        // FIX: Déclaration correcte des variables pour le cas d'erreur
+        projects = hardcodedProjectsData.projects;
+        fillers = hardcodedProjectsData.fillers || [];
+        
+        // Préparation des items avec les données de secours
+        const preparedItems = prepareStrategicItems(
+          projects, 
+          fillers, 
+          breakpointColumns.default
+        );
+        setAllItems(preparedItems);
       } finally {
-        setLoading(false);
+        setLoading(false);     
       }
     };
 
     loadProjectsData();
   }, []);
-
-  const interleaveItems = (projects: Project[], fillers: FillerItem[]): (Project | FillerItem)[] => {
-    const total = projects.length + fillers.length;
-    const result: (Project | FillerItem)[] = [];
-    
-    const fillerPositions = calculateFillerPositions(projects.length, fillers.length);
-    
-    let fillerIndex = 0;
-    let projectIndex = 0;
-    
-    for (let i = 0; i < total; i++) {
-      if (fillerPositions.includes(i) && fillerIndex < fillers.length) {
-        result.push(fillers[fillerIndex]);
-        fillerIndex++;
-      } else if (projectIndex < projects.length) {
-        result.push(projects[projectIndex]);
-        projectIndex++;
-      }
-    }
-
-    while (projectIndex < projects.length) {
-        result.push(projects[projectIndex]);
-        projectIndex++;
-    }
-    while (fillerIndex < fillers.length) {
-        result.push(fillers[fillerIndex]);
-        fillerIndex++;
-    }
-
-    return result;
-  };
   
-  const calculateFillerPositions = (projectCount: number, fillerCount: number): number[] => {
-    const positions: number[] = [];
-    if (fillerCount <= 0) return positions;
-
-    const spacing = Math.ceil(projectCount / (fillerCount + 1));
-    
-    for (let i = 0; i < fillerCount; i++) {
-      const position = (i + 1) * spacing;
-      if (position <= projectCount + fillerCount) { 
-        positions.push(position);
-      }
-    }
-    
-    return positions;
-  };
-
   const openModal = (project: Project) => {
     setSelectedProject(project);
     setIsModalOpen(true);
@@ -282,7 +288,7 @@ export default function ProjectGallery() {
   return (
     <section ref={sectionRef} id="projects" className="relative py-16 md:py-24 min-h-screen">
       
-      {/* 3. FOND FIXE CSS PUR : simple, stable et performant */}
+      {/* Fond fixe CSS pur : simple, stable et performant */}
       <div className="fixed inset-0 -z-10">
         <Image
           src="/images/gallery-background.jpg"
@@ -322,18 +328,16 @@ export default function ProjectGallery() {
         )}
 
         {!loading && !error && allItems.length > 0 && (
-          // 4. REMPLACEMENT DE LA GRILLE PAR LE COMPOSANT MASONRY
           <Masonry
             breakpointCols={breakpointColumns}
-            className="masonry-grid-js"       // Classe pour le conteneur principal
-            columnClassName="masonry-column"  // Classe pour chaque colonne
+            className="masonry-grid-js"
+            columnClassName="masonry-column"
           >
             {allItems.map((item) => {
               // Rendu pour les Fillers
               if ('isFiller' in item) {
                 const filler = item as FillerItem;
                 return (
-                  // La div wrapper .masonry-item est gérée par la bibliothèque
                   <div key={`filler-${filler.id}`} className="hidden md:block">
                     <FillerCard
                       id={filler.id}
@@ -348,7 +352,6 @@ export default function ProjectGallery() {
               // Rendu pour les Projets
               const project = item as Project;
               return (
-                // La div wrapper .masonry-item est gérée par la bibliothèque
                 <div
                   key={project.id}
                   onClick={() => openModal(project)}
@@ -356,6 +359,7 @@ export default function ProjectGallery() {
                   tabIndex={0}
                   role="button"
                   aria-label={`View ${project.title} project details`}
+                  className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 rounded-lg"
                 >
                   <div className="card-container bg-white/100 backdrop-blur-sm">
                     <div className="img-container">
@@ -395,4 +399,4 @@ export default function ProjectGallery() {
     </section>
   );
 }
-// --- END OF FILE project-gallery.tsx (FINAL VERSION) ---
+// --- END OF FILE project-gallery.tsx (FIXED VERSION) ---
