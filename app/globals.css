@@ -703,4 +703,27 @@
     transition: transform 0.2s ease !important;
   }
 }
-/* Ajoutez ceci à la fin de votre globals.css */
+
+/* Scrollbar personnalisée pour le modal */
+.custom-scrollbar.scrolling::-webkit-scrollbar-thumb {
+  background: #f7a520;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: #f7a520;
+}
+
+/* Animation du spinner */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
