@@ -368,6 +368,77 @@
 .custom-scrollbar.scrolling {
   scrollbar-color: #f7a520 #f0e9e6; }
 
+/* Ajoutez ces styles à votre globals.css pour améliorer la compatibilité Safari */
+
+/* Scrollbar personnalisée - Safari spécifique */
+.custom-scrollbar {
+  -webkit-overflow-scrolling: touch;
+  /* Smooth scrolling sur iOS */
+}
+
+/* Force l'affichage de la scrollbar sur Safari desktop */
+@supports (-webkit-appearance: none) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    -webkit-appearance: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #fff3e0;
+    border-radius: 4px;
+    -webkit-appearance: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+    -webkit-appearance: none;
+  }
+
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb,
+  .custom-scrollbar.has-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: #f7a520;
+  }
+
+  .custom-scrollbar.scrolling::-webkit-scrollbar-thumb {
+    background: #f7a520;
+  }
+}
+
+/* Mobile - Afficher la scrollbar toujours */
+@media (max-width: 768px) {
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #f7a520 #fff3e0;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    -webkit-appearance: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #fff3e0;
+    -webkit-appearance: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #f7a520;
+    -webkit-appearance: none;
+  }
+
+  /* Force la visibilité sur iOS */
+  .custom-scrollbar {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
+
 /* 🎨 ANIMATION ÉVENTAIL FLUIDE - Suit le mouvement du doigt */
 .swiper-card-fan {
   overflow: visible !important;

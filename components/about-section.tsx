@@ -30,7 +30,7 @@ export default function AboutSection() {
             <div className="qsm-image-container">
               {/* REMPLACEZ le `src` par le chemin de votre image */}
               <Image
-                src="/path/to/your/image.jpg" // <--- MODIFIEZ CECI
+                src="/images/QSM_illu.png" // <--- MODIFIEZ CECI
                 alt="Voiture jaune sur la côte méditerranéenne"
                 width={550}
                 height={688}

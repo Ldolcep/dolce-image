@@ -172,42 +172,69 @@ const ProjectModalDesktop: React.FC<ProjectModalDesktopProps> = ({ project, isOp
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose, goToNext, goToPrevious, allVisuals.length])
 
-  // Synchronisation des hauteurs
+  // Synchronisation des hauteurs basée sur l'image
+  const syncHeights = useCallback(() => {
+    if (!modalRef.current || !descriptionRef.current) return
+    
+    const imageElement = modalRef.current.querySelector('.image-column img')
+    if (!imageElement) return
+    
+    // Attendre que l'image soit complètement rendue
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const imageHeight = imageElement.offsetHeight
+        modalRef.current!.style.height = `${imageHeight}px`
+        descriptionRef.current!.style.height = `${imageHeight}px`
+      })
+    })
+  }, [])
+
   useEffect(() => {
-    if (!isOpen || !modalRef.current || !descriptionRef.current) return
+    if (!isOpen || !isCurrentImageReady) return
 
-    const syncHeights = () => {
-      const modal = modalRef.current
-      const desc = descriptionRef.current
-      if (!modal || !desc) return
-
-      const imageCol = modal.querySelector('.image-column')
-      if (imageCol) {
-        const height = imageCol.getBoundingClientRect().height
-        desc.style.maxHeight = `${height}px`
-      }
+    // Synchroniser après le chargement de l'image
+    const timeoutId = setTimeout(syncHeights, 50)
+    
+    // Observer les changements de taille
+    const resizeObserver = new ResizeObserver(syncHeights)
+    const imageElement = modalRef.current?.querySelector('.image-column img')
+    if (imageElement) {
+      resizeObserver.observe(imageElement)
     }
-
-    const timeoutId = setTimeout(syncHeights, 100)
+    
     window.addEventListener('resize', syncHeights)
-
+    
     return () => {
       clearTimeout(timeoutId)
+      resizeObserver.disconnect()
       window.removeEventListener('resize', syncHeights)
     }
-  }, [isOpen, currentImageIndex])
+  }, [isOpen, isCurrentImageReady, currentImageIndex, syncHeights])
 
-  // Gestion de la scrollbar
+  // Gestion de la scrollbar (compatible Safari)
   useEffect(() => {
     if (!isOpen || !descriptionRef.current) return
 
     const desc = descriptionRef.current
     let scrollTimeout: NodeJS.Timeout
 
+    const updateScrollbarVisibility = () => {
+      const hasScroll = desc.scrollHeight > desc.clientHeight
+      if (hasScroll) {
+        desc.style.scrollbarColor = '#f7a520 #fff3e0'
+        desc.classList.add('has-scrollbar')
+      } else {
+        desc.style.scrollbarColor = 'transparent transparent'
+        desc.classList.remove('has-scrollbar')
+      }
+    }
+
     const handleScroll = () => {
       desc.style.scrollbarColor = '#f7a520 #fff3e0'
+      desc.classList.add('scrolling')
       clearTimeout(scrollTimeout)
       scrollTimeout = setTimeout(() => {
+        desc.classList.remove('scrolling')
         if (!desc.matches(':hover')) {
           desc.style.scrollbarColor = 'transparent transparent'
         }
@@ -215,13 +242,21 @@ const ProjectModalDesktop: React.FC<ProjectModalDesktopProps> = ({ project, isOp
     }
 
     const handleMouseEnter = () => {
-      desc.style.scrollbarColor = '#f7a520 #fff3e0'
+      updateScrollbarVisibility()
     }
 
     const handleMouseLeave = () => {
-      desc.style.scrollbarColor = 'transparent transparent'
+      if (!desc.classList.contains('scrolling')) {
+        const hasScroll = desc.scrollHeight > desc.clientHeight
+        if (!hasScroll || !desc.classList.contains('has-scrollbar')) {
+          desc.style.scrollbarColor = 'transparent transparent'
+        }
+      }
     }
 
+    // Initialiser
+    updateScrollbarVisibility()
+    
     desc.addEventListener('scroll', handleScroll)
     desc.addEventListener('mouseenter', handleMouseEnter)
     desc.addEventListener('mouseleave', handleMouseLeave)
@@ -232,7 +267,7 @@ const ProjectModalDesktop: React.FC<ProjectModalDesktopProps> = ({ project, isOp
       desc.removeEventListener('mouseleave', handleMouseLeave)
       clearTimeout(scrollTimeout)
     }
-  }, [isOpen])
+  }, [isOpen, currentImageIndex])
 
   const isCurrentImageReady = imagesReady.has(currentImageIndex)
 
@@ -263,42 +298,49 @@ const ProjectModalDesktop: React.FC<ProjectModalDesktopProps> = ({ project, isOp
           <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
         </div>
 
-        {/* Modal */}
-        <motion.div
-          ref={modalRef}
-          className="bg-white w-full max-w-5xl max-h-[90vh] relative shadow-2xl flex flex-col md:flex-row overflow-hidden rounded-lg"
-          variants={modalVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Colonne image */}
-          <div className="image-column w-full md:w-1/2 relative flex-shrink-0 bg-gray-100 min-h-[300px] md:min-h-[500px] flex items-center justify-center">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={currentImageIndex}
-                custom={direction}
-                variants={imageVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="absolute inset-0 flex items-center justify-center p-4"
-              >
-                {isCurrentImageReady ? (
-                  <Image
-                    src={allVisuals[currentImageIndex]}
-                    alt={`${project.title} - Image ${currentImageIndex + 1}`}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority
-                  />
-                ) : (
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-orange" />
-                )}
-              </motion.div>
-            </AnimatePresence>
+          {/* Modal */}
+          <motion.div
+            ref={modalRef}
+            className="bg-white w-full max-w-5xl relative shadow-xl"
+            style={{ 
+              display: 'flex',
+              flexDirection: 'row',
+              overflow: 'visible'
+            }}
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Colonne image */}
+            <div className="image-column w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50">
+              <div className="relative w-full h-full">
+                <AnimatePresence mode="wait" custom={direction}>
+                  <motion.div
+                    key={currentImageIndex}
+                    custom={direction}
+                    variants={imageVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    className="absolute inset-0"
+                  >
+                    {isCurrentImageReady ? (
+                      <img
+                        src={allVisuals[currentImageIndex]}
+                        alt={`${project.title} - Image ${currentImageIndex + 1}`}
+                        className="w-full h-auto object-contain"
+                        style={{ maxHeight: '90vh' }}
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-orange" />
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
 
             {/* Navigation */}
             {allVisuals.length > 1 && (
@@ -342,15 +384,29 @@ const ProjectModalDesktop: React.FC<ProjectModalDesktopProps> = ({ project, isOp
             )}
           </div>
 
-          {/* Colonne description */}
-          <div 
-            ref={descriptionRef}
-            className="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto custom-scrollbar"
-            style={{ 
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'transparent transparent'
-            }}
-          >
+            {/* Colonne description */}
+            <div 
+              ref={descriptionRef}
+              className="w-full md:w-1/2 p-8 custom-scrollbar"
+              style={{ 
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'transparent transparent',
+                transition: 'scrollbar-color 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                const hasScroll = e.currentTarget.scrollHeight > e.currentTarget.clientHeight
+                if (hasScroll) {
+                  e.currentTarget.style.scrollbarColor = '#f7a520 #fff3e0'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.classList.contains('scrolling')) {
+                  e.currentTarget.style.scrollbarColor = 'transparent transparent'
+                }
+              }}
+            >
             <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">
               {project.title}
             </h2>
@@ -377,16 +433,24 @@ const ProjectModalDesktop: React.FC<ProjectModalDesktopProps> = ({ project, isOp
             )}
           </div>
 
-          {/* Bouton fermer */}
-          <motion.button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-30 text-gray-500 hover:text-gray-700 bg-white/90 hover:bg-white rounded-full p-2 transition-all duration-200 shadow-md"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Fermer"
-          >
-            <X size={24} />
-          </motion.button>
+            {/* Bouton fermer */}
+            <button
+              onClick={onClose}
+              className="absolute -top-5 -right-5 z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{ 
+                backgroundColor: 'rgb(98, 137, 181)', 
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)' 
+              }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
+              }}
+              onMouseLeave={(e) => { 
+                e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' 
+              }}
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
         </motion.div>
       </motion.div>
     </AnimatePresence>
