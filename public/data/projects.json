@@ -157,7 +157,7 @@
       "id": "filler_2",
       "backgroundImage": "/images/fillers/filler_2_bg.jpg",
       "textImage": "/images/fillers/filler_2_text.png",
-      "aspectRatio": "5/4",
+      "aspectRatio": "1/1",
       "isFiller": true
     },
     {
