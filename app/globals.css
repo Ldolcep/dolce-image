@@ -108,6 +108,34 @@
     @apply bg-primary-blue text-white px-6 py-3 transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2;
     font-family: var(--font-cocogoose);
   }
+  .qsm-image-container {
+    @apply relative;
+    }
+  
+    /* Style et positionnement du texte "Bienvenue..." */
+  .qsm-handwritten-text {
+    @apply absolute text-center text-4xl md:text-5xl leading-none text-primary-blue;
+    /* On utilise la police des titres que vous avez déjà définie */
+    font-family: var(--font-koolegant);
+    transform: rotate(-8deg);
+  
+    /* Positionnement sur mobile : centré en bas de l'image */
+    bottom: -2.5rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    width: 100%;
+      /* S'assure qu'il ne déborde pas bizarrement */
+  
+      /* Positionnement sur desktop (écrans larges : lg) */
+    @media (min-width: 1024px) {
+      top: -3rem;
+      right: -4rem;
+      bottom: auto;
+      left: auto;
+      transform: rotate(-10deg);
+      text-align: right;
+    }
+  }
 }
 
 /**
@@ -398,6 +426,7 @@
   backface-visibility: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   transform-origin: bottom center;
+  transform: translateZ(0);
 
   /* 🎨 Animation fluide basée sur la progression du swipe */
   transition: transform 0.1s linear, opacity 0.1s linear !important;

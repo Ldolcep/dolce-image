@@ -58,11 +58,15 @@ export default function ProjectModalDesktop({ project, isOpen, onClose }: Projec
 
   // Animation d'ouverture
   useEffect(() => {
-    const timer = isOpen && isMounted ? setTimeout(() => setIsAnimating(true), 50) : undefined;
-    return () => {
-      if (timer) clearTimeout(timer);
+    if (isOpen && isMounted) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsAnimating(true);
+        });
+      });
+    } else {
       setIsAnimating(false);
-    };
+    }
   }, [isOpen, isMounted]);
 
   // Préchargement intelligent des images
