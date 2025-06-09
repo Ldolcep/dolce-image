@@ -1,4 +1,4 @@
-// --- START OF FILE ProjectModalDesktop.tsx (ULTRA-STABLE VERSION) ---
+// --- START OF FILE ProjectModalDesktop.tsx (VERSION COMPLÈTE CORRIGÉE) ---
 
 "use client"
 
@@ -7,6 +7,9 @@ import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import ReactMarkdown from "react-markdown"
+
+// Durée d'animation constante
+const ANIMATION_DURATION = 200; // ms
 
 // Interface pour le projet
 export interface Project {
@@ -49,11 +52,18 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
     }
   }, [project.id, isOpen])
 
-  // Préchargement des images
+  // Préchargement des images optimisé
   React.useEffect(() => {
     if (!isOpen) return
 
+    // L'image principale devrait déjà être préchargée
+    // Marquer immédiatement la première image comme prête
+    setImagesReady(new Set([0]))
+
+    // Précharger les images additionnelles
     allVisuals.forEach((src, index) => {
+      if (index === 0) return // Skip la première, déjà marquée
+      
       const img = document.createElement('img')
       img.src = src
       img.onload = () => {
@@ -74,8 +84,13 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
     })
   }, [allVisuals, isOpen])
 
-  // Navigation
+  // Navigation avec protection contre les clics rapides
   const paginate = React.useCallback((newDirection: number) => {
+    // Éviter les changements pendant une animation
+    if (document.querySelector('.carousel-slide[data-framer-animate="true"]')) {
+      return;
+    }
+    
     setDirection(newDirection)
     setCurrentImageIndex(prev => {
       const newIndex = prev + newDirection
@@ -114,7 +129,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const syncHeights = React.useCallback(() => {
     if (!modalRef.current || !descriptionRef.current) return
     
-    const imageElement = modalRef.current.querySelector('.image-column img')
+    const imageElement = modalRef.current.querySelector('.carousel-image')
     if (!imageElement) return
     
     // Attendre que l'image soit complètement rendue
@@ -137,7 +152,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
     
     // Observer les changements de taille
     const resizeObserver = new ResizeObserver(syncHeights)
-    const imageElement = modalRef.current?.querySelector('.image-column img')
+    const imageElement = modalRef.current?.querySelector('.carousel-image')
     if (imageElement) {
       resizeObserver.observe(imageElement)
     }
@@ -220,7 +235,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.2 }}
         onClick={onClose}
       >
         {/* Fond */}
@@ -249,45 +264,65 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Colonne image */}
           <div className="image-column w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50">
-            <div className="relative w-full h-full">
-              <AnimatePresence mode="wait" custom={direction}>
-                <motion.div
-                  key={currentImageIndex}
-                  custom={direction}
-                  initial={(custom: number) => ({ 
-                    x: custom > 0 ? 50 : -50, 
-                    opacity: 0 
-                  })}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={(custom: number) => ({ 
-                    x: custom < 0 ? 50 : -50, 
-                    opacity: 0 
-                  })}
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 }
-                  }}
-                  className="absolute inset-0"
-                >
-                  {isCurrentImageReady ? (
-                    <img
-                      src={allVisuals[currentImageIndex]}
-                      alt={`${project.title} - Image ${currentImageIndex + 1}`}
-                      className="w-full h-auto object-contain"
-                      style={{ maxHeight: '90vh' }}
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-orange" />
+            <div className="carousel-container">
+              <div className="carousel-slides-wrapper">
+                <AnimatePresence mode="wait" custom={direction}>
+                  <motion.div
+                    key={`slide-${currentImageIndex}`} // Clé unique pour forcer le re-render
+                    custom={direction}
+                    initial={(custom: number) => ({ 
+                      x: custom > 0 ? 50 : -50, 
+                      opacity: 0,
+                      scale: 0.95 
+                    })}
+                    animate={{ 
+                      x: 0, 
+                      opacity: 1,
+                      scale: 1 
+                    }}
+                    exit={(custom: number) => ({ 
+                      x: custom < 0 ? 50 : -50, 
+                      opacity: 0,
+                      scale: 0.95 
+                    })}
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 },
+                      scale: { duration: 0.2 }
+                    }}
+                    className="carousel-slide"
+                    onAnimationComplete={() => {
+                      // Force un repaint après l'animation
+                      const element = document.querySelector('.carousel-slide');
+                      if (element) {
+                        element.classList.add('transitioning');
+                        setTimeout(() => {
+                          element.classList.remove('transitioning');
+                        }, 10);
+                      }
+                    }}
+                  >
+                    <div className="modal-image-wrapper">
+                      {isCurrentImageReady ? (
+                        <img
+                          src={allVisuals[currentImageIndex]}
+                          alt={`${project.title} - Image ${currentImageIndex + 1}`}
+                          className="carousel-image"
+                          loading="eager"
+                          decoding="sync"
+                        />
+                      ) : (
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-orange" />
+                      )}
                     </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Navigation */}
@@ -295,25 +330,25 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
               <>
                 <button 
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 btn-nav"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 carousel-button-prev btn-nav"
                   aria-label="Image précédente"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button 
                   onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 btn-nav"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 carousel-button-next btn-nav"
                   aria-label="Image suivante"
                 >
                   <ChevronRight size={20} />
                 </button>
 
                 {/* Indicateurs */}
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center carousel-indicators">
                   <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
                     {allVisuals.map((_, index) => (
                       <button
-                        key={index}
+                        key={`indicator-${index}`}
                         onClick={() => {
                           setDirection(index > currentImageIndex ? 1 : -1)
                           setCurrentImageIndex(index)
@@ -407,4 +442,4 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
 
 export default ProjectModalDesktop
 
-// --- END OF FILE ProjectModalDesktop.tsx (ULTRA-STABLE VERSION) ---
+// --- END OF FILE ProjectModalDesktop.tsx (VERSION COMPLÈTE CORRIGÉE) ---

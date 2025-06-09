@@ -1,4 +1,4 @@
-// project-gallery.tsx - Version avec préchargement intégré
+// project-gallery.tsx - Version corrigée avec gestion sécurisée du DOM
 
 "use client"
 
@@ -30,6 +30,13 @@ interface ProjectsData {
   projects: Project[];
   fillers?: FillerItem[];
 }
+
+// Fonction utilitaire pour manipuler le body de manière sécurisée
+const setBodyOverflow = (value: 'hidden' | 'auto') => {
+  if (typeof window !== 'undefined' && document.body) {
+    document.body.style.overflow = value;
+  }
+};
 
 // Données hardcodées
 const hardcodedProjectsData: ProjectsData = {
@@ -188,8 +195,15 @@ export default function ProjectGallery() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [preloadedProjects, setPreloadedProjects] = useState<Set<string>>(new Set());
+  const [isMounted, setIsMounted] = useState(false);
   
   const sectionRef = useRef<HTMLElement>(null);
+
+  // S'assurer que le composant est monté
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   // Fonction de préchargement intégrée
   const preloadProjectAssets = useCallback(async (project: Project) => {
@@ -239,9 +253,11 @@ export default function ProjectGallery() {
 
   // Précharger l'image de fond au chargement
   useEffect(() => {
-    const img = new window.Image();
-    img.src = '/images/gallery-background.jpg';
-  }, []);
+    if (isMounted) {
+      const img = new window.Image();
+      img.src = '/images/gallery-background.jpg';
+    }
+  }, [isMounted]);
 
   useEffect(() => {
     const loadProjectsData = async () => {
@@ -295,15 +311,19 @@ export default function ProjectGallery() {
       }
     };
 
-    loadProjectsData();
-  }, []);
+    if (isMounted) {
+      loadProjectsData();
+    }
+  }, [isMounted]);
   
-  const openModal = async (project: Project) => {
+  const openModal = useCallback(async (project: Project) => {
+    if (!isMounted) return;
+
     // Si déjà préchargé, ouvrir immédiatement
     if (preloadedProjects.has(project.id)) {
       setSelectedProject(project);
       setIsModalOpen(true);
-      document.body.style.overflow = "hidden";
+      setBodyOverflow('hidden');
       return;
     }
 
@@ -311,35 +331,45 @@ export default function ProjectGallery() {
     try {
       await preloadProjectAssets(project);
       
-      // Petit délai pour garantir que le rendu est prêt
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      setSelectedProject(project);
-      setIsModalOpen(true);
-      document.body.style.overflow = "hidden";
+      // Utiliser requestAnimationFrame pour s'assurer que le DOM est prêt
+      if (isMounted) {
+        requestAnimationFrame(() => {
+          if (isMounted) {
+            setSelectedProject(project);
+            setIsModalOpen(true);
+            setBodyOverflow('hidden');
+          }
+        });
+      }
     } catch (error) {
       console.error('Erreur lors du préchargement:', error);
       // Ouvrir quand même en cas d'erreur
-      setSelectedProject(project);
-      setIsModalOpen(true);
-      document.body.style.overflow = "hidden";
+      if (isMounted) {
+        setSelectedProject(project);
+        setIsModalOpen(true);
+        setBodyOverflow('hidden');
+      }
     }
-  };
+  }, [isMounted, preloadedProjects, preloadProjectAssets]);
 
   // Préchargement au survol
-  const handleProjectHover = (project: Project) => {
-    if (!preloadedProjects.has(project.id)) {
+  const handleProjectHover = useCallback((project: Project) => {
+    if (!preloadedProjects.has(project.id) && isMounted) {
       preloadProjectAssets(project).catch(() => {});
     }
-  };
+  }, [preloadedProjects, isMounted, preloadProjectAssets]);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
+    if (!isMounted) return;
+    
     setIsModalOpen(false);
     setSelectedProject(null);
-    document.body.style.overflow = "auto";
-  };
+    setBodyOverflow('auto');
+  }, [isMounted]);
 
   useEffect(() => {
+    if (!isMounted) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
         closeModal();
@@ -348,7 +378,18 @@ export default function ProjectGallery() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isModalOpen]);
+  }, [isModalOpen, isMounted, closeModal]);
+
+  // Nettoyer l'overflow au démontage
+  useEffect(() => {
+    return () => {
+      setBodyOverflow('auto');
+    };
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <section ref={sectionRef} id="projects" className="relative py-16 md:py-24 min-h-screen">
