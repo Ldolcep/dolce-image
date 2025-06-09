@@ -744,3 +744,81 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* ===============================
+   ANTI-FLASH MODAL STYLES
+   ===============================*/
+
+/* Préparation du modal - éviter le flash blanc */
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-out;
+}
+
+/* Image de fond du modal - chargement invisible */
+.modal-background-image {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.modal-background-image.loaded {
+  opacity: 1;
+}
+
+/* Conteneur d'image principal - fond neutre pendant le chargement */
+.image-column {
+  background-color: #f3f4f6;
+  transition: background-color 200ms ease-out;
+}
+
+.image-column.image-loaded {
+  background-color: transparent;
+}
+
+/* Optimisation du rendu initial */
+@supports (content-visibility: auto) {
+  .modal-content {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+  }
+}
+
+/* Force l'accélération matérielle pour les transitions */
+.card-container,
+.project-img,
+.modal-container {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Préchargement d'image invisible */
+.preload-image {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Animation de chargement plus douce */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-fade-in {
+  animation: fadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
