@@ -188,7 +188,6 @@ const prepareStrategicItems = (
 // Définition des points de rupture pour les colonnes
 const breakpointColumns = {
   default: 3,    // 3 colonnes par défaut
-  1440: 4,       // 4 colonnes pour les grands écrans
   1024: 3,       // 3 colonnes à partir de 1024px
   768: 2,        // 2 colonnes à partir de 768px
   640: 1         // 1 colonne en dessous de 640px
