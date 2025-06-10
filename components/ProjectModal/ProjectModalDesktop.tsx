@@ -268,9 +268,9 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           {/* Colonne image */}
-          <div className="image-column w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50">
-            <div className="carousel-container">
-              <div className="carousel-slides-wrapper">
+          <div className="image-column w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
+            <div className="carousel-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <div className="carousel-slides-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
                     key={`slide-${currentImageIndex}`} // Clé unique pour forcer le re-render
@@ -296,6 +296,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                       scale: { duration: 0.2 }
                     }}
                     className="carousel-slide"
+                    style={{ position: 'absolute', inset: 0, zIndex: 1 }}
                     onAnimationComplete={() => {
                       // Force un repaint après l'animation
                       const element = document.querySelector('.carousel-slide');
@@ -307,7 +308,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                       }
                     }}
                   >
-                    <div className="modal-image-wrapper">
+                    <div className="modal-image-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                       {isCurrentImageReady ? (
                         <img
                           src={allVisuals[currentImageIndex]}

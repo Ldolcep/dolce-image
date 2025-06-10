@@ -6,6 +6,8 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import ProjectModalMobile from "./ProjectModalMobile"
 import ProjectModalDesktop from "./ProjectModalDesktop"
 import { Project } from "./ProjectModalDesktop"
+import "@/styles/features/modal-desktop.css"
+import "@/styles/features/carousel.css"
 
 interface ProjectModalProps {
   project: Project
@@ -20,6 +22,11 @@ export default function ProjectModal(props: ProjectModalProps) {
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  if (isMobile) {
+    import("@/styles/features/swiper-mobile.css")
+  }
+  }, [isMobile])  
 
   if (!isMounted) {
     if (!props.isOpen) return null
