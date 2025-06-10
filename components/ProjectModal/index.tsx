@@ -21,11 +21,10 @@ export default function ProjectModal(props: ProjectModalProps) {
 
   useEffect(() => {
     setIsMounted(true)
-  }, [])
 
-  if (isMobile) {
-    import("@/styles/features/swiper-mobile.css")
-  }
+    if (isMobile) {
+      import("@/styles/features/swiper-mobile.css")
+    }
   }, [isMobile])  
 
   if (!isMounted) {
