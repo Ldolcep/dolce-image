@@ -1,8 +1,8 @@
 "use client";
 
-import { AboutSection } from "@/components/about-section"
-import { FillerCard } from "@/components/filler-card"
-import { Hero } from "@/components/hero"
+import AboutSection from "@/components/about-section"
+import FillerCard from "@/components/filler-card"
+import Hero from "@/components/hero"
 import ProjectGallery from "@/components/project-gallery"
 import dynamic from "next/dynamic"
 
