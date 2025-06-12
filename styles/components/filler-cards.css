@@ -1,0 +1,88 @@
+/* filler-cards.css */
+
+/* Base styles */
+.filler-card-container {
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  perspective: 1000px;
+  cursor: default;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  will-change: transform, box-shadow;
+}
+
+.filler-card-container:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Layers */
+.filler-card-container .background-layer,
+.filler-card-container .text-layer {
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.filler-card-container .text-layer {
+  z-index: 2;
+}
+
+/* Shine effect */
+@keyframes shine3DSmooth {
+  0% {
+    background-position: -100% 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.3;
+  }
+  40%, 60% {
+    opacity: 0.7;
+  }
+  85% {
+    opacity: 0.3;
+  }
+  100% {
+    background-position: 200% 0;
+    opacity: 0;
+  }
+}
+
+.filler-card-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.filler-card-container:hover::before {
+  animation: shine3DSmooth 2.5s infinite cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+/* Glow effect */
+.filler-card-container::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle at center, rgba(247, 165, 32, 0.3), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0, 0, 0.2, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.filler-card-container:hover::after {
+  opacity: 0.5;
+}

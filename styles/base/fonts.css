@@ -1,0 +1,28 @@
+/* fonts.css */
+
+/* Koolegant pour les titres */
+@font-face {
+  font-family: 'Koolegant';
+  src: url('/fonts/koolegant-webfont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  letter-spacing: 0.025em;
+}
+
+/* Cocogoose pour le corps du texte */
+@font-face {
+  font-family: 'Cocogoose Pro';
+  src: url('/fonts/cocogoosepro-ultralight.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cocogoose Pro';
+  src: url('/fonts/cocogoosepro-regular.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
