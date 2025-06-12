@@ -140,6 +140,7 @@ export default function Hero() {
           muted // Commence en mute
           loop
           playsInline
+          preload="metadata"
         >
           <source src="/hero-video/dolce-banner.mp4" type="video/mp4" />
           Your browser does not support the video tag.

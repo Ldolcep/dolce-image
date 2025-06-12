@@ -37,6 +37,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   // Refs
   const modalRef = React.useRef<HTMLDivElement>(null)
   const descriptionRef = React.useRef<HTMLDivElement>(null)
+  const imageRef = React.useRef<HTMLImageElement>(null)
   
   // Calcul des visuals
   const allVisuals = React.useMemo(() => {
@@ -129,7 +130,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const syncHeights = React.useCallback(() => {
     if (!modalRef.current || !descriptionRef.current) return
     
-    const imageElement = modalRef.current.querySelector('.carousel-image')
+    const imageElement = modalRef.current.querySelector('.carousel-image') as HTMLElement | null;
     if (!imageElement) return
     
     // Attendre que l'image soit complètement rendue
@@ -227,6 +228,24 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   if (!isOpen) return null
 
   // Variants définis inline pour éviter les problèmes de référence
+  const slideVariants = {
+    initial: (custom: number) => ({
+      x: custom > 0 ? 50 : -50,
+      opacity: 0,
+      scale: 0.95,
+    }),
+    animate: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (custom: number) => ({
+      x: custom < 0 ? 50 : -50,
+      opacity: 0,
+      scale: 0.95,
+    }),
+  };
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -273,23 +292,12 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
               <div className="carousel-slides-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
-                    key={`slide-${currentImageIndex}`} // Clé unique pour forcer le re-render
+                    key={`slide-${currentImageIndex}`}
+                    variants={slideVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
                     custom={direction}
-                    initial={(custom: number) => ({ 
-                      x: custom > 0 ? 50 : -50, 
-                      opacity: 0,
-                      scale: 0.95 
-                    })}
-                    animate={{ 
-                      x: 0, 
-                      opacity: 1,
-                      scale: 1 
-                    }}
-                    exit={(custom: number) => ({ 
-                      x: custom < 0 ? 50 : -50, 
-                      opacity: 0,
-                      scale: 0.95 
-                    })}
                     transition={{
                       x: { type: "spring", stiffness: 300, damping: 30 },
                       opacity: { duration: 0.2 },
@@ -309,17 +317,25 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                     }}
                   >
                     <div className="modal-image-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
-                      {isCurrentImageReady ? (
-                        <img
-                          src={allVisuals[currentImageIndex]}
-                          alt={`${project.title} - Image ${currentImageIndex + 1}`}
-                          className="carousel-image"
-                          loading="eager"
-                          decoding="sync"
+                      {allVisuals.map((visual, index) => (
+                        <Image
+                          key={visual}
+                          ref={index === currentImageIndex ? imageRef : undefined}
+                          src={visual}
+                          alt={`Image ${index + 1} du projet ${project.title}`}
+                          fill
+                          style={{
+                            objectFit: 'contain',
+                            visibility: index === currentImageIndex ? 'visible' : 'hidden',
+                            maxHeight: '90vh',
+                          }}
+                          className={`absolute inset-0 transition-opacity duration-300 ${
+                            index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                          }`}
+                          priority={index <= 1}
+                          sizes="(max-width: 1200px) 90vw, 1200px"
                         />
-                      ) : (
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-orange" />
-                      )}
+                      ))}
                     </div>
                   </motion.div>
                 </AnimatePresence>
@@ -397,9 +413,11 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             <div className="text-base text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
               {Array.isArray(project.description) ? (
                 project.description.map((paragraph, i) => (
-                  <ReactMarkdown key={i} className="mb-4 last:mb-0">
-                    {paragraph}
-                  </ReactMarkdown>
+                  <div key={i} className="mb-4 last:mb-0">
+                    <ReactMarkdown>
+                      {paragraph}
+                    </ReactMarkdown>
+                  </div>
                 ))
               ) : (
                 <ReactMarkdown>{project.description}</ReactMarkdown>

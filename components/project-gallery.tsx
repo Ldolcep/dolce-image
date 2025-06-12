@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import Masonry from 'react-masonry-css'
-import ProjectModal from "./ProjectModal" 
+import dynamic from "next/dynamic"
 import FillerCard from "./filler-card"
 
 // Interfaces
@@ -187,6 +187,8 @@ const breakpointColumns = {
   768: 2,
   640: 1
 };
+
+const ProjectModal = dynamic(() => import("./ProjectModal"), { ssr: false })
 
 export default function ProjectGallery() {
   const [allItems, setAllItems] = useState<(Project | FillerItem)[]>([]);

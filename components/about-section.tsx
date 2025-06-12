@@ -35,6 +35,7 @@ export default function AboutSection() {
                 width={550}
                 height={688}
                 className="w-full h-auto object-cover rounded-[2px] shadow-lg"
+                sizes="(max-width: 768px) 90vw, 550px"
               />
             </div>
             

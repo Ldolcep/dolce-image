@@ -115,12 +115,13 @@ export default function Header() {
         <Link href="/" className="relative h-12 w-36 md:h-14 md:w-40 mx-2">
           {/* Utiliser l'état currentLogo pour la source de l'image */}
           <Image 
-            key={currentLogo} // Important pour forcer le re-rendu de l'image si Next/Image optimise trop
-            src={currentLogo} 
-            alt="Dolce" 
-            fill 
-            className="object-contain" 
-            priority={currentLogo === LOGO_STAGE_1} // Priority si c'est le logo initial et au-dessus de la ligne de flottaison
+            key={currentLogo}
+            src={currentLogo}
+            alt="Dolce"
+            fill
+            className="object-contain"
+            priority={currentLogo === LOGO_STAGE_1}
+            sizes="(max-width: 768px) 150px, 200px"
           />
         </Link>
         <nav className="hidden md:flex space-x-8">
