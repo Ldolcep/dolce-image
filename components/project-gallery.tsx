@@ -6,16 +6,7 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import ProjectModal from "./ProjectModal" 
 import FillerCard from "./filler-card"
-
-// Définir les types de base
-interface Project {
-  id: string
-  title: string
-  mainVisual: string
-  additionalVisuals: string[]
-  description: string | string[]
-  link: string
-}
+import { Project } from "../types/project"
 
 // Interface pour les fillers
 interface FillerItem {
@@ -33,7 +24,7 @@ interface ProjectsData {
 }
 
 // Définir les données des projets codées en dur (utilisées comme fallback)
-const hardcodedProjectsData: ProjectsData = { // Type explicite pour la cohérence
+const hardcodedProjectsData: ProjectsData = {
   projects: [
     {
       id: "1",
