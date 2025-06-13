@@ -1,14 +1,14 @@
-// --- START OF FILE project-gallery.tsx (MODIFIED) ---
+// project-gallery.tsx - Version corrigée avec gestion sécurisée du DOM
 
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
-import ProjectModal from "./ProjectModal" 
+import Masonry from 'react-masonry-css'
+import dynamic from "next/dynamic"
 import FillerCard from "./filler-card"
 import { Project } from "../types/project"
 
-// Interface pour les fillers
 interface FillerItem {
   id: string
   backgroundImage: string
@@ -17,7 +17,6 @@ interface FillerItem {
   isFiller: boolean
 }
 
-// Structure attendue pour les données des projets
 interface ProjectsData {
   projects: Project[];
   fillers?: FillerItem[];
@@ -38,10 +37,10 @@ const hardcodedProjectsData: ProjectsData = {
       ],
       description: [
         "Situé à Toulon, Le Boudoir Miadana est un salon de beauté du regard spécialisé dans les extensions de cils, offrant une expérience chaleureuse et sensorielle.",
-        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre “a” dans le nom du salon et symbolise la métamorphose, la beauté et l’élégance.",
-        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd’hui une image forte et différenciante, capable de séduire une clientèle en quête d’une expérience esthétique singulière."
+        "Pour accompagner son lancement, nous avons conçu une identité visuelle douce et apaisante, mêlant des teintes chaudes inspirées de la peau à des éléments graphiques délicats, pour créer un univers propice au bien-être. Le logo, en forme de papillon, fait écho à la triple présence de la lettre 'a' dans le nom du salon et symbolise la métamorphose, la beauté et l'élégance.",
+        "Grâce à cette direction artistique, Le Boudoir Miadana affirme aujourd'hui une image forte et différenciante, capable de séduire une clientèle en quête d'une expérience esthétique singulière."
       ],
-      link: "https://ellipse-real-estate.com/", // Mettez à jour ce lien si nécessaire
+      link: "https://ellipse-real-estate.com/",
     },
     {
       id: "2",
@@ -84,11 +83,11 @@ const hardcodedProjectsData: ProjectsData = {
         "/images/projects/Dolce/dolce-gallery-7.jpg"
       ],
       description: [ 
-        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l’élégance intemporelle de la French Riviera des années 60 et l’art de vivre de la Dolce Vita",
-        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre “O” crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l’inspiration marine.",
-        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l’élégance propre à l’esprit DOLCE."
+        "Notre agence de communication digitale DOLCE est inspirée par la beauté ensoleillée de la Méditerranée, l'élégance intemporelle de la French Riviera des années 60 et l'art de vivre de la Dolce Vita",
+        "Pour incarner cet univers, nous avons imaginé une identité visuelle raffinée et contemporaine. Le logo, à la typographie sérifée, évoque la sophistication, tandis que le travail graphique autour de la lettre 'O' crée une dualité visuelle subtile. Les vagues tracées au pinceau ajoutent une dimension artistique, en lien avec l'inspiration marine.",
+        "La palette de couleurs mêle un bleu profond, un jaune solaire et un beige sableux, pour retranscrire toute la chaleur, la douceur et l'élégance propre à l'esprit DOLCE."
       ],
-      link: "https://example.com/social-media", // Mettez à jour ce lien si nécessaire
+      link: "https://example.com/social-media",
     },
     {
       id: "5",
@@ -103,7 +102,7 @@ const hardcodedProjectsData: ProjectsData = {
       ],
       description: [
         "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
-        "Nous avons conçu un logotype moderne et dynamique, reflétant la nature technologique et innovante de l'application.",
+        "Nous avons conçu un logotype moderne et dynamique, reflètant la nature technologique et innovante de l'application.",
         "L'identité visuelle s'accompagne d'un système graphique cohérent qui a été décliné sur l'ensemble des supports de communication."
       ],
       link: "https://example.com/ui-ux",
@@ -121,36 +120,59 @@ const hardcodedProjectsData: ProjectsData = {
         "Souhaitant développer une application à destination des chauffeurs privés, le fondateur de Pick Up nous à contacté pour la création de son identité visuelle.",
         "Notre client souhaitait se différencier par une identité forte, moderne, inspirant la confiance et la sérénité et rappelant la nature.",
         "La typographie futuriste et inspirée de la technologie, offre au logo un style minimaliste.",
-        "L’élément graphique représentant l’icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
+        "L'élément graphique représentant l'icône de localisation se dévoile subtilement grâce au motif de remplissage inspiré des reliefs cartographiques des routes.",
         "Le choix des couleurs en camaïeu de verts inspire la sérénité et rappelle la nature."
       ],
       link: "https://example.com/content",
     },
   ],
   fillers: [
-    {
-      id: "filler_1",
-      backgroundImage: "/images/fillers/filler_1_bg.jpg",
-      textImage: "/images/fillers/filler_1_text.png", 
-      aspectRatio: "4/3",
-      isFiller: true
-    },
-    {
-      id: "filler_2",
-      backgroundImage: "/images/fillers/filler_2_bg.jpg",
-      textImage: "/images/fillers/filler_2_text.png",
-      aspectRatio: "3/2",
-      isFiller: true
-    },
-    {
-      id: "filler_3",
-      backgroundImage: "/images/fillers/filler_3_bg.jpg",
-      textImage: "/images/fillers/filler_3_text.png",
-      aspectRatio: "4/3",
-      isFiller: true
-    },
+    { id: "filler_1", backgroundImage: "/images/fillers/filler_1_bg.jpg", textImage: "/images/fillers/filler_1_text.png", aspectRatio: "4/3", isFiller: true },
+    { id: "filler_2", backgroundImage: "/images/fillers/filler_2_bg.jpg", textImage: "/images/fillers/filler_2_text.png", aspectRatio: "4/3", isFiller: true },
+    { id: "filler_3", backgroundImage: "/images/fillers/filler_3_bg.jpg", textImage: "/images/fillers/filler_3_text.png", aspectRatio: "4/3", isFiller: true },
   ]
 };
+
+const prepareStrategicItems = (
+  projects: Project[], 
+  fillers: FillerItem[], 
+  numColumns: number
+): (Project | FillerItem)[] => {
+  if (fillers.length === 0 || projects.length === 0) {
+    return projects;
+  }
+
+  const useableFillers = fillers.slice(0, numColumns);
+  const numFillers = useableFillers.length;
+  const numProjects = projects.length;
+  const result: (Project | FillerItem)[] = [];
+
+  const numGroups = numFillers + 1;
+  const projectsPerGroup = Math.ceil(numProjects / numGroups);
+
+  let projectIndex = 0;
+
+  for (let i = 0; i < numFillers; i++) {
+    const group = projects.slice(projectIndex, projectIndex + projectsPerGroup);
+    result.push(...group);
+    projectIndex += projectsPerGroup;
+    result.push(useableFillers[i]);
+  }
+
+  const remainingProjects = projects.slice(projectIndex);
+  result.push(...remainingProjects);
+
+  return result;
+};
+
+const breakpointColumns = {
+  default: 3,
+  1024: 3,
+  768: 2,
+  640: 1
+};
+
+const ProjectModal = dynamic(() => import("./ProjectModal"), { ssr: false })
 
 export default function ProjectGallery() {
   const [allItems, setAllItems] = useState<(Project | FillerItem)[]>([]);
@@ -158,8 +180,70 @@ export default function ProjectGallery() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [preloadedProjects, setPreloadedProjects] = useState<Set<string>>(new Set());
+  const [isMounted, setIsMounted] = useState(false);
   
   const sectionRef = useRef<HTMLElement>(null);
+
+  // S'assurer que le composant est monté
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  // Fonction de préchargement intégrée
+  const preloadProjectAssets = useCallback(async (project: Project) => {
+    if (preloadedProjects.has(project.id)) {
+      return Promise.resolve();
+    }
+
+    try {
+      const criticalAssets = [
+        '/images/gallery-background.jpg',
+        project.mainVisual
+      ];
+
+      await Promise.all(
+        criticalAssets.map(src => {
+          return new Promise<void>((resolve) => {
+            const img = new window.Image();
+            img.onload = () => resolve();
+            img.onerror = () => {
+              console.warn(`Failed to preload: ${src}`);
+              resolve();
+            };
+            img.src = src;
+          });
+        })
+      );
+
+      setPreloadedProjects(prev => new Set(prev).add(project.id));
+
+      // Précharger les images additionnelles en arrière-plan
+      if (project.additionalVisuals?.length > 0) {
+        Promise.all(
+          project.additionalVisuals.map(src => {
+            return new Promise<void>((resolve) => {
+              const img = new window.Image();
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+              img.src = src;
+            });
+          })
+        ).catch(() => {});
+      }
+    } catch (error) {
+      console.error('Erreur lors du préchargement:', error);
+    }
+  }, [preloadedProjects]);
+
+  // Précharger l'image de fond au chargement
+  useEffect(() => {
+    if (isMounted) {
+      const img = new window.Image();
+      img.src = '/images/gallery-background.jpg';
+    }
+  }, [isMounted]);
 
   useEffect(() => {
     const loadProjectsData = async () => {
@@ -169,9 +253,7 @@ export default function ProjectGallery() {
         
         const response = await fetch('/data/projects.json', {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
         
         if (!response.ok) {
@@ -184,97 +266,96 @@ export default function ProjectGallery() {
           throw new Error('Format de données invalide: projects manquant ou invalide');
         }
         
-        const projectsFromJson = fetchedProjectsData.projects;
-        const fillersFromJson = fetchedProjectsData.fillers || []; 
+        const projects = fetchedProjectsData.projects;
+        const fillers = fetchedProjectsData.fillers || [];
         
-        const interleavedItems = interleaveItems(
-          projectsFromJson,
-          fillersFromJson
+        const preparedItems = prepareStrategicItems(
+          projects, 
+          fillers, 
+          breakpointColumns.default
         );
-        
-        setAllItems(interleavedItems);
-        
+        setAllItems(preparedItems);
+         
       } catch (err) {
         console.error('Erreur lors du chargement des projets:', err);
         const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue lors du chargement';
         setError(errorMessage);
         
-        console.warn("Utilisation des données de secours (hardcodées) car le chargement du JSON a échoué.");
-        const fallbackFillers = hardcodedProjectsData.fillers || [];
-        const fallbackInterleavedItems = interleaveItems(
-          hardcodedProjectsData.projects,
-          fallbackFillers
-        );
-        setAllItems(fallbackInterleavedItems);
+        console.warn("Utilisation des données de secours (hardcodées).");
         
+        const projects = hardcodedProjectsData.projects;
+        const fillers = hardcodedProjectsData.fillers || [];
+        
+        const preparedItems = prepareStrategicItems(
+          projects, 
+          fillers, 
+          breakpointColumns.default
+        );
+        setAllItems(preparedItems);
       } finally {
-        setLoading(false);
+        setLoading(false);     
       }
     };
 
-    loadProjectsData();
-  }, []);
-
-  const interleaveItems = (projects: Project[], fillers: FillerItem[]): (Project | FillerItem)[] => {
-    const total = projects.length + fillers.length;
-    const result: (Project | FillerItem)[] = [];
-    
-    const fillerPositions = calculateFillerPositions(projects.length, fillers.length);
-    
-    let fillerIndex = 0;
-    let projectIndex = 0;
-    
-    for (let i = 0; i < total; i++) {
-      if (fillerPositions.includes(i) && fillerIndex < fillers.length) {
-        result.push(fillers[fillerIndex]);
-        fillerIndex++;
-      } else if (projectIndex < projects.length) {
-        result.push(projects[projectIndex]);
-        projectIndex++;
-      }
+    if (isMounted) {
+      loadProjectsData();
     }
-
-    while (projectIndex < projects.length) {
-        result.push(projects[projectIndex]);
-        projectIndex++;
-    }
-    while (fillerIndex < fillers.length) {
-        result.push(fillers[fillerIndex]);
-        fillerIndex++;
-    }
-
-    return result;
-  };
+  }, [isMounted]);
   
-  const calculateFillerPositions = (projectCount: number, fillerCount: number): number[] => {
-    const positions: number[] = [];
-    if (fillerCount <= 0) return positions;
+  const openModal = useCallback(async (project: Project) => {
+    if (!isMounted) return;
 
-    const spacing = Math.ceil(projectCount / (fillerCount + 1));
-    
-    for (let i = 0; i < fillerCount; i++) {
-      const position = (i + 1) * spacing;
-      if (position <= projectCount + fillerCount) { 
-        positions.push(position);
+    // Si déjà préchargé, ouvrir immédiatement
+    if (preloadedProjects.has(project.id)) {
+      setSelectedProject(project);
+      setIsModalOpen(true);
+      setBodyOverflow('hidden');
+      return;
+    }
+
+    // Sinon, précharger d'abord
+    try {
+      await preloadProjectAssets(project);
+      
+      // Utiliser requestAnimationFrame pour s'assurer que le DOM est prêt
+      if (isMounted) {
+        requestAnimationFrame(() => {
+          if (isMounted) {
+            setSelectedProject(project);
+            setIsModalOpen(true);
+            setBodyOverflow('hidden');
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors du préchargement:', error);
+      // Ouvrir quand même en cas d'erreur
+      if (isMounted) {
+        setSelectedProject(project);
+        setIsModalOpen(true);
+        setBodyOverflow('hidden');
       }
     }
+  }, [isMounted, preloadedProjects, preloadProjectAssets]);
+
+  // Préchargement au survol
+  const handleProjectHover = useCallback((project: Project) => {
+    if (!preloadedProjects.has(project.id) && isMounted) {
+      preloadProjectAssets(project).catch(() => {});
+    }
+  }, [preloadedProjects, isMounted, preloadProjectAssets]);
+
+  const closeModal = useCallback(() => {
+    if (!isMounted) return;
     
-    return positions;
-  };
-
-  const openModal = (project: Project) => {
-    setSelectedProject(project);
-    setIsModalOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const closeModal = () => {
     setIsModalOpen(false);
     setSelectedProject(null);
-    document.body.style.overflow = "auto";
-  };
+    setBodyOverflow('auto');
+  }, [isMounted]);
 
   useEffect(() => {
+    if (!isMounted) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
         closeModal();
@@ -283,45 +364,36 @@ export default function ProjectGallery() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isModalOpen]);
+  }, [isModalOpen, isMounted, closeModal]);
+
+  // Nettoyer l'overflow au démontage
+  useEffect(() => {
+    return () => {
+      setBodyOverflow('auto');
+    };
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <section ref={sectionRef} id="projects" className="relative py-16 md:py-24 min-h-screen">
-      {/* Fond fixe - fonctionne sur tous les appareils */}
+      
       <div className="fixed inset-0 -z-10">
-        {/* Image de fond */}
         <Image
           src="/images/gallery-background.jpg"
           alt=""
           fill
           quality={90}
           sizes="100vw"
-          className="object-cover object-center"
-          style={{
-            // Pour éviter un zoom excessif, vous pouvez ajuster le scale
-            transform: 'scale(1)' // Changez à scale(0.9) si l'image est trop zoomée
-          }}
+          className="object-cover"
           priority
         />
-        
-        {/* Overlay sombre */}
-        <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
-        
-        {/* Effet de grain subtil */}
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            filter: 'contrast(200%) brightness(100%)'
-          }}
-        />
-        
-        {/* Gradient pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      {/* Contenu principal */}
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 relative">
         <h2 className="font-koolegant text-4xl md:text-5xl mb-16 text-center text-white drop-shadow-lg">
           Our Projects
         </h2>
@@ -348,16 +420,16 @@ export default function ProjectGallery() {
         )}
 
         {!loading && !error && allItems.length > 0 && (
-          <div className="masonry-grid">
+          <Masonry
+            breakpointCols={breakpointColumns}
+            className="masonry-grid-js"
+            columnClassName="masonry-column"
+          >
             {allItems.map((item) => {
-              // Rendu pour les Fillers
               if ('isFiller' in item) {
                 const filler = item as FillerItem;
                 return (
-                  <div 
-                    key={`filler-${filler.id}`} 
-                    className="masonry-item hidden md:block"
-                  > 
+                  <div key={`filler-${filler.id}`} className="hidden md:block">
                     <FillerCard
                       id={filler.id}
                       backgroundImage={filler.backgroundImage}
@@ -368,19 +440,19 @@ export default function ProjectGallery() {
                 );
               }
               
-              // Rendu pour les Projets
               const project = item as Project;
               return (
                 <div
                   key={project.id}
-                  className="masonry-item"
                   onClick={() => openModal(project)}
+                  onMouseEnter={() => handleProjectHover(project)}
                   onKeyDown={(e) => e.key === "Enter" && openModal(project)}
                   tabIndex={0}
                   role="button"
                   aria-label={`View ${project.title} project details`}
+                  className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2 rounded-lg"
                 >
-                  <div className="card-container bg-white/95 backdrop-blur-sm rounded-sm shadow-xl hover:bg-white transition-all duration-300">
+                  <div className="card-container bg-white/100 backdrop-blur-sm">
                     <div className="img-container">
                       <Image
                         src={project.mainVisual || "/placeholder.svg"}
@@ -398,7 +470,7 @@ export default function ProjectGallery() {
                 </div>
               );
             })}
-          </div>
+          </Masonry>
         )}
 
         {!loading && !error && allItems.length === 0 && (
@@ -418,4 +490,3 @@ export default function ProjectGallery() {
     </section>
   );
 }
-// --- END OF FILE project-gallery.tsx (MODIFIED) ---

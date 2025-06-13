@@ -1,0 +1,22 @@
+/* variables.css */
+
+:root {
+  /* Primary Colors */
+  --color-primary-orange: #f7a520;
+  --color-primary-blue: #09478e;
+  --color-primary-black: #000000;
+
+  /* Secondary Colors */
+  --color-secondary-orange: #f9af3f;
+  --color-secondary-cream-1: #efe4e4;
+  --color-secondary-cream-2: #f0e9e6;
+  --color-secondary-cream-3: #faf7f7;
+
+  /* Background */
+  --background: #faf7f7;
+  --foreground: #000000;
+
+  /* Font Families */
+  --font-koolegant: 'Koolegant', Georgia, serif;
+  --font-cocogoose: 'Cocogoose Pro', 'Helvetica Neue', Arial, sans-serif;
+}

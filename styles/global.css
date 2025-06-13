@@ -1,0 +1,108 @@
+/* globals.css - Fichier principal */
+
+/* Tailwind imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles imports */
+@import './base/variables.css';
+@import './base/fonts.css';
+
+/* Component imports */
+@layer components {
+  @import './components/buttons.css';
+  @import './components/gallery.css';
+  @import './components/filler-cards.css';
+  @import './components/scrollbar.css';
+}
+/* Feature imports - Import conditionnel selon les pages */
+/* Ces imports peuvent être déplacés dans les composants qui les utilisent */
+@import './features/modal-desktop.css';
+@import './features/carousel.css';
+/* @import './features/swiper-mobile.css'; - À importer uniquement sur mobile */
+
+/* Utility imports */
+@import './utilities/animations.css';
+
+/**
+ * ========================================
+ * BASE STYLES & TYPOGRAPHY
+ * ========================================
+ */
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-cocogoose);
+    font-weight: 400;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-koolegant);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-orange);
+    outline-offset: 2px;
+  }
+}
+
+/**
+ * ========================================
+ * SHARED UTILITIES
+ * ========================================
+ */
+
+/* Z-index scale */
+:root {
+  --z-base: 1;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-modal-indicators: 25;
+  --z-modal-controls: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Isolation contexts */
+.isolate-context {
+  isolation: isolate;
+  position: relative;
+}
+
+/* QSM Handwritten text - Component spécifique */
+@layer components {
+  .qsm-image-container {
+    @apply relative;
+  }
+  
+  .qsm-handwritten-text {
+    @apply absolute text-center text-4xl md:text-5xl leading-none text-primary-blue;
+    font-family: var(--font-koolegant);
+    transform: rotate(-8deg);
+    bottom: -2.5rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    width: 100%;
+  
+    @media (min-width: 1024px) {
+      top: -3rem;
+      right: -4rem;
+      bottom: auto;
+      left: auto;
+      transform: rotate(-10deg);
+      text-align: right;
+    }
+  }
+}

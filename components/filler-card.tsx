@@ -207,7 +207,7 @@ export default function FillerCard({
           ref={backgroundRef}
           style={{
             position: 'absolute',
-            inset: '-5%', // Légèrement plus grand pour éviter les bords lors de la rotation/scale
+            inset: '-5%',
             transform: `scale(1)`, // Scale initial
             // La transition initiale est gérée par handleMouseLeave/Enter
             willChange: 'transform',
@@ -216,13 +216,14 @@ export default function FillerCard({
         >
           <Image
             src={backgroundImage}
-            alt="Background design element"
+            alt="" // décoratif
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Example sizes, adjust as needed
             style={{
               objectFit: 'cover',
               transform: 'scale(1.1)' // Pré-scaler un peu dans l'image pour compenser l'inset
             }}
+            priority={false}
           />
         </div>
 
@@ -244,13 +245,14 @@ export default function FillerCard({
         >
           <Image
             src={textImage}
-            alt="Text overlay"
+            alt="Texte décoratif du filler"
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Example sizes
             style={{
               objectFit: 'contain',
               padding: '1.5rem' // Ajuster si nécessaire
             }}
+            priority={false}
           />
         </div>
 

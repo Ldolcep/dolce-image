@@ -1,0 +1,148 @@
+/* carousel.css */
+
+/* Container structure */
+.carousel-container {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-base);
+}
+
+.carousel-slides-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: var(--z-base);
+}
+
+/* Slides */
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: flat; /* Important: flat instead of preserve-3d */
+  -webkit-transform-style: flat;
+  z-index: var(--z-base);
+}
+
+/* Prevent animations overlap */
+.carousel-slide[data-framer-animate="true"] {
+  pointer-events: none;
+}
+
+/* Image wrapper */
+.modal-image-wrapper {
+  background-color: #f3f4f6;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-base);
+}
+
+/* Image */
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  position: relative;
+  z-index: var(--z-base);
+}
+
+/* Navigation controls */
+.carousel-button-prev,
+.carousel-button-next {
+  z-index: var(--z-modal-controls) !important;
+  isolation: isolate;
+  position: absolute !important;
+}
+
+.carousel-indicators {
+  z-index: var(--z-modal-indicators) !important;
+  isolation: isolate;
+  position: absolute !important;
+}
+
+/* Force repaint animation */
+@keyframes forceRepaint {
+  from { opacity: 0.99999; }
+  to { opacity: 1; }
+}
+
+.carousel-slide.transitioning {
+  animation: forceRepaint 0.01s;
+}
+
+/* Framer Motion fix */
+.image-column [data-framer-component-type] {
+  isolation: isolate;
+}
+
+/* Safari specific fixes */
+@supports (-webkit-appearance: none) {
+  .carousel-slide {
+    -webkit-transform: translateZ(0);
+    -webkit-perspective: 1000;
+  }
+  
+  .modal-image-wrapper {
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Ajouter ces lignes à la fin de carousel.css */
+
+/* ===============================
+   BUG FIX - Superposition carousel
+   ===============================*/
+
+/* Force isolation sur tous les conteneurs */
+.image-column>* {
+  position: relative;
+  z-index: auto;
+}
+
+/* Assurer que les contrôles restent au-dessus */
+.absolute.left-4.top-1\/2,
+.absolute.right-4.top-1\/2,
+.absolute.bottom-4.left-0.right-0 {
+  z-index: var(--z-modal-controls) !important;
+  pointer-events: auto !important;
+}
+
+/* Fix modal backdrop */
+[data-framer-component-type="Presence"] {
+  isolation: isolate;
+  z-index: var(--z-modal);
+}
+
+/* Forcer un nouveau contexte pour le modal */
+.bg-white.shadow-xl {
+  isolation: isolate;
+  position: relative;
+  z-index: var(--z-base);
+}
+
+/* Empêcher le débordement */
+.overflow-visible {
+  overflow: hidden !important;
+}
+
+/* Reset des transformations 3D problématiques sur Swiper desktop */
+.swiper-slide,
+.swiper-wrapper {
+  transform-style: flat !important;
+  -webkit-transform-style: flat !important;
+}

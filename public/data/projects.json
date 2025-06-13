@@ -150,28 +150,28 @@
       "id": "filler_1",
       "backgroundImage": "/images/fillers/filler_1_bg.jpg",
       "textImage": "/images/fillers/filler_1_text.png",
-      "aspectRatio": "4/3",
+      "aspectRatio": "1/1",
       "isFiller": true
     },
     {
       "id": "filler_2",
       "backgroundImage": "/images/fillers/filler_2_bg.jpg",
       "textImage": "/images/fillers/filler_2_text.png",
-      "aspectRatio": "3/2",
+      "aspectRatio": "5/4",
       "isFiller": true
     },
     {
       "id": "filler_3",
       "backgroundImage": "/images/fillers/filler_3_bg.jpg",
       "textImage": "/images/fillers/filler_3_text.png",
-      "aspectRatio": "4/3",
+      "aspectRatio": "1/1",
       "isFiller": true
     },
     {
       "id": "filler_4",
       "backgroundImage": "/images/fillers/filler_4_bg.jpg",
       "textImage": "/images/fillers/filler_4_text.png",
-      "aspectRatio": "4/3",
+      "aspectRatio": "1/1",
       "isFiller": true
     }
   ]

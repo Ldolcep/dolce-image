@@ -1,0 +1,205 @@
+/* swiper-mobile.css - À charger uniquement sur mobile */
+
+/* Configuration globale */
+.swiper {
+  --swiper-theme-color: #f97316;
+  --swiper-navigation-size: 18px;
+  touch-action: pan-y pinch-zoom !important;
+}
+
+.swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  will-change: transform !important;
+  cursor: grab !important;
+}
+
+.swiper-wrapper:active {
+  cursor: grabbing !important;
+}
+
+/* Animation éventail */
+.swiper-card-fan {
+  overflow: visible !important;
+  position: relative;
+  perspective: 600px;
+  transform-style: preserve-3d;
+}
+
+.swiper-card-fan .swiper-wrapper {
+  transform-style: preserve-3d;
+}
+
+.swiper-card-fan .swiper-slide {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  position: relative !important;
+  border-radius: 0px !important;
+  overflow: hidden !important;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transform-origin: bottom center;
+  transform: translateZ(0);
+  transition: transform 0.1s linear, opacity 0.1s linear !important;
+}
+
+/* Carte active */
+.swiper-card-fan .swiper-slide-active {
+  z-index: 15 !important;
+  transform: translateZ(calc(15px + var(--swipe-progress, 0) * 5px)) 
+             translateY(calc(-8px + var(--swipe-progress, 0) * -2px)) 
+             scale(calc(0.96 + var(--swipe-progress, 0) * 0.02)) 
+             rotate(calc(var(--swipe-progress, 0) * -2deg)) !important;
+  box-shadow: 0 calc(12px + var(--swipe-progress, 0) * 8px) 
+              calc(40px + var(--swipe-progress, 0) * 20px) 
+              rgba(0, 0, 0, calc(0.25 + var(--swipe-progress, 0) * 0.1)) !important;
+}
+
+/* Carte suivante */
+.swiper-card-fan .swiper-slide-next {
+  z-index: 12 !important;
+  transform: translateZ(calc(5px + var(--swipe-progress, 0) * 8px)) 
+             translateY(calc(0px + var(--swipe-progress, 0) * -6px)) 
+             scale(calc(0.94 + var(--swipe-progress, 0) * 0.02)) 
+             rotate(calc(8deg + var(--swipe-progress, 0) * -8deg)) !important;
+  opacity: calc(0.88 + var(--swipe-progress, 0) * 0.12) !important;
+}
+
+/* Carte précédente */
+.swiper-card-fan .swiper-slide-prev {
+  z-index: 8 !important;
+  transform: translateZ(calc(8px + var(--swipe-progress, 0) * -3px)) 
+             translateY(calc(-1px + var(--swipe-progress, 0) * 1px)) 
+             scale(calc(0.96 + var(--swipe-progress, 0) * -0.01)) 
+             rotate(calc(-8deg + var(--swipe-progress, 0) * -3deg)) !important;
+  opacity: calc(0.9 + var(--swipe-progress, 0) * -0.2) !important;
+}
+
+/* Positions statiques des cartes */
+.swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active) {
+  transform: translateZ(5px) translateY(-1px) rotate(-12deg) scale(0.94) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active) {
+  transform: translateZ(8px) translateY(0px) rotate(-6deg) scale(0.96) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(3):not(.swiper-slide-active) {
+  transform: translateZ(10px) translateY(0px) rotate(-3deg) scale(0.97) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(4):not(.swiper-slide-active) {
+  transform: translateZ(10px) translateY(0px) rotate(3deg) scale(0.97) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+  transform: translateZ(8px) translateY(0px) rotate(6deg) scale(0.96) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+  transform: translateZ(5px) translateY(-1px) rotate(12deg) scale(0.94) !important;
+}
+
+.swiper-card-fan .swiper-slide:nth-child(n+7):not(.swiper-slide-active) {
+  transform: translateZ(2px) rotate(15deg) scale(0.92) !important;
+}
+
+/* Animation de finalisation */
+.swiper-card-fan[data-transitioning="true"] .swiper-slide {
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+/* Effets visuels */
+.swiper-card-fan .swiper-slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+              linear-gradient(45deg, transparent 60%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 0px;
+}
+
+.swiper-card-fan .swiper-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Boutons navigation */
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+  width: 44px !important;
+  height: 44px !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 25 !important;
+}
+
+.swiper-button-prev-custom:not([disabled]),
+.swiper-button-next-custom:not([disabled]) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+}
+
+.swiper-button-prev-custom:not([disabled]):hover,
+.swiper-button-next-custom:not([disabled]):hover {
+  background: rgba(255, 255, 255, 1) !important;
+  color: #f97316 !important;
+  transform: scale(1.05) !important;
+}
+
+.swiper-button-prev-custom[disabled],
+.swiper-button-next-custom[disabled] {
+  background: rgba(200, 200, 200, 0.5) !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.4 !important;
+}
+
+/* Masquer navigation par défaut */
+.swiper-button-next,
+.swiper-button-prev {
+  display: none !important;
+}
+
+/* Performance optimizations */
+.swiper-card-fan .swiper-slide {
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
+}
+
+/* Très petits écrans */
+@media (max-width: 480px) {
+  .swiper-card-fan {
+    perspective: 600px !important;
+  }
+
+  .swiper-card-fan .swiper-slide-active {
+    transform: translateZ(15px) translateY(-8px) scale(0.96) rotate(0deg) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(1):not(.swiper-slide-active),
+  .swiper-card-fan .swiper-slide:nth-child(6):not(.swiper-slide-active) {
+    transform: translateZ(3px) translateY(0px) rotate(var(--rotation, 10deg)) scale(0.95) !important;
+  }
+
+  .swiper-card-fan .swiper-slide:nth-child(2):not(.swiper-slide-active),
+  .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
+    transform: translateZ(5px) translateY(0px) rotate(var(--rotation, 5deg)) scale(0.97) !important;
+  }
+}
