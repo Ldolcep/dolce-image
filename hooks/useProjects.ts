@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Project } from "@/types/project";
 
 // Ces types sont nécessaires pour la logique interne du hook
-export  interface FillerItem {
+export interface FillerItem {
   id: string;
   backgroundImage: string;
   textImage: string;

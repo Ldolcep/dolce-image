@@ -6,9 +6,16 @@ import { useRef, useEffect } from "react";
 import Image from "next/image";
 import ProjectModal from "./ProjectModal";
 import FillerCard from "./filler-card";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjects, type FillerItem } from "@/hooks/useProjects";
 import { useProjectModal } from "@/hooks/useProjectModal";
 import { Project } from "@/types/project";
+import Masonry from "react-masonry-css";
+
+const breakpointCols = {
+  default: 3,
+  1100: 2,
+  700: 1,
+};
 
 export default function ProjectGallery() {
   const { allItems, loading, error } = useProjects();
@@ -78,7 +85,11 @@ export default function ProjectGallery() {
         )}
 
         {!loading && !error && allItems.length > 0 && (
-          <div className="masonry-grid">
+          <Masonry
+            breakpointCols={breakpointCols}
+            className="my-masonry-grid"
+            columnClassName="my-masonry-grid_column"
+          >
             {allItems.map((item: Project | FillerItem) => {
               if ("isFiller" in item) {
                 // Filler
@@ -125,7 +136,7 @@ export default function ProjectGallery() {
                 </div>
               );
             })}
-          </div>
+          </Masonry>
         )}
 
         {!loading && !error && allItems.length === 0 && (
