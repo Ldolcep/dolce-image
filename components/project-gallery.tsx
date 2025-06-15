@@ -9,7 +9,6 @@ import FillerCard from "./filler-card";
 import { useProjects } from "@/hooks/useProjects";
 import { useProjectModal } from "@/hooks/useProjectModal";
 import { Project } from "@/types/project";
-import { useProjects, type FillerItem } from "@/hooks/useProjects";
 
 export default function ProjectGallery() {
   const { allItems, loading, error } = useProjects();
