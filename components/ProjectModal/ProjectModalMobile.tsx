@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
+import { Project } from "@/types/project";
 
 // Import Swiper styles
 import 'swiper/css';
@@ -19,15 +20,11 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 // Types
-interface Project {
-  id: string;
-  title: string;
-  mainVisual: string;
-  additionalVisuals: string[];
-  description: string | string[];
-  link: string;
-}
-
+// interface ProjectModalMobileProps {
+//   project: Project;
+//   isOpen: boolean;
+//   onClose: () => void;
+// }
 interface ProjectModalMobileProps {
   project: Project;
   isOpen: boolean;

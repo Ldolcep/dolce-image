@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Project } from "@/types/project"
 
 import ProjectModalMobile from "./ProjectModalMobile"
 import ProjectModalDesktop from "./ProjectModalDesktop"
-import { Project } from "./ProjectModalDesktop"
 import "@/styles/features/modal-desktop.css"
 import "@/styles/features/carousel.css"
 
 interface ProjectModalProps {
-  project: Project
-  isOpen: boolean
-  onClose: () => void
+  project: Project;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export default function ProjectModal(props: ProjectModalProps) {

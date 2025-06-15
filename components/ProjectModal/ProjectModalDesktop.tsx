@@ -7,24 +7,25 @@ import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import ReactMarkdown from "react-markdown"
+import { Project } from "@/types/project"
 
 // Durée d'animation constante
 const ANIMATION_DURATION = 200; // ms
 
 // Interface pour le projet
-export interface Project {
-  id: string
-  title: string
-  mainVisual: string
-  additionalVisuals: string[]
-  description: string | string[]
-  link: string
-}
+// export interface Project {
+//   id: string
+//   title: string
+//   mainVisual: string
+//   additionalVisuals: string[]
+//   description: string | string[]
+//   link: string
+// }
 
 interface ProjectModalDesktopProps {
-  project: Project
-  isOpen: boolean
-  onClose: () => void
+  project: Project;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 // Composant principal sans variables externes
