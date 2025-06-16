@@ -38,9 +38,13 @@ const config: Config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
       },
-      fontFamily: { // Cette section est correcte pour définir les polices disponibles
-        sans: ['"Cocogoose Pro"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
-        koolegant: ['Koolegant', 'Georgia', 'Times New Roman', 'serif'], 
+      fontFamily: {
+        // On dit à Tailwind que la famille 'sans' DOIT utiliser notre variable CSS.
+        // Les autres polices sont des fallbacks si la variable n'est pas disponible.
+        sans: ['var(--font-cocogoose)', 'ui-sans-serif', 'system-ui'],
+        
+        // On fait de même pour notre police personnalisée 'koolegant'.
+        koolegant: ['var(--font-koolegant)', 'serif'], 
       },
       borderRadius: {
         lg: "var(--radius)",
