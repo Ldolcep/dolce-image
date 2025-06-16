@@ -4,12 +4,10 @@
 
 .btn-primary {
   @apply bg-primary-orange text-white px-6 py-3 transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-orange focus:ring-offset-2;
-  font-family: var(--font-cocogoose);
 }
 
 .btn-secondary {
   @apply bg-primary-blue text-white px-6 py-3 transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2;
-  font-family: var(--font-cocogoose);
 }
 
 .btn-nav {

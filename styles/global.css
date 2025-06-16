@@ -35,18 +35,6 @@
     font-weight: 400;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-koolegant);
-  }
-
-  h2, .section-title {
-    font-family: var(--font-koolegant), serif;
-  }
-
-  .project-title {
-    font-family: var(--font-cocogoose), Arial, sans-serif;
-  }
-
   html {
     scroll-behavior: smooth;
   }

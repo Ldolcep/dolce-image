@@ -10,6 +10,14 @@ const config: Config = {
     "*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    fontFamily: {
+      // On dit à Tailwind que la famille 'sans' DOIT utiliser notre variable CSS.
+      // Les autres polices sont des fallbacks si la variable n'est pas disponible.
+      sans: ['var(--font-cocogoose)', 'ui-sans-serif', 'system-ui'],
+      
+      // On fait de même pour notre police personnalisée 'koolegant'.
+      koolegant: ['var(--font-koolegant)', 'serif'], 
+    },
     extend: {
       spacing: {
         '60': '15rem',
@@ -37,14 +45,6 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-      },
-      fontFamily: {
-        // On dit à Tailwind que la famille 'sans' DOIT utiliser notre variable CSS.
-        // Les autres polices sont des fallbacks si la variable n'est pas disponible.
-        sans: ['var(--font-cocogoose)', 'ui-sans-serif', 'system-ui'],
-        
-        // On fait de même pour notre police personnalisée 'koolegant'.
-        koolegant: ['var(--font-koolegant)', 'serif'], 
       },
       borderRadius: {
         lg: "var(--radius)",
