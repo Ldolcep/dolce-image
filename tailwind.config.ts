@@ -11,12 +11,8 @@ const config: Config = {
   ],
   theme: {
     fontFamily: {
-      // On dit à Tailwind que la famille 'sans' DOIT utiliser notre variable CSS.
-      // Les autres polices sont des fallbacks si la variable n'est pas disponible.
-      sans: ['var(--font-cocogoose)', 'ui-sans-serif', 'system-ui'],
-      
-      // On fait de même pour notre police personnalisée 'koolegant'.
-      koolegant: ['var(--font-koolegant)', 'serif'], 
+      sans: ['var(--font-cocogoose)', 'sans-serif'],
+      koolegant: ['var(--font-koolegant)', 'serif'],
     },
     extend: {
       spacing: {
