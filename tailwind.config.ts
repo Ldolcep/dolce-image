@@ -59,42 +59,34 @@ const config: Config = {
       typography: ({ theme }) => ({
         DEFAULT: { 
           css: {
-            // Variables de couleur pour prose (bon à garder pour la cohérence)
             '--tw-prose-body': theme('colors.foreground / 1'), 
             '--tw-prose-headings': theme('colors.foreground / 1'),
             '--tw-prose-links': theme('colors.primary-blue / 1'),
             '--tw-prose-bold': theme('colors.foreground / 1'),
-            // ... vous pouvez ajouter d'autres variables de couleur prose si nécessaire
-
-            // Style de base pour le corps du texte dans .prose
-            fontFamily: theme('fontFamily.cocogoose'),
-            fontSize: '1rem', // Taille de police par défaut, ajustez si nécessaire
+            fontFamily: theme('fontFamily.sans'),
+            fontSize: '1rem',
             color: 'var(--tw-prose-body)',
-            fontWeight: '400', // <<< Correction clé : Forcer la graisse regular pour le texte de base
-
-            // Styles pour les titres dans .prose
+            fontWeight: '400',
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
               color: 'var(--tw-prose-headings)',
-              fontWeight: '700', // Ou le poids désiré pour Koolegant (souvent bold)
+              fontWeight: '700',
             },
-
-            // Styles pour les éléments en gras dans .prose
             strong: {
-              fontWeight: '700', // Assure que la graisse 700 (bold) est utilisée
+              fontWeight: '700',
               color: 'var(--tw-prose-bold)',
             },
-            b: { // Au cas où Markdown génère <b>
+            b: {
               fontWeight: '700',
               color: 'var(--tw-prose-bold)',
             }
           },
         },
-        // Appliquer des corrections similaires pour les modificateurs de taille
-        sm: { // Pour prose-sm (utilisé sur mobile)
-           css: {
-            color: 'var(--tw-prose-body)', // Hérite de DEFAULT ou spécifiez ici si différent
-            fontWeight: '400', // <<< Correction clé
+        sm: {
+          css: {
+            color: 'var(--tw-prose-body)',
+            fontWeight: '400',
+            fontFamily: theme('fontFamily.sans'),
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
               fontWeight: '700',
@@ -103,10 +95,11 @@ const config: Config = {
             b: { fontWeight: '700' },
           },
         },
-        lg: { // Pour prose-lg (utilisé sur desktop)
+        lg: {
           css: {
-            color: 'var(--tw-prose-body)', // Hérite de DEFAULT ou spécifiez ici si différent
-            fontWeight: '400', // <<< Correction clé
+            color: 'var(--tw-prose-body)',
+            fontWeight: '400',
+            fontFamily: theme('fontFamily.sans'),
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
               fontWeight: '700',
