@@ -62,7 +62,7 @@ export default function AboutSection() {
               Le paragraphe `p` utilisera automatiquement la police 'Cocogoose Pro' 
               définie pour le `body`.
             */}
-            <p className="text-base md:text-lg leading-relaxed text-foreground">
+            <p className="text-base md:text-lg leading-relaxed text-foreground font-cocogoose">
               {/* MODIFIEZ le texte ici */}
               Bienvenue dans l'univers DOLCE, l'agence de communication digitale 
               inspirée de la beauté de la Méditerranée, de l'élégance de la 

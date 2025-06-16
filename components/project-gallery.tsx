@@ -130,7 +130,7 @@ export default function ProjectGallery() {
                       />
                     </div>
                     <div className="project-content">
-                      <h3 className="project-title font-koolegant">{item.title}</h3>
+                      <h3 className="project-title font-cocogoose">{item.title}</h3>
                     </div>
                   </div>
                 </div>
