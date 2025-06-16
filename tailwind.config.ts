@@ -67,10 +67,10 @@ const config: Config = {
             '--tw-prose-headings': theme('colors.foreground'),
             '--tw-prose-links': theme('colors.primary-blue'),
             '--tw-prose-bold': theme('colors.foreground'),
-            fontFamily: theme('fontFamily.sans'),
+            'font-family': theme('fontFamily.sans'),
             color: 'var(--tw-prose-body)',
             'h1, h2, h3, h4, h5, h6': {
-              fontFamily: theme('fontFamily.koolegant'),
+              'font-family': theme('fontFamily.koolegant'),
               color: 'var(--tw-prose-headings)',
             },
           },

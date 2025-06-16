@@ -53,7 +53,7 @@ export default function AboutSection() {
               Le titre `h2` utilisera automatiquement la police 'Koolegant' 
               définie dans la base de votre CSS.
             */}
-            <h2 className="text-5xl md:text-6xl mb-6 text-primary-black">
+            <h2 className="font-koolegant text-5xl md:text-6xl mb-6 text-primary-black">
               {/* MODIFIEZ le titre si besoin */}
               Qui sommes-nous ?
             </h2>
