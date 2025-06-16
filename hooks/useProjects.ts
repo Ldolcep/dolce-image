@@ -36,33 +36,32 @@ const hardcodedProjectsData: ProjectsData = {
 };
 
 // Fonctions utilitaires internes au hook
-function interleaveItems(projects: Project[], fillers: FillerItem[]): (Project | FillerItem)[] {
-    const total = projects.length + fillers.length;
-    const result: (Project | FillerItem)[] = [];
-    const fillerPositions = calculateFillerPositions(projects.length, fillers.length);
-    let fillerIndex = 0;
-    let projectIndex = 0;
-    for (let i = 0; i < total; i++) {
-        if (fillerPositions.includes(i) && fillerIndex < fillers.length) {
-            result.push(fillers[fillerIndex++]);
-        } else if (projectIndex < projects.length) {
-            result.push(projects[projectIndex++]);
-        }
-    }
-    while (projectIndex < projects.length) result.push(projects[projectIndex++]);
-    while (fillerIndex < fillers.length) result.push(fillers[fillerIndex++]);
-    return result;
-}
+function interleaveItems(
+  projects: Project[],
+  fillers: FillerItem[],
+  interval: number = 3 // Insère un filler toutes les 3 cartes de projet
+): (Project | FillerItem)[] {
+  if (fillers.length === 0) return projects;
 
-function calculateFillerPositions(projectCount: number, fillerCount: number): number[] {
-    const positions: number[] = [];
-    if (fillerCount <= 0) return positions;
-    const spacing = Math.ceil(projectCount / (fillerCount + 1));
-    for (let i = 0; i < fillerCount; i++) {
-        const position = (i + 1) * spacing;
-        if (position <= projectCount + fillerCount) positions.push(position);
+  const result: (Project | FillerItem)[] = [];
+  let fillerIndex = 0;
+
+  for (let i = 0; i < projects.length; i++) {
+    result.push(projects[i]);
+    // Après chaque `interval` projets, insérer un filler s'il en reste
+    if ((i + 1) % interval === 0 && fillerIndex < fillers.length) {
+      result.push(fillers[fillerIndex]);
+      fillerIndex++;
     }
-    return positions;
+  }
+
+  // Si des fillers restent, les ajouter à la fin
+  while (fillerIndex < fillers.length) {
+    result.push(fillers[fillerIndex]);
+    fillerIndex++;
+  }
+
+  return result;
 }
 
 // Le hook principal

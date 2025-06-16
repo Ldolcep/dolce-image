@@ -60,7 +60,7 @@ export default function ProjectGallery() {
 
       <div className="container mx-auto px-4 relative z-10">
         <h2 className="font-koolegant text-4xl md:text-5xl mb-16 text-center text-white drop-shadow-lg">
-          Our Projects
+          Portfolio
         </h2>
 
         {loading && (
