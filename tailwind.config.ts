@@ -10,11 +10,16 @@ const config: Config = {
     "*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    fontFamily: {
-      sans: ['var(--font-cocogoose)', 'sans-serif'],
-      koolegant: ['var(--font-koolegant)', 'serif'],
-    },
     extend: {
+      // ON MET TOUT DANS EXTEND POUR ÉVITER TOUTE AMBIGUÏTÉ
+
+      // 1. Définition de nos polices personnalisées
+      fontFamily: {
+        sans: ['var(--font-cocogoose)', 'sans-serif'],
+        koolegant: ['var(--font-koolegant)', 'serif'],
+      },
+
+      // 2. Le reste de vos personnalisations
       spacing: {
         '60': '15rem',
       },
@@ -55,61 +60,22 @@ const config: Config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-      // ▼▼▼ SECTION TYPOGRAPHY AJUSTÉE ▼▼▼
       typography: ({ theme }) => ({
-        DEFAULT: { 
+        DEFAULT: {
           css: {
-            '--tw-prose-body': theme('colors.foreground / 1'), 
-            '--tw-prose-headings': theme('colors.foreground / 1'),
-            '--tw-prose-links': theme('colors.primary-blue / 1'),
-            '--tw-prose-bold': theme('colors.foreground / 1'),
+            '--tw-prose-body': theme('colors.foreground'),
+            '--tw-prose-headings': theme('colors.foreground'),
+            '--tw-prose-links': theme('colors.primary-blue'),
+            '--tw-prose-bold': theme('colors.foreground'),
             fontFamily: theme('fontFamily.sans'),
-            fontSize: '1rem',
             color: 'var(--tw-prose-body)',
-            fontWeight: '400',
             'h1, h2, h3, h4, h5, h6': {
               fontFamily: theme('fontFamily.koolegant'),
               color: 'var(--tw-prose-headings)',
-              fontWeight: '700',
             },
-            strong: {
-              fontWeight: '700',
-              color: 'var(--tw-prose-bold)',
-            },
-            b: {
-              fontWeight: '700',
-              color: 'var(--tw-prose-bold)',
-            }
           },
         },
-        sm: {
-          css: {
-            color: 'var(--tw-prose-body)',
-            fontWeight: '400',
-            fontFamily: theme('fontFamily.sans'),
-            'h1, h2, h3, h4, h5, h6': {
-              fontFamily: theme('fontFamily.koolegant'),
-              fontWeight: '700',
-            },
-            strong: { fontWeight: '700' },
-            b: { fontWeight: '700' },
-          },
-        },
-        lg: {
-          css: {
-            color: 'var(--tw-prose-body)',
-            fontWeight: '400',
-            fontFamily: theme('fontFamily.sans'),
-            'h1, h2, h3, h4, h5, h6': {
-              fontFamily: theme('fontFamily.koolegant'),
-              fontWeight: '700',
-            },
-            strong: { fontWeight: '700' },
-            b: { fontWeight: '700' },
-          }
-        }
       }),
-      // ▲▲▲ FIN DE LA SECTION TYPOGRAPHY AJUSTÉE ▲▲▲
     },
   },
   plugins: [
