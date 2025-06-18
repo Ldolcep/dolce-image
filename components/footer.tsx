@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="relative h-16 w-16 mb-4 md:mb-0">
             <Image
               src="/images/DOLCE_LOGO_SHORT.png"
-              alt="Dolce"
+              alt="Logo Dolce"
               fill
               className="object-contain"
               sizes="64px"

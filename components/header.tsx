@@ -117,7 +117,7 @@ export default function Header() {
           <Image 
             key={currentLogo}
             src={currentLogo}
-            alt="Dolce"
+            alt="Logo Dolce, retour à l’accueil"
             fill
             className="object-contain"
             priority={currentLogo === LOGO_STAGE_1}
@@ -127,13 +127,13 @@ export default function Header() {
         <nav className="hidden md:flex space-x-8">
           <button
             onClick={() => scrollToSection("projects")}
-            className="font-poppins text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
+            className="text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
           >
             PROJECTS
           </button>
           <button
             onClick={() => scrollToSection("contact")}
-            className="font-poppins text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
+            className="text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
           >
             CONTACT
           </button>
