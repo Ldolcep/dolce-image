@@ -161,7 +161,7 @@ export default function ProjectModalMobile({
         </button>
         
         <h2 
-          className="flex-1 text-center text-white font-semibold truncate mx-3 font-koolegant drop-shadow-md"
+          className="flex-1 text-center text-white font-semibold truncate mx-3 drop-shadow-md"
           style={{ fontSize: '1.4rem', letterSpacing: '0.01em', lineHeight: '1.2' }}
         >
           {project.title}
