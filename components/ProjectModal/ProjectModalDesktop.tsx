@@ -275,12 +275,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="bg-white w-full max-w-5xl relative shadow-xl"
-          style={{ 
-            display: 'flex',
-            flexDirection: 'row',
-            overflow: 'visible'
-          }}
+          className="bg-white w-full max-w-5xl min-h-[500px] h-[80vh] relative shadow-xl flex flex-row"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -288,7 +283,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           {/* Colonne image */}
-          <div className="image-column w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
+          <div className="image-column w-full md:w-1/2 h-full relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
             <div className="carousel-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
               <div className="carousel-slides-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <AnimatePresence mode="wait" custom={direction}>
@@ -329,6 +324,8 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                             objectFit: 'contain',
                             visibility: index === currentImageIndex ? 'visible' : 'hidden',
                             maxHeight: '90vh',
+                            height: '100%',
+                            width: '100%',
                           }}
                           className={`absolute inset-0 transition-opacity duration-300 ${
                             index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -388,25 +385,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           {/* Colonne description */}
           <div 
             ref={descriptionRef}
-            className="w-full md:w-1/2 p-8 custom-scrollbar"
-            style={{ 
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'transparent transparent',
-              transition: 'scrollbar-color 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              const hasScroll = e.currentTarget.scrollHeight > e.currentTarget.clientHeight
-              if (hasScroll) {
-                e.currentTarget.style.scrollbarColor = '#f7a520 #fff3e0'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!e.currentTarget.classList.contains('scrolling')) {
-                e.currentTarget.style.scrollbarColor = 'transparent transparent'
-              }
-            }}
+            className="w-full md:w-1/2 h-full p-8 overflow-y-auto custom-scrollbar"
           >
             <h2 className="text-2xl md:text-3xl font-medium mb-4">
               {project.title}
