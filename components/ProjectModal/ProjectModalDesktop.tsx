@@ -408,7 +408,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
               }
             }}
           >
-            <h2 className="font-koolegant text-2xl md:text-3xl font-medium mb-4">
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">
               {project.title}
             </h2>
             <div className="text-base text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
