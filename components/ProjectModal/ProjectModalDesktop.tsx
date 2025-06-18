@@ -2,7 +2,7 @@
 
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -34,7 +34,8 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [direction, setDirection] = React.useState(0)
   const [imagesReady, setImagesReady] = React.useState<Set<number>>(new Set())
-  
+  const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
+
   // Refs
   const modalRef = React.useRef<HTMLDivElement>(null)
   const descriptionRef = React.useRef<HTMLDivElement>(null)
@@ -275,7 +276,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="bg-white w-full max-w-5xl min-h-[500px] h-[80vh] relative shadow-xl flex flex-row"
+          className="bg-white w-full max-w-5xl relative shadow-xl flex flex-row items-stretch"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -283,7 +284,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           {/* Colonne image */}
-          <div className="image-column w-full md:w-1/2 h-full relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
+          <div className="image-column aspect-[4/5] w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
             <div className="carousel-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
               <div className="carousel-slides-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <AnimatePresence mode="wait" custom={direction}>
@@ -323,7 +324,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                           style={{
                             objectFit: 'contain',
                             visibility: index === currentImageIndex ? 'visible' : 'hidden',
-                            maxHeight: '90vh',
+                            maxHeight: '100%',
                             height: '100%',
                             width: '100%',
                           }}
@@ -385,7 +386,9 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           {/* Colonne description */}
           <div 
             ref={descriptionRef}
-            className="w-full md:w-1/2 h-full p-8 overflow-y-auto custom-scrollbar"
+            className={`w-full md:w-1/2 p-8 overflow-y-auto custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
+            onMouseEnter={() => setIsDescriptionHovered(true)}
+            onMouseLeave={() => setIsDescriptionHovered(false)}
           >
             <h2 className="text-2xl md:text-3xl font-medium mb-4">
               {project.title}

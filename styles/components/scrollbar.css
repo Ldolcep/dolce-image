@@ -23,6 +23,14 @@
   transition: background-color 0.3s ease;
 }
 
+.custom-scrollbar.scrollbar-visible::-webkit-scrollbar-thumb {
+  background-color: #f7a520;
+}
+
+.custom-scrollbar.scrollbar-visible {
+  scrollbar-color: #f7a520 #f0e9e6;
+}
+
 /* Hover states */
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   background-color: #f7a520;
