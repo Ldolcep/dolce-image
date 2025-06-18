@@ -7,7 +7,7 @@ import "@/styles/global.css"
 
 // Polices locales optimisées avec next/font
 const cocogoose = localFont({
-  src: "../public/fonts/cocogoosepro-regular.woff2",
+  src: "../public/fonts/cocogoosepro-ultralight.woff2",
   weight: '400',
   style: 'normal',
   fallback: ['sans-serif'],
