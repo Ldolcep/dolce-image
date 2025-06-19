@@ -346,20 +346,16 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             </div>
             {/* Colonne description */}
             <div className="flex flex-col h-full min-h-0">
-              {/* En-tête */}
-              <div className="flex-shrink-0 p-6 border-b">
-                <h2 className="text-sm md:text-base font-medium mb-2">
-                  {project.title}
-                </h2>
-              </div>
-              {/* Contenu scrollable */}
               <div
-                className={`flex-1 overflow-y-auto p-6 min-h-0 custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
+                className={`flex-1 overflow-y-auto px-6 py-0 min-h-0 custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
                 ref={descriptionRef}
                 onMouseEnter={() => setIsDescriptionHovered(true)}
                 onMouseLeave={() => setIsDescriptionHovered(false)}
               >
-                <div className="text-sm text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
+                <div className="text-sm text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none py-6">
+                  <h2 className="text-xl md:text-2xl font-bold mb-6 text-gray-900">
+                    {project.title}
+                  </h2>
                   {Array.isArray(project.description) ? (
                     project.description.map((paragraph, i) => (
                       <div key={i} className="mb-4 last:mb-0">
@@ -371,20 +367,18 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                   ) : (
                     <ReactMarkdown>{project.description}</ReactMarkdown>
                   )}
+                  {project.link && (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline text-sm"
+                    >
+                      Visiter le site du projet
+                    </a>
+                  )}
                 </div>
-                {project.link && (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline text-sm"
-                  >
-                    Visiter le site du projet
-                  </a>
-                )}
               </div>
-              {/* Footer (optionnel) */}
-              {/* <div className="flex-shrink-0 p-6 border-t">Footer ici</div> */}
             </div>
           </div>
         </motion.div>
