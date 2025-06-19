@@ -8,6 +8,7 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import ReactMarkdown from "react-markdown"
 import { Project } from "@/types/project"
+import { createPortal } from 'react-dom'
 
 // Durée d'animation constante
 const ANIMATION_DURATION = 200; // ms
@@ -35,6 +36,8 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const [direction, setDirection] = React.useState(0)
   const [imagesReady, setImagesReady] = React.useState<Set<number>>(new Set())
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 })
+  const [isClient, setIsClient] = useState(false)
 
   // Refs
   const modalRef = React.useRef<HTMLDivElement>(null)
@@ -244,6 +247,34 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
     return () => clearTimeout(timeoutId)
   }, [isOpen, currentImageIndex, project.id])
 
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  React.useEffect(() => {
+    if (!isOpen || !modalRef.current || !isClient) return
+    const updateButtonPosition = () => {
+      const modal = modalRef.current
+      if (!modal) return
+      const gridElement = modal.querySelector('.modal-grid')
+      if (gridElement) {
+        const gridRect = gridElement.getBoundingClientRect()
+        const columnImageWidth = gridRect.width * 0.45 // 45% pour image
+        setButtonPosition({
+          top: gridRect.top,
+          left: gridRect.left + columnImageWidth
+        })
+      }
+    }
+    updateButtonPosition()
+    window.addEventListener('resize', updateButtonPosition)
+    window.addEventListener('scroll', updateButtonPosition)
+    return () => {
+      window.removeEventListener('resize', updateButtonPosition)
+      window.removeEventListener('scroll', updateButtonPosition)
+    }
+  }, [isOpen, isClient, currentImageIndex])
+
   if (!isOpen) return null
 
   // Variants définis inline pour éviter les problèmes de référence
@@ -302,7 +333,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           <div
-            className="grid h-full rounded-lg bg-white overflow-visible"
+            className="grid h-full rounded-lg bg-white overflow-visible modal-grid"
             style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr' }}
           >
             {/* Colonne image */}
@@ -404,32 +435,38 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                   )}
                 </div>
               </div>
-              {/* Bouton fermer - Dans la colonne description */}
-              <button
-                onClick={onClose}
-                className="absolute text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-                style={{ 
-                  backgroundColor: 'rgb(98, 137, 181)', 
-                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-                  top: '0px',
-                  right: '0px',
-                  transform: 'translate(50%, -50%)',
-                  zIndex: 9999
-                }}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' 
-                }}
-                aria-label="Fermer"
-              >
-                <X size={20} />
-              </button>
             </div>
           </div>
         </motion.div>
       </motion.div>
+    </AnimatePresence>
+      {/* Bouton fermeture via Portal */}
+      {isClient && isOpen && createPortal(
+        <button
+          onClick={onClose}
+          className="text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{ 
+            position: 'fixed',
+            top: `${buttonPosition.top}px`,
+            left: `${buttonPosition.left}px`,
+            transform: 'translate(50%, -50%)',
+            backgroundColor: 'rgb(98, 137, 181)', 
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+            zIndex: 9999,
+            pointerEvents: 'auto'
+          }}
+          onMouseEnter={(e) => { 
+            e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
+          }}
+          onMouseLeave={(e) => { 
+            e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' 
+          }}
+          aria-label="Fermer"
+        >
+          <X size={20} />
+        </button>,
+        document.body
+      )}
     </AnimatePresence>
   )
 }
