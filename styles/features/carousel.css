@@ -135,11 +135,6 @@
   z-index: var(--z-base);
 }
 
-/* Empêcher le débordement */
-.overflow-visible {
-  overflow: hidden !important;
-}
-
 /* Reset des transformations 3D problématiques sur Swiper desktop */
 .swiper-slide,
 .swiper-wrapper {
