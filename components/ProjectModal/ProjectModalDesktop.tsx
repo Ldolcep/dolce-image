@@ -227,6 +227,23 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
     }
   }, [isOpen, currentImageIndex])
 
+  React.useEffect(() => {
+    if (!isOpen || !descriptionRef.current) return
+    const desc = descriptionRef.current
+    const forceScrollbarUpdate = () => {
+      desc.scrollTop = 0
+      desc.style.height = 'auto'
+      requestAnimationFrame(() => {
+        desc.style.height = '100%'
+        requestAnimationFrame(() => {
+          desc.scrollTop = 0
+        })
+      })
+    }
+    const timeoutId = setTimeout(forceScrollbarUpdate, 100)
+    return () => clearTimeout(timeoutId)
+  }, [isOpen, currentImageIndex, project.id])
+
   if (!isOpen) return null
 
   // Variants définis inline pour éviter les problèmes de référence
@@ -346,16 +363,24 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             </div>
             {/* Colonne description */}
             <div className="flex flex-col h-full min-h-0">
+              {/* En-tête */}
+              <div className="flex-shrink-0 p-6 border-b">
+                <h2 className="text-sm md:text-base font-medium mb-2">
+                  {project.title}
+                </h2>
+              </div>
+              {/* Contenu scrollable */}
               <div
-                className={`flex-1 overflow-y-auto px-6 py-0 min-h-0 custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
+                className={`flex-1 overflow-y-auto p-6 min-h-0 custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
                 ref={descriptionRef}
+                style={{ scrollBehavior: 'smooth', overscrollBehavior: 'contain' }}
                 onMouseEnter={() => setIsDescriptionHovered(true)}
                 onMouseLeave={() => setIsDescriptionHovered(false)}
               >
                 <div className="text-sm text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none py-6">
-                  <h2 className="text-xl md:text-2xl font-bold mb-6 text-gray-900">
+                  <div className="text-2xl md:text-3xl font-bold mb-6 text-gray-900" style={{ fontFamily: 'Cocogoose, sans-serif' }}>
                     {project.title}
-                  </h2>
+                  </div>
                   {Array.isArray(project.description) ? (
                     project.description.map((paragraph, i) => (
                       <div key={i} className="mb-4 last:mb-0">
@@ -380,6 +405,14 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                 </div>
               </div>
             </div>
+            {/* Bouton fermer */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-gray-600 hover:text-gray-900 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-md"
+              aria-label="Fermer"
+            >
+              <X size={16} />
+            </button>
           </div>
         </motion.div>
 
