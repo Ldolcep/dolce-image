@@ -276,7 +276,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="bg-white w-full max-w-5xl relative shadow-xl flex flex-row items-stretch"
+          className="bg-white w-full max-w-5xl relative shadow-xl flex"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -284,7 +284,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           {/* Colonne image */}
-          <div className="image-column aspect-[4/5] w-full md:w-1/2 relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
+          <div className="w-1/2 aspect-[4/5] relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
             <div className="carousel-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
               <div className="carousel-slides-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <AnimatePresence mode="wait" custom={direction}>
@@ -384,38 +384,40 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           </div>
 
           {/* Colonne description */}
-          <div 
-            ref={descriptionRef}
-            className={`w-full md:w-1/2 p-8 overflow-y-auto custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
-            onMouseEnter={() => setIsDescriptionHovered(true)}
-            onMouseLeave={() => setIsDescriptionHovered(false)}
-          >
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">
-              {project.title}
-            </h2>
-            <div className="text-base text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
-              {Array.isArray(project.description) ? (
-                project.description.map((paragraph, i) => (
-                  <div key={i} className="mb-4 last:mb-0">
-                    <ReactMarkdown>
-                      {paragraph}
-                    </ReactMarkdown>
-                  </div>
-                ))
-              ) : (
-                <ReactMarkdown>{project.description}</ReactMarkdown>
+          <div className="w-1/2 flex flex-col">
+            <div
+              className={`flex-1 p-8 overflow-y-auto custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
+              ref={descriptionRef}
+              onMouseEnter={() => setIsDescriptionHovered(true)}
+              onMouseLeave={() => setIsDescriptionHovered(false)}
+            >
+              <h2 className="text-2xl md:text-3xl font-medium mb-4">
+                {project.title}
+              </h2>
+              <div className="text-base text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
+                {Array.isArray(project.description) ? (
+                  project.description.map((paragraph, i) => (
+                    <div key={i} className="mb-4 last:mb-0">
+                      <ReactMarkdown>
+                        {paragraph}
+                      </ReactMarkdown>
+                    </div>
+                  ))
+                ) : (
+                  <ReactMarkdown>{project.description}</ReactMarkdown>
+                )}
+              </div>
+              {project.link && (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline"
+                >
+                  Visiter le site du projet
+                </a>
               )}
             </div>
-            {project.link && (
-              <a 
-                href={project.link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline"
-              >
-                Visiter le site du projet
-              </a>
-            )}
           </div>
 
           {/* Bouton fermer */}
