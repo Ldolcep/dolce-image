@@ -362,18 +362,24 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
               )}
             </div>
             {/* Colonne description */}
-            <div className="flex flex-col h-full min-h-0">
+            <div className="flex flex-col h-full min-h-0 relative">
+              {/* En-tête avec titre */}
+              <div className="flex-shrink-0 p-6 pb-4">
+                <div className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Cocogoose, sans-serif' }}>
+                  {project.title}
+                </div>
+              </div>
+              {/* Séparateur fin noir */}
+              <div className="flex-shrink-0 border-b border-gray-900" style={{ borderWidth: '0.5px' }}></div>
+              {/* Contenu scrollable */}
               <div
-                className="flex-1 overflow-y-auto p-6 min-h-0"
+                className="flex-1 overflow-y-auto p-6 pt-4 min-h-0"
                 ref={descriptionRef}
                 style={{ 
                   scrollBehavior: 'smooth',
                   overscrollBehavior: 'contain'
                 }}
               >
-                <div className="text-2xl md:text-3xl font-bold mb-6 text-gray-900" style={{ fontFamily: 'Cocogoose, sans-serif' }}>
-                  {project.title}
-                </div>
                 <div className="text-sm text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
                   {Array.isArray(project.description) ? (
                     project.description.map((paragraph, i) => (
@@ -398,27 +404,29 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                   )}
                 </div>
               </div>
+              {/* Bouton fermer - Positionné au coin de la colonne description */}
+              <button
+                onClick={onClose}
+                className="absolute z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{ 
+                  backgroundColor: 'rgb(98, 137, 181)', 
+                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+                  top: '-5px',
+                  right: '-5px'
+                }}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' 
+                }}
+                aria-label="Fermer"
+              >
+                <X size={20} />
+              </button>
             </div>
           </div>
         </motion.div>
-        {/* Bouton fermer */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-          style={{ 
-            backgroundColor: 'rgb(98, 137, 181)', 
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)' 
-          }}
-          onMouseEnter={(e) => { 
-            e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
-          }}
-          onMouseLeave={(e) => { 
-            e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' 
-          }}
-          aria-label="Fermer"
-        >
-          <X size={20} />
-        </button>
       </motion.div>
     </AnimatePresence>
   )
