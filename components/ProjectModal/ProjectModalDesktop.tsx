@@ -439,7 +439,6 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
       {/* Bouton fermeture via Portal */}
       {isClient && isOpen && createPortal(
         <button
