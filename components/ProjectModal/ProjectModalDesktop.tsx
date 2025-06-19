@@ -38,6 +38,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 })
   const [isClient, setIsClient] = useState(false)
+  const [buttonReady, setButtonReady] = useState(false)
 
   // Refs
   const modalRef = React.useRef<HTMLDivElement>(null)
@@ -253,25 +254,29 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
 
   React.useEffect(() => {
     if (!isOpen || !modalRef.current || !isClient) return
+    setButtonReady(false)
     const updateButtonPosition = () => {
       const modal = modalRef.current
       if (!modal) return
       const gridElement = modal.querySelector('.modal-grid')
       if (gridElement) {
         const gridRect = gridElement.getBoundingClientRect()
-        const columnImageWidth = gridRect.width * 0.45 // 45% pour image
+        const columnImageWidth = gridRect.width * 0.45
         setButtonPosition({
           top: gridRect.top,
           left: gridRect.left + columnImageWidth
         })
+        setButtonReady(true)
       }
     }
-    updateButtonPosition()
+    // Utilise requestAnimationFrame pour garantir que le layout est prêt
+    const raf = requestAnimationFrame(updateButtonPosition)
     window.addEventListener('resize', updateButtonPosition)
     window.addEventListener('scroll', updateButtonPosition)
     return () => {
       window.removeEventListener('resize', updateButtonPosition)
       window.removeEventListener('scroll', updateButtonPosition)
+      cancelAnimationFrame(raf)
     }
   }, [isOpen, isClient, currentImageIndex])
 
@@ -440,7 +445,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         </motion.div>
       </motion.div>
       {/* Bouton fermeture via Portal */}
-      {isClient && isOpen && createPortal(
+      {isClient && isOpen && buttonReady && createPortal(
         <button
           onClick={onClose}
           className="text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
