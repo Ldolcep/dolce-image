@@ -285,61 +285,63 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           <div
-            className="grid h-full overflow-hidden rounded-lg"
+            className="grid h-full overflow-hidden rounded-lg bg-white"
             style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr' }}
           >
             {/* Colonne image */}
-            <div className="bg-gray-100 h-full flex items-center justify-center">
-              {allVisuals.length > 0 && (
+            <div className="bg-gray-100 h-full flex items-center justify-center relative overflow-hidden">
+              <div className="w-full h-full relative overflow-hidden">
                 <Image
                   src={allVisuals[currentImageIndex]}
                   alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
                   className="w-full h-full object-cover"
-                  style={{ aspectRatio: '4/5', objectFit: 'cover' }}
-                  fill
+                  style={{ aspectRatio: '4/5' }}
+                  width={600}
+                  height={750}
                   priority
-                  sizes="(max-width: 1200px) 90vw, 600px"
+                  sizes="600px"
                 />
-              )}
+              </div>
               {/* Navigation */}
               {allVisuals.length > 1 && (
                 <>
-                  <button 
+                  <button
                     onClick={goToPrevious}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 carousel-button-prev btn-nav"
+                    className="absolute left-4 top-1/2 z-10 carousel-button-prev btn-nav"
                     aria-label="Image précédente"
                   >
                     <ChevronLeft size={20} />
                   </button>
-                  <button 
+                  <button
                     onClick={goToNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 carousel-button-next btn-nav"
+                    className="absolute right-4 top-1/2 z-10 carousel-button-next btn-nav"
                     aria-label="Image suivante"
                   >
                     <ChevronRight size={20} />
                   </button>
-
-                  {/* Indicateurs */}
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center carousel-indicators">
-                    <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                      {allVisuals.map((_, index) => (
-                        <button
-                          key={`indicator-${index}`}
-                          onClick={() => {
-                            setDirection(index > currentImageIndex ? 1 : -1)
-                            setCurrentImageIndex(index)
-                          }}
-                          className={`transition-all duration-300 rounded-full ${
-                            currentImageIndex === index 
-                              ? 'bg-white w-6 h-2' 
-                              : 'bg-white/60 w-2 h-2 hover:bg-white/80'
-                          }`}
-                          aria-label={`Image ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
                 </>
+              )}
+              {/* Indicateurs */}
+              {allVisuals.length > 1 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center carousel-indicators">
+                  <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                    {allVisuals.map((_, index) => (
+                      <button
+                        key={`indicator-${index}`}
+                        onClick={() => {
+                          setDirection(index > currentImageIndex ? 1 : -1)
+                          setCurrentImageIndex(index)
+                        }}
+                        className={`transition-all duration-300 rounded-full ${
+                          currentImageIndex === index 
+                            ? 'bg-white w-6 h-2' 
+                            : 'bg-white/60 w-2 h-2 hover:bg-white/80'
+                        }`}
+                        aria-label={`Image ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
             {/* Colonne description */}
