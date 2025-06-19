@@ -276,7 +276,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="bg-white w-full max-w-5xl relative shadow-xl flex"
+          className="bg-white w-full max-w-5xl relative shadow-xl grid grid-cols-2"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -284,7 +284,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           {/* Colonne image */}
-          <div className="w-1/2 aspect-[4/5] relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
+          <div className="aspect-[4/5] relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
             <div className="carousel-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
               <div className="carousel-slides-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <AnimatePresence mode="wait" custom={direction}>
@@ -384,7 +384,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           </div>
 
           {/* Colonne description */}
-          <div className="w-1/2 flex flex-col">
+          <div className="flex min-h-0 flex-col">
             <div
               className={`flex-1 p-8 overflow-y-auto custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
               ref={descriptionRef}
