@@ -291,7 +291,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="w-full max-w-none overflow-visible"
+          className="w-full max-w-none overflow-visible relative" // Ajout de 'relative' pour positionnement absolu du bouton
           style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)' }}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -299,6 +299,22 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Bouton de fermeture flottant, centre aligné au coin supérieur droit du modal */}
+          <button
+            onClick={onClose}
+            className="absolute z-30 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300"
+            style={{
+              top: '-20px',
+              right: '-20px',
+              backgroundColor: 'rgb(98, 137, 181)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' }}
+            aria-label="Fermer le modal"
+          >
+            <X size={20} strokeWidth={2} />
+          </button>
           <div
             className="grid h-full rounded-lg bg-white overflow-visible modal-grid"
             style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr' }}
@@ -361,20 +377,6 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             </div>
             {/* Colonne description */}
             <div className="flex flex-col h-full min-h-0 relative">
-              {/* Bouton de fermeture flottant, accessible et stylé */}
-              <button
-                onClick={onClose}
-                className="absolute z-30 w-10 h-10 -top-2 -right-2 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300 active:scale-95"
-                style={{
-                  backgroundColor: 'rgb(98, 137, 181)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' }}
-                aria-label="Fermer le modal"
-              >
-                <X size={20} strokeWidth={2} className="text-white" />
-              </button>
               {/* En-tête avec titre */}
               <div className="flex-shrink-0 p-6 pb-4">
                 <div className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Cocogoose, sans-serif' }}>
