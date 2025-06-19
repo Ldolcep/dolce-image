@@ -130,19 +130,29 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
 
   // Synchronisation des hauteurs basée sur l'image
   const syncHeights = React.useCallback(() => {
-    if (!modalRef.current || !descriptionRef.current) return
-    
+    if (!modalRef.current || !descriptionRef.current) return;
     const imageElement = modalRef.current.querySelector('.carousel-image') as HTMLElement | null;
-    if (!imageElement) return
-    
-    // Attendre que l'image soit complètement rendue
+    const desc = descriptionRef.current;
+    if (!imageElement) return;
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const imageHeight = imageElement.offsetHeight
-        modalRef.current!.style.height = `${imageHeight}px`
-        descriptionRef.current!.style.height = `${imageHeight}px`
-      })
-    })
+        requestAnimationFrame(() => {
+          // ONLY reset description height, NOT modal height
+          desc.style.height = 'auto';
+          void desc.offsetHeight;
+
+          const imageHeight = imageElement.offsetHeight;
+          modalRef.current!.style.height = `${imageHeight}px`; // Keep this
+          desc.style.height = `${imageHeight}px`
+          desc.scrollTop = 0;
+
+          setTimeout(() => {
+            desc.scrollTop = 0;
+          }, 5);
+        });
+      });
+    });
   }, [])
 
   const isCurrentImageReady = imagesReady.has(currentImageIndex)
@@ -168,81 +178,6 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
       window.removeEventListener('resize', syncHeights)
     }
   }, [isOpen, isCurrentImageReady, currentImageIndex, syncHeights])
-
-  // Gestion de la scrollbar (compatible Safari)
-  React.useEffect(() => {
-    if (!isOpen || !descriptionRef.current) return
-
-    const desc = descriptionRef.current
-    let scrollTimeout: NodeJS.Timeout
-
-    const updateScrollbarVisibility = () => {
-      const hasScroll = desc.scrollHeight > desc.clientHeight
-      if (hasScroll) {
-        desc.style.scrollbarColor = '#f7a520 #fff3e0'
-        desc.classList.add('has-scrollbar')
-      } else {
-        desc.style.scrollbarColor = 'transparent transparent'
-        desc.classList.remove('has-scrollbar')
-      }
-    }
-
-    const handleScroll = () => {
-      desc.style.scrollbarColor = '#f7a520 #fff3e0'
-      desc.classList.add('scrolling')
-      clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(() => {
-        desc.classList.remove('scrolling')
-        if (!desc.matches(':hover')) {
-          desc.style.scrollbarColor = 'transparent transparent'
-        }
-      }, 1000)
-    }
-
-    const handleMouseEnter = () => {
-      updateScrollbarVisibility()
-    }
-
-    const handleMouseLeave = () => {
-      if (!desc.classList.contains('scrolling')) {
-        const hasScroll = desc.scrollHeight > desc.clientHeight
-        if (!hasScroll || !desc.classList.contains('has-scrollbar')) {
-          desc.style.scrollbarColor = 'transparent transparent'
-        }
-      }
-    }
-
-    // Initialiser
-    updateScrollbarVisibility()
-    
-    desc.addEventListener('scroll', handleScroll)
-    desc.addEventListener('mouseenter', handleMouseEnter)
-    desc.addEventListener('mouseleave', handleMouseLeave)
-
-    return () => {
-      desc.removeEventListener('scroll', handleScroll)
-      desc.removeEventListener('mouseenter', handleMouseEnter)
-      desc.removeEventListener('mouseleave', handleMouseLeave)
-      clearTimeout(scrollTimeout)
-    }
-  }, [isOpen, currentImageIndex])
-
-  React.useEffect(() => {
-    if (!isOpen || !descriptionRef.current) return
-    const desc = descriptionRef.current
-    const forceScrollbarUpdate = () => {
-      desc.scrollTop = 0
-      desc.style.height = 'auto'
-      requestAnimationFrame(() => {
-        desc.style.height = '100%'
-        requestAnimationFrame(() => {
-          desc.scrollTop = 0
-        })
-      })
-    }
-    const timeoutId = setTimeout(forceScrollbarUpdate, 100)
-    return () => clearTimeout(timeoutId)
-  }, [isOpen, currentImageIndex, project.id])
 
   // Variants définis inline pour éviter les problèmes de référence
   const slideVariants = {

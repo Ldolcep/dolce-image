@@ -1,0 +1,151 @@
+.
+├── app
+│   ├── layout.tsx
+│   └── page.tsx
+├── components
+│   ├── ProjectModal
+│   │   ├── ProjectModalDesktop.tsx
+│   │   ├── ProjectModalMobile.tsx
+│   │   ├── index.tsx
+│   │   ├── types
+│   │   │   └── modal.ts
+│   │   └── utils
+│   │       └── preloader.ts
+│   ├── about-section.tsx
+│   ├── cta-section.tsx
+│   ├── filler-card.tsx
+│   ├── footer.tsx
+│   ├── header.tsx
+│   ├── hero.tsx
+│   ├── project-gallery.tsx
+│   └── theme-provider.tsx
+├── components.json
+├── hooks
+│   ├── # Code Citations.md
+│   ├── use-mobile.tsx
+│   ├── use-preload-modal.ts
+│   ├── use-toast.ts
+│   ├── useProjectModal.ts
+│   └── useProjects.ts
+├── lib
+│   └── utils.ts
+├── next.config.mjs
+├── package-lock.json
+├── package.json
+├── pnpm-lock.yaml
+├── postcss.config.mjs
+├── public
+│   ├── data
+│   │   └── projects.json
+│   ├── fonts
+│   │   ├── cocogoosepro-regular.woff2
+│   │   ├── cocogoosepro-ultralight.woff2
+│   │   └── koolegant-webfont.woff2
+│   ├── hero-video
+│   │   └── dolce-banner.mp4
+│   ├── images
+│   │   ├── DOLCE_LOGO_PRIMAIRE.png
+│   │   ├── DOLCE_LOGO_SECONDAIRE.png
+│   │   ├── DOLCE_LOGO_SHORT.png
+│   │   ├── QSM_illu.png
+│   │   ├── fillers
+│   │   │   ├── filler_1_bg.jpg
+│   │   │   ├── filler_1_text.png
+│   │   │   ├── filler_1_text_black.png
+│   │   │   ├── filler_2_bg.jpg
+│   │   │   ├── filler_2_text.png
+│   │   │   ├── filler_2_text_black.png
+│   │   │   ├── filler_3_bg.jpg
+│   │   │   ├── filler_3_text.png
+│   │   │   ├── filler_3_text_black.png
+│   │   │   ├── filler_4_bg.jpg
+│   │   │   └── filler_4_text.png
+│   │   ├── gallery-background-mobile.jpg
+│   │   ├── gallery-background.jpg
+│   │   └── projects
+│   │       ├── Dolce
+│   │       │   ├── dolce-gallery-2.jpg
+│   │       │   ├── dolce-gallery-3.jpg
+│   │       │   ├── dolce-gallery-4.jpg
+│   │       │   ├── dolce-gallery-5.jpg
+│   │       │   ├── dolce-gallery-6.jpg
+│   │       │   ├── dolce-gallery-7.jpg
+│   │       │   └── dolce-main.jpg
+│   │       ├── Ellipse Group
+│   │       │   ├── ellipse-group-gallery-2.jpg
+│   │       │   ├── ellipse-group-gallery-3.jpg
+│   │       │   ├── ellipse-group-gallery-4.jpg
+│   │       │   ├── ellipse-group-gallery-5.jpg
+│   │       │   └── ellipse-group-main.jpg
+│   │       ├── Ilios
+│   │       │   ├── ilios-gallery-10.jpg
+│   │       │   ├── ilios-gallery-2.jpg
+│   │       │   ├── ilios-gallery-3.jpg
+│   │       │   ├── ilios-gallery-4.jpg
+│   │       │   ├── ilios-gallery-5.jpg
+│   │       │   ├── ilios-gallery-6.jpg
+│   │       │   ├── ilios-gallery-7.jpg
+│   │       │   ├── ilios-gallery-8.jpg
+│   │       │   ├── ilios-gallery-9.jpg
+│   │       │   └── ilios-main.jpg
+│   │       ├── Le Boudoir de Miadana
+│   │       │   ├── le-boudoir-miadana-gallery-1.jpg
+│   │       │   ├── le-boudoir-miadana-gallery-2.jpg
+│   │       │   ├── le-boudoir-miadana-gallery-3.jpg
+│   │       │   ├── le-boudoir-miadana-gallery-4.jpg
+│   │       │   └── le-boudoir-miadana-main.jpg
+│   │       ├── Maison M
+│   │       │   ├── maison-m-gallery-2.jpg
+│   │       │   ├── maison-m-gallery-3.jpg
+│   │       │   ├── maison-m-gallery-4.jpg
+│   │       │   └── maison-m-main.jpg
+│   │       ├── PickUp
+│   │       │   ├── pickup-gallery-2.jpg
+│   │       │   ├── pickup-gallery-3.jpg
+│   │       │   ├── pickup-gallery-4.jpg
+│   │       │   └── pickup-main.jpg
+│   │       ├── Podium
+│   │       │   ├── podium-gallery-2.jpg
+│   │       │   ├── podium-gallery-3.jpg
+│   │       │   ├── podium-gallery-4.jpg
+│   │       │   └── podium-main.jpg
+│   │       ├── TED
+│   │       │   ├── ted-gallery-2.jpg
+│   │       │   ├── ted-gallery-3.jpg
+│   │       │   ├── ted-gallery-4.jpg
+│   │       │   └── ted-main.jpg
+│   │       └── THE ONES
+│   │           ├── the-ones-gallery-2.jpg
+│   │           ├── the-ones-gallery-3.jpg
+│   │           ├── the-ones-gallery-4.jpg
+│   │           ├── the-ones-gallery-5.jpg
+│   │           └── the-ones-main.jpg
+│   ├── placeholder-logo.png
+│   ├── placeholder-logo.svg
+│   ├── placeholder-user.jpg
+│   ├── placeholder.jpg
+│   └── placeholder.svg
+├── structure.txt
+├── structure_projet.txt
+├── styles
+│   ├── base
+│   │   ├── fonts.css
+│   │   └── variables.css
+│   ├── components
+│   │   ├── buttons.css
+│   │   ├── filler-cards.css
+│   │   ├── gallery.css
+│   │   └── scrollbar.css
+│   ├── features
+│   │   ├── carousel.css
+│   │   ├── modal-desktop.css
+│   │   └── swiper-mobile.css
+│   ├── global.css
+│   └── utilities
+│       └── animations.css
+├── tailwind.config.ts
+├── tsconfig.json
+└── types
+    └── project.ts
+
+30 directories, 119 files
