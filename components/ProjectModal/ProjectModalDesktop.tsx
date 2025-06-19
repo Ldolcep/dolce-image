@@ -276,169 +276,135 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="bg-white w-full max-w-5xl relative shadow-xl grid grid-cols-2"
+          className="w-full max-w-none"
+          style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)' }}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Colonne image */}
-          <div className="aspect-[4/5] relative flex-shrink-0 flex items-center justify-center bg-gray-50" style={{ isolation: 'isolate' }}>
-            <div className="carousel-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
-              <div className="carousel-slides-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
-                <AnimatePresence mode="wait" custom={direction}>
-                  <motion.div
-                    key={`slide-${currentImageIndex}`}
-                    variants={slideVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    custom={direction}
-                    transition={{
-                      x: { type: "spring", stiffness: 300, damping: 30 },
-                      opacity: { duration: 0.2 },
-                      scale: { duration: 0.2 }
-                    }}
-                    className="carousel-slide"
-                    style={{ position: 'absolute', inset: 0, zIndex: 1 }}
-                    onAnimationComplete={() => {
-                      // Force un repaint après l'animation
-                      const element = document.querySelector('.carousel-slide');
-                      if (element) {
-                        element.classList.add('transitioning');
-                        setTimeout(() => {
-                          element.classList.remove('transitioning');
-                        }, 10);
-                      }
-                    }}
+          <div
+            className="grid h-full overflow-hidden rounded-lg"
+            style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr' }}
+          >
+            {/* Colonne image */}
+            <div className="bg-gray-100 h-full flex items-center justify-center">
+              {allVisuals.length > 0 && (
+                <Image
+                  src={allVisuals[currentImageIndex]}
+                  alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
+                  className="w-full h-full object-cover"
+                  style={{ aspectRatio: '4/5', objectFit: 'cover' }}
+                  fill
+                  priority
+                  sizes="(max-width: 1200px) 90vw, 600px"
+                />
+              )}
+              {/* Navigation */}
+              {allVisuals.length > 1 && (
+                <>
+                  <button 
+                    onClick={goToPrevious}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 carousel-button-prev btn-nav"
+                    aria-label="Image précédente"
                   >
-                    <div className="modal-image-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
-                      {allVisuals.map((visual, index) => (
-                        <Image
-                          key={visual}
-                          ref={index === currentImageIndex ? imageRef : undefined}
-                          src={visual}
-                          alt={`Image ${index + 1} du projet ${project.title}`}
-                          fill
-                          style={{
-                            objectFit: 'contain',
-                            visibility: index === currentImageIndex ? 'visible' : 'hidden',
-                            maxHeight: '100%',
-                            height: '100%',
-                            width: '100%',
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button 
+                    onClick={goToNext}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 carousel-button-next btn-nav"
+                    aria-label="Image suivante"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+
+                  {/* Indicateurs */}
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center carousel-indicators">
+                    <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                      {allVisuals.map((_, index) => (
+                        <button
+                          key={`indicator-${index}`}
+                          onClick={() => {
+                            setDirection(index > currentImageIndex ? 1 : -1)
+                            setCurrentImageIndex(index)
                           }}
-                          className={`absolute inset-0 transition-opacity duration-300 ${
-                            index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                          className={`transition-all duration-300 rounded-full ${
+                            currentImageIndex === index 
+                              ? 'bg-white w-6 h-2' 
+                              : 'bg-white/60 w-2 h-2 hover:bg-white/80'
                           }`}
-                          priority={index <= 1}
-                          sizes="(max-width: 1200px) 90vw, 1200px"
+                          aria-label={`Image ${index + 1}`}
                         />
                       ))}
                     </div>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            {allVisuals.length > 1 && (
-              <>
-                <button 
-                  onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 carousel-button-prev btn-nav"
-                  aria-label="Image précédente"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button 
-                  onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 carousel-button-next btn-nav"
-                  aria-label="Image suivante"
-                >
-                  <ChevronRight size={20} />
-                </button>
-
-                {/* Indicateurs */}
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center carousel-indicators">
-                  <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                    {allVisuals.map((_, index) => (
-                      <button
-                        key={`indicator-${index}`}
-                        onClick={() => {
-                          setDirection(index > currentImageIndex ? 1 : -1)
-                          setCurrentImageIndex(index)
-                        }}
-                        className={`transition-all duration-300 rounded-full ${
-                          currentImageIndex === index 
-                            ? 'bg-white w-6 h-2' 
-                            : 'bg-white/60 w-2 h-2 hover:bg-white/80'
-                        }`}
-                        aria-label={`Image ${index + 1}`}
-                      />
-                    ))}
                   </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Colonne description */}
-          <div className="flex min-h-0 flex-col">
-            <div
-              className={`flex-1 p-8 overflow-y-auto custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
-              ref={descriptionRef}
-              onMouseEnter={() => setIsDescriptionHovered(true)}
-              onMouseLeave={() => setIsDescriptionHovered(false)}
-            >
-              <h2 className="text-2xl md:text-3xl font-medium mb-4">
-                {project.title}
-              </h2>
-              <div className="text-base text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
-                {Array.isArray(project.description) ? (
-                  project.description.map((paragraph, i) => (
-                    <div key={i} className="mb-4 last:mb-0">
-                      <ReactMarkdown>
-                        {paragraph}
-                      </ReactMarkdown>
-                    </div>
-                  ))
-                ) : (
-                  <ReactMarkdown>{project.description}</ReactMarkdown>
-                )}
-              </div>
-              {project.link && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline"
-                >
-                  Visiter le site du projet
-                </a>
+                </>
               )}
             </div>
+            {/* Colonne description */}
+            <div className="flex flex-col h-full min-h-0">
+              {/* En-tête */}
+              <div className="flex-shrink-0 p-6 border-b">
+                <h2 className="text-sm md:text-base font-medium mb-2">
+                  {project.title}
+                </h2>
+              </div>
+              {/* Contenu scrollable */}
+              <div
+                className={`flex-1 overflow-y-auto p-6 min-h-0 custom-scrollbar ${isDescriptionHovered ? 'scrollbar-visible' : ''}`}
+                ref={descriptionRef}
+                onMouseEnter={() => setIsDescriptionHovered(true)}
+                onMouseLeave={() => setIsDescriptionHovered(false)}
+              >
+                <div className="text-sm text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
+                  {Array.isArray(project.description) ? (
+                    project.description.map((paragraph, i) => (
+                      <div key={i} className="mb-4 last:mb-0">
+                        <ReactMarkdown>
+                          {paragraph}
+                        </ReactMarkdown>
+                      </div>
+                    ))
+                  ) : (
+                    <ReactMarkdown>{project.description}</ReactMarkdown>
+                  )}
+                </div>
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline text-sm"
+                  >
+                    Visiter le site du projet
+                  </a>
+                )}
+              </div>
+              {/* Footer (optionnel) */}
+              {/* <div className="flex-shrink-0 p-6 border-t">Footer ici</div> */}
+            </div>
           </div>
-
-          {/* Bouton fermer */}
-          <button
-            onClick={onClose}
-            className="absolute -top-5 -right-5 z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-            style={{ 
-              backgroundColor: 'rgb(98, 137, 181)', 
-              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)' 
-            }}
-            onMouseEnter={(e) => { 
-              e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
-            }}
-            onMouseLeave={(e) => { 
-              e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' 
-            }}
-            aria-label="Fermer"
-          >
-            <X size={20} />
-          </button>
         </motion.div>
+
+        {/* Bouton fermer */}
+        <button
+          onClick={onClose}
+          className="absolute -top-5 -right-5 z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{ 
+            backgroundColor: 'rgb(98, 137, 181)', 
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)' 
+          }}
+          onMouseEnter={(e) => { 
+            e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
+          }}
+          onMouseLeave={(e) => { 
+            e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' 
+          }}
+          aria-label="Fermer"
+        >
+          <X size={20} />
+        </button>
       </motion.div>
     </AnimatePresence>
   )
