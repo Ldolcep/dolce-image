@@ -293,7 +293,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="w-full max-w-none"
+          className="w-full max-w-none overflow-visible"
           style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)' }}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -302,7 +302,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           onClick={(e) => e.stopPropagation()}
         >
           <div
-            className="grid h-full overflow-hidden rounded-lg bg-white"
+            className="grid h-full rounded-lg bg-white overflow-visible"
             style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr' }}
           >
             {/* Colonne image */}
@@ -370,7 +370,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                 </div>
               </div>
               {/* Séparateur fin noir */}
-              <div className="flex-shrink-0 border-b border-gray-900" style={{ borderWidth: '0.5px' }}></div>
+              <div className="flex-shrink-0 border-b border-gray-900" style={{ borderWidth: '0px' }}></div>
               {/* Contenu scrollable */}
               <div
                 className="flex-1 overflow-y-auto p-6 pt-4 min-h-0"
@@ -404,15 +404,17 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                   )}
                 </div>
               </div>
-              {/* Bouton fermer - Positionné au coin de la colonne description */}
+              {/* Bouton fermer - Dans la colonne description */}
               <button
                 onClick={onClose}
-                className="absolute z-20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                className="absolute text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
                 style={{ 
                   backgroundColor: 'rgb(98, 137, 181)', 
                   boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-                  top: '-5px',
-                  right: '-5px'
+                  top: '0px',
+                  right: '0px',
+                  transform: 'translate(50%, -50%)',
+                  zIndex: 9999
                 }}
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' 
