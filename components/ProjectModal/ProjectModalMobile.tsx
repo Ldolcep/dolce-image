@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Navigation, Pagination, EffectFade } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { Project } from "@/types/project";
 
@@ -42,7 +42,7 @@ export default function ProjectModalMobile({
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   
-  const swiperRef = useRef<SwiperType>();
+  const swiperRef = useRef<SwiperType | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const gripRef = useRef<HTMLDivElement>(null);
@@ -176,11 +176,12 @@ export default function ProjectModalMobile({
           <Swiper
             onBeforeInit={(swiper) => { swiperRef.current = swiper; }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-            effect="slide"
-            modules={[Navigation, Pagination]}
+            effect="fade"
+            fadeEffect={{ crossFade: true }}
+            modules={[Navigation, Pagination, EffectFade]}
             spaceBetween={0}
             slidesPerView={1}
-            speed={400}
+            speed={500}
             threshold={3}
             touchRatio={1}
             resistance={true}

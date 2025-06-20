@@ -3,14 +3,14 @@
 /* Masonry Grid */
 .masonry-grid-js {
   display: flex;
-  gap: 3rem;
+  gap: 5rem;
   width: auto;
 }
 
 .masonry-column {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 5rem;
   background-clip: padding-box;
 }
 

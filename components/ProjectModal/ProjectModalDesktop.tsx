@@ -257,16 +257,29 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             {/* Colonne image */}
             <div className="bg-gray-100 h-full flex items-center justify-center relative overflow-hidden">
               <div className="w-full h-full relative overflow-hidden">
-                <Image
-                  src={allVisuals[currentImageIndex]}
-                  alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-                  className="w-full h-full object-cover"
-                  style={{ aspectRatio: '4/5' }}
-                  width={600}
-                  height={750}
-                  priority
-                  sizes="600px"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentImageIndex}
+                    initial={{ opacity: 0, scale: 1.02 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    layoutId={`project-image-${project.id}-${currentImageIndex}`}
+                    style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, willChange: 'opacity, transform' }}
+                    aria-live="polite"
+                  >
+                    <Image
+                      src={allVisuals[currentImageIndex]}
+                      alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
+                      className="w-full h-full object-cover carousel-image"
+                      style={{ aspectRatio: '4/5' }}
+                      width={600}
+                      height={750}
+                      priority
+                      sizes="600px"
+                    />
+                  </motion.div>
+                </AnimatePresence>
               </div>
               {/* Navigation */}
               {allVisuals.length > 1 && (
