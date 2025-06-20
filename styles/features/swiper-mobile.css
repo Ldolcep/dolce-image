@@ -41,6 +41,7 @@
   transform-origin: bottom center;
   transform: translateZ(0);
   transition: transform 0.1s linear, opacity 0.1s linear !important;
+  will-change: transform;
 }
 
 /* Carte active */
@@ -181,6 +182,12 @@
   -webkit-backface-visibility: hidden !important;
   transform-style: preserve-3d !important;
   -webkit-transform-style: preserve-3d !important;
+  will-change: transform;
+}
+
+.swiper-wrapper {
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* Très petits écrans */
@@ -202,4 +209,14 @@
   .swiper-card-fan .swiper-slide:nth-child(5):not(.swiper-slide-active) {
     transform: translateZ(5px) translateY(0px) rotate(var(--rotation, 5deg)) scale(0.97) !important;
   }
+}
+
+/* État de transition */
+.swiper-card-fan.transitioning .swiper-slide::before,
+.swiper-card-fan.transitioning .swiper-slide::after {
+  display: none;
+}
+
+.swiper-card-fan.transitioning .swiper-slide {
+  box-shadow: none !important;
 }

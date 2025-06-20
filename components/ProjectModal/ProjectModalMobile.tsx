@@ -41,6 +41,7 @@ export default function ProjectModalMobile({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   const swiperRef = useRef<SwiperType | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -178,25 +179,29 @@ export default function ProjectModalMobile({
           <Swiper
             onBeforeInit={(swiper) => { swiperRef.current = swiper; }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
+            onSlideChangeTransitionStart={() => setIsTransitioning(true)}
+            onSlideChangeTransitionEnd={() => setIsTransitioning(false)}
             effect="slide"
             modules={[Navigation, Pagination]}
             spaceBetween={0}
             slidesPerView={1}
-            speed={600}
-            threshold={3}
-            touchRatio={1}
-            resistance={true}
-            resistanceRatio={0.65}
+            speed={400}
+            resistance={false}
+            resistanceRatio={0}
+            centeredSlides={true}
+            touchRatio={1.2}
+            threshold={5}
+            allowTouchMove={true}
+            simulateTouch={true}
             followFinger={true}
             shortSwipes={true}
             longSwipes={true}
-            longSwipesRatio={0.3}
-            centeredSlides={true}
+            longSwipesRatio={0.2}
             pagination={false}
             navigation={false}
-            className="w-full h-full swiper-card-fan"
+            className={`w-full h-full swiper-card-fan${isTransitioning ? ' transitioning' : ''}`}
             style={{
-              '--swiper-transition-timing-function': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              '--swiper-transition-timing-function': 'ease-out'
             } as React.CSSProperties}
           >
             {allVisuals.map((visual, index) => (
