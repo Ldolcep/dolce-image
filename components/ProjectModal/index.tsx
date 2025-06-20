@@ -41,12 +41,8 @@ export default function ProjectModal({ project, isOpen, onClose }: ProjectModalP
     exit: { opacity: 0, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } },
   }
 
-  if (!isMounted) {
-    if (!isOpen) return null
-    return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>
-  }
-
-  if (!isOpen) return null
+  if (!isMounted) return null;
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence mode="wait">
