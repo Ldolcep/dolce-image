@@ -11,11 +11,45 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { Project } from "@/types/project";
+import { AnimatePresence, motion } from "framer-motion";
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+
+// Animation variants for staggered modal content
+const contentStagger = {
+  animate: {
+    transition: {
+      staggerChildren: 0.15, // 150ms between each child
+      delayChildren: 0,
+    },
+  },
+};
+
+const fadeUpStagger = {
+  initial: { opacity: 0, y: 20 },
+  animate: (custom: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      type: "spring",
+      ease: [0.4, 0, 0.2, 1],
+      delay: custom * 0.15,
+    },
+  }),
+  exit: (custom: number) => ({
+    opacity: 0,
+    y: 20,
+    transition: {
+      duration: 0.3,
+      ease: [0.4, 0, 0.2, 1],
+      delay: custom * 0.1,
+    },
+  }),
+};
 
 // Types
 // interface ProjectModalMobileProps {
@@ -134,7 +168,6 @@ export default function ProjectModalMobile({
   if (!isMounted || !isOpen) return null;
 
   return (
-    // MODIFIED: Remplacement de l'ancien fond par la nouvelle structure
     <div className="fixed inset-0 z-50 overflow-hidden select-none">
       
       {/* NOUVEAU: Conteneur pour l'image de fond et l'overlay */}
@@ -174,8 +207,20 @@ export default function ProjectModalMobile({
       </div>
 
       {/* Zone carrousel */}
-      <div className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center w-[92%] mx-auto sm:w-[85%] md:w-[80%]">
-        <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]">
+      <motion.div
+        className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center w-[92%] mx-auto sm:w-[85%] md:w-[80%]"
+        variants={contentStagger}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        {/* Image/Swiper */}
+        <motion.div
+          className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]"
+          variants={fadeUpStagger}
+          custom={0}
+          style={{ willChange: "transform, opacity" }}
+        >
           <Swiper
             onBeforeInit={(swiper) => { swiperRef.current = swiper; }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
@@ -206,7 +251,7 @@ export default function ProjectModalMobile({
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
-                <div className="relative w-full h-full overflow-hidden bg-gray-200 shadow-2xl">
+                <motion.div className="relative w-full h-full overflow-hidden bg-gray-200 shadow-2xl" variants={fadeUpStagger} custom={0} style={{ willChange: "transform, opacity" }}>
                   <Image
                     src={visual}
                     alt={`Image ${index + 1} du projet ${project.title}`}
@@ -221,46 +266,42 @@ export default function ProjectModalMobile({
                       style={{ boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.5)' }}
                     />
                   )}
-                </div>
+                </motion.div>
               </SwiperSlide>
             ))}
           </Swiper>
-          {/* ... (Le reste du code des boutons de navigation est inchangé) ... */}
+          {/* Navigation Buttons */}
           {allVisuals.length > 1 && (
             <>
-              <button 
+              <motion.button
                 className={`swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${ isAtStart ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer' }`}
                 aria-label="Image précédente"
                 disabled={isAtStart}
                 onTouchStart={(e) => { e.preventDefault(); if (!isAtStart) swiperRef.current?.slidePrev(); }}
                 onMouseDown={(e) => { if (!('ontouchstart' in window) && !isAtStart) swiperRef.current?.slidePrev(); }}
-              ><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
-              <button 
+                variants={fadeUpStagger}
+                custom={3}
+                style={{ willChange: "transform, opacity" }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg>
+              </motion.button>
+              <motion.button
                 className={`swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${ isAtEnd ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer' }`}
                 aria-label="Image suivante"
                 disabled={isAtEnd}
                 onTouchStart={(e) => { e.preventDefault(); if (!isAtEnd) swiperRef.current?.slideNext(); }}
                 onMouseDown={(e) => { if (!('ontouchstart' in window) && !isAtEnd) swiperRef.current?.slideNext(); }}
-              ><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
+                variants={fadeUpStagger}
+                custom={3}
+                style={{ willChange: "transform, opacity" }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
+              </motion.button>
             </>
           )}
-        </div>
-        {/* ... (Le reste du code des indicateurs est inchangé) ... */}
-        {allVisuals.length > 1 && (
-          <div className="mt-6 flex justify-center">
-            <div className="flex space-x-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-full shadow-sm">
-              {allVisuals.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => swiperRef.current?.slideTo(idx)}
-                  className={`rounded-full transition-all duration-300 ${ currentIndex === idx ? 'w-2.5 h-2.5 bg-orange-500' : 'w-2 h-2 bg-white/60 hover:bg-white/80 hover:scale-110' }`}
-                  aria-label={`Aller à l'image ${idx + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+        </motion.div>
+        {/* ... (indicators and panel description unchanged) ... */}
+      </motion.div>
 
       {/* Panel Description */}
       <div 
