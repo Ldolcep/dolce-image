@@ -322,7 +322,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
               <div className="flex-shrink-0 border-b border-gray-900" style={{ borderWidth: '0px' }}></div>
               {/* Contenu scrollable */}
               <div
-                className="flex-1 overflow-y-auto p-6 pt-4 min-h-0"
+                className="flex-1 overflow-y-auto p-6 pt-4 min-h-0 custom-scrollbar"
                 ref={descriptionRef}
                 style={{ 
                   scrollBehavior: 'smooth',
