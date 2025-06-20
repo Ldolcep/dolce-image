@@ -169,7 +169,6 @@ export default function ProjectModalMobile({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden select-none">
-      
       {/* NOUVEAU: Conteneur pour l'image de fond et l'overlay */}
       <div className="absolute inset-0 -z-10">
         <Image
@@ -182,7 +181,6 @@ export default function ProjectModalMobile({
         />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
       </div>
-
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm h-16 border-b border-white/10">
         <button 
@@ -195,31 +193,21 @@ export default function ProjectModalMobile({
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
-        
         <h2 
           className="flex-1 text-center text-white font-semibold truncate mx-3 drop-shadow-md"
           style={{ fontSize: '1.4rem', letterSpacing: '0.01em', lineHeight: '1.2' }}
         >
           {project.title}
         </h2>
-        
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
-
       {/* Zone carrousel */}
-      <motion.div
+      <div
         className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center w-[92%] mx-auto sm:w-[85%] md:w-[80%]"
-        variants={contentStagger}
-        initial="initial"
-        animate="animate"
-        exit="exit"
       >
         {/* Image/Swiper */}
-        <motion.div
+        <div
           className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]"
-          variants={fadeUpStagger}
-          custom={0}
-          style={{ willChange: "transform, opacity" }}
         >
           <Swiper
             onBeforeInit={(swiper) => { swiperRef.current = swiper; }}
@@ -251,7 +239,7 @@ export default function ProjectModalMobile({
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
-                <motion.div className="relative w-full h-full overflow-hidden bg-gray-200 shadow-2xl" variants={fadeUpStagger} custom={0} style={{ willChange: "transform, opacity" }}>
+                <div className="relative w-full h-full overflow-hidden bg-gray-200 shadow-2xl">
                   <Image
                     src={visual}
                     alt={`Image ${index + 1} du projet ${project.title}`}
@@ -266,43 +254,36 @@ export default function ProjectModalMobile({
                       style={{ boxShadow: 'inset 0 0 0 2px rgba(247,165,32,0.5)' }}
                     />
                   )}
-                </motion.div>
+                </div>
               </SwiperSlide>
             ))}
           </Swiper>
           {/* Navigation Buttons */}
           {allVisuals.length > 1 && (
             <>
-              <motion.button
+              <button
                 className={`swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${ isAtStart ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer' }`}
                 aria-label="Image précédente"
                 disabled={isAtStart}
                 onTouchStart={(e) => { e.preventDefault(); if (!isAtStart) swiperRef.current?.slidePrev(); }}
                 onMouseDown={(e) => { if (!('ontouchstart' in window) && !isAtStart) swiperRef.current?.slidePrev(); }}
-                variants={fadeUpStagger}
-                custom={3}
-                style={{ willChange: "transform, opacity" }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg>
-              </motion.button>
-              <motion.button
+              </button>
+              <button
                 className={`swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${ isAtEnd ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer' }`}
                 aria-label="Image suivante"
                 disabled={isAtEnd}
                 onTouchStart={(e) => { e.preventDefault(); if (!isAtEnd) swiperRef.current?.slideNext(); }}
                 onMouseDown={(e) => { if (!('ontouchstart' in window) && !isAtEnd) swiperRef.current?.slideNext(); }}
-                variants={fadeUpStagger}
-                custom={3}
-                style={{ willChange: "transform, opacity" }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
-              </motion.button>
+              </button>
             </>
           )}
-        </motion.div>
+        </div>
         {/* ... (indicators and panel description unchanged) ... */}
-      </motion.div>
-
+      </div>
       {/* Panel Description */}
       <div 
         ref={panelRef}
