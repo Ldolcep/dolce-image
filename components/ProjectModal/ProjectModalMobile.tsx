@@ -17,7 +17,6 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-
 // Types
 // interface ProjectModalMobileProps {
 //   project: Project;
@@ -134,6 +133,7 @@ export default function ProjectModalMobile({
   if (!isMounted || !isOpen) return null;
 
   return (
+    // MODIFIED: Remplacement de l'ancien fond par la nouvelle structure
     <div className="fixed inset-0 z-50 overflow-hidden select-none">
       {/* NOUVEAU: Conteneur pour l'image de fond et l'overlay */}
       <div className="absolute inset-0 -z-10">
@@ -168,13 +168,8 @@ export default function ProjectModalMobile({
         <div className="w-9 h-9 flex-shrink-0"></div>
       </div>
       {/* Zone carrousel */}
-      <div
-        className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center w-[92%] mx-auto sm:w-[85%] md:w-[80%]"
-      >
-        {/* Image/Swiper */}
-        <div
-          className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]"
-        >
+      <div className="absolute inset-0 pt-16 pb-[5vh] flex flex-col items-center justify-center w-[92%] mx-auto sm:w-[85%] md:w-[80%]">
+        <div className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] max-h-[65vh] sm:max-h-[70vh]">
           <Swiper
             onBeforeInit={(swiper) => { swiperRef.current = swiper; }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
@@ -220,27 +215,23 @@ export default function ProjectModalMobile({
               </SwiperSlide>
             ))}
           </Swiper>
-          {/* Navigation Buttons */}
+          {/* ... (Le reste du code des boutons de navigation est inchangé) ... */}
           {allVisuals.length > 1 && (
             <>
-              <button
+              <button 
                 className={`swiper-button-prev-custom absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${ isAtStart ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer' }`}
                 aria-label="Image précédente"
                 disabled={isAtStart}
                 onTouchStart={(e) => { e.preventDefault(); if (!isAtStart) swiperRef.current?.slidePrev(); }}
                 onMouseDown={(e) => { if (!('ontouchstart' in window) && !isAtStart) swiperRef.current?.slidePrev(); }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-              <button
+              ><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button 
                 className={`swiper-button-next-custom absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${ isAtEnd ? 'bg-gray-300/70 text-gray-400 cursor-not-allowed opacity-50' : 'bg-white/90 text-gray-800 hover:bg-white hover:text-orange-500 cursor-pointer' }`}
                 aria-label="Image suivante"
                 disabled={isAtEnd}
                 onTouchStart={(e) => { e.preventDefault(); if (!isAtEnd) swiperRef.current?.slideNext(); }}
                 onMouseDown={(e) => { if (!('ontouchstart' in window) && !isAtEnd) swiperRef.current?.slideNext(); }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
+              ><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg></button>
             </>
           )}
         </div>
@@ -260,6 +251,7 @@ export default function ProjectModalMobile({
           </div>
         )}
       </div>
+
       {/* Panel Description */}
       <div 
         ref={panelRef}
