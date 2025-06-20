@@ -17,7 +17,7 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 4px;
+  border-radius: 2px;
   border: 2px solid transparent;
   background-clip: padding-box;
   transition: background-color 0.3s ease;
@@ -28,7 +28,7 @@
 }
 
 .custom-scrollbar.scrollbar-visible {
-  scrollbar-color: #f7a520 #f0e9e6;
+  scrollbar-color: #f7a520 transparent;
 }
 
 /* Hover states */
@@ -63,7 +63,7 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: transparent;
-    border-radius: 4px;
+    border-radius: 2px;
     transition: background 0.3s ease;
     -webkit-appearance: none;
   }
