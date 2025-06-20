@@ -10,6 +10,7 @@ import { useProjects, type FillerItem } from "@/hooks/useProjects";
 import { useProjectModal } from "@/hooks/useProjectModal";
 import { Project } from "@/types/project";
 import Masonry from "react-masonry-css";
+import { motion } from "framer-motion"
 
 const breakpointCols = {
   default: 3,
@@ -109,7 +110,7 @@ export default function ProjectGallery() {
               }
               // Project
               return (
-                <div
+                <motion.div
                   key={item.id}
                   className="masonry-item"
                   onClick={() => openModal(item)}
@@ -117,6 +118,9 @@ export default function ProjectGallery() {
                   tabIndex={0}
                   role="button"
                   aria-label={`View ${item.title} project details`}
+                  whileHover={{ scale: 1.03, y: -8 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25, duration: 0.3 }}
+                  style={{ willChange: 'transform' }}
                 >
                   <div className="card-container bg-white/95 backdrop-blur-sm rounded-sm shadow-xl hover:bg-white transition-all duration-300">
                     <div className="img-container">
@@ -127,13 +131,14 @@ export default function ProjectGallery() {
                         height={400}
                         className="project-img"
                         priority={item.id === "1"}
+                        style={{ transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1)', willChange: 'transform' }}
                       />
                     </div>
                     <div className="project-content">
                       <h3 className="project-title font-cocogoose">{item.title}</h3>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </Masonry>

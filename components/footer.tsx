@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { motion } from "framer-motion"
 
 export default function Footer() {
   return (
@@ -17,12 +18,15 @@ export default function Footer() {
           </div>
 
           <div className="flex space-x-6">
-            <Link
+            <motion.a
               href="https://instagram.com/groupedolce"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
               className="text-black hover:text-primary-orange transition-colors"
+              whileHover={{ rotate: 5, scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 320, damping: 18, duration: 0.22 }}
+              style={{ willChange: 'transform' }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -39,13 +43,16 @@ export default function Footer() {
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
-            </Link>
-            <Link
+            </motion.a>
+            <motion.a
               href="https://tiktok.com/@groupedolce"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="TikTok"
               className="text-black hover:text-primary-orange transition-colors"
+              whileHover={{ rotate: 5, scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 320, damping: 18, duration: 0.22 }}
+              style={{ willChange: 'transform' }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -62,11 +69,13 @@ export default function Footer() {
                   <path d="M6.977,15.532a2.791,2.791,0,0,0,2.791,2.792,2.859,2.859,0,0,0,2.9-2.757L12.7,3h2.578A4.8,4.8,0,0,0,19.7,7.288v2.995h0c-.147.014-.295.022-.443.022a4.8,4.8,0,0,1-4.02-2.172v7.4a5.469,5.469,0,1,1-5.469-5.469c.114,0,.226.01.338.017v2.7a2.909,2.909,0,0,0-.338-.034A2.791,2.791,0,0,0,6.977,15.532Z"></path>
                 </g>
               </svg>
-            </Link>
+            </motion.a>
           </div>
         </div>
         <div className="mt-6 text-center md:text-right">
-          <p className="text-sm text-gray-600 font-sans">© {new Date().getFullYear()} Dolce. All rights reserved.</p>
+          <p className="text-sm text-gray-600 font-sans">
+            © {new Date().getFullYear()} Dolce. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

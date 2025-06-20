@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { motion } from "framer-motion"
 
 // --- Début de la fonction Throttle (peut être dans un fichier utils) ---
 function throttle<T extends (...args: any[]) => any>(
@@ -112,8 +113,13 @@ export default function Header() {
       style={{ backgroundColor: `rgba(255, 255, 255, ${headerBgOpacity})` }}
     >
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="relative h-12 w-36 md:h-14 md:w-40 mx-2">
-          {/* Utiliser l'état currentLogo pour la source de l'image */}
+        <motion.a
+          href="/"
+          className="relative h-12 w-36 md:h-14 md:w-40 mx-2"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 350, damping: 24, duration: 0.22 }}
+          style={{ display: 'block', willChange: 'transform' }}
+        >
           <Image 
             key={currentLogo}
             src={currentLogo}
@@ -123,20 +129,28 @@ export default function Header() {
             priority={currentLogo === LOGO_STAGE_1}
             sizes="(max-width: 768px) 150px, 200px"
           />
-        </Link>
+        </motion.a>
         <nav className="hidden md:flex space-x-8">
-          <button
+          <motion.button
             onClick={() => scrollToSection("projects")}
-            className="text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
+            className="text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange relative"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 350, damping: 22, duration: 0.18 }}
+            style={{ willChange: 'transform' }}
           >
-            PROJECTS
-          </button>
-          <button
+            <span className="nav-link-underline">PROJECTS</span>
+          </motion.button>
+          <motion.button
             onClick={() => scrollToSection("contact")}
-            className="text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange"
+            className="text-sm hover:text-primary-orange transition-colors focus:outline-none focus:text-primary-orange relative"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 350, damping: 22, duration: 0.18 }}
+            style={{ willChange: 'transform' }}
           >
-            CONTACT
-          </button>
+            <span className="nav-link-underline">CONTACT</span>
+          </motion.button>
         </nav>
         <button className="md:hidden">
           <svg
