@@ -37,7 +37,7 @@
 }
 
 .custom-scrollbar:hover {
-  scrollbar-color: #f7a520 #f0e9e6;
+  scrollbar-color: #f7a520 transparent;
 }
 
 .custom-scrollbar.scrolling::-webkit-scrollbar-thumb {
@@ -45,7 +45,7 @@
 }
 
 .custom-scrollbar.scrolling {
-  scrollbar-color: #f7a520 #f0e9e6;
+  scrollbar-color: #f7a520 transparent;
 }
 
 /* Safari support */
@@ -56,7 +56,7 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #fff3e0;
+    background: transparent;
     border-radius: 4px;
     -webkit-appearance: none;
   }
