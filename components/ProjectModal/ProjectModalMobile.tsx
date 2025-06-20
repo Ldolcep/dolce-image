@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, EffectFade } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { Project } from "@/types/project";
 
@@ -81,7 +81,9 @@ export default function ProjectModalMobile({
 
   const handlePanelTouchMove = (e: React.TouchEvent) => {
     if (!isDraggingPanel.current) return;
-    e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     const deltaY = e.touches[0].clientY - panelStartY.current;
     const newY = Math.max(0, Math.min(window.innerHeight * 0.32, panelCurrentY.current + deltaY));
     if (panelRef.current) {
@@ -176,16 +178,15 @@ export default function ProjectModalMobile({
           <Swiper
             onBeforeInit={(swiper) => { swiperRef.current = swiper; }}
             onSlideChange={(swiper) => setCurrentIndex(swiper.activeIndex)}
-            effect="fade"
-            fadeEffect={{ crossFade: true }}
-            modules={[Navigation, Pagination, EffectFade]}
+            effect="slide"
+            modules={[Navigation, Pagination]}
             spaceBetween={0}
             slidesPerView={1}
-            speed={500}
+            speed={600}
             threshold={3}
             touchRatio={1}
             resistance={true}
-            resistanceRatio={0.85}
+            resistanceRatio={0.65}
             followFinger={true}
             shortSwipes={true}
             longSwipes={true}
@@ -194,6 +195,9 @@ export default function ProjectModalMobile({
             pagination={false}
             navigation={false}
             className="w-full h-full swiper-card-fan"
+            style={{
+              '--swiper-transition-timing-function': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            } as React.CSSProperties}
           >
             {allVisuals.map((visual, index) => (
               <SwiperSlide key={visual} className="relative">
