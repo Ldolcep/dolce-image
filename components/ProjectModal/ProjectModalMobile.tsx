@@ -11,45 +11,12 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { Project } from "@/types/project";
-import { AnimatePresence, motion } from "framer-motion";
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-// Animation variants for staggered modal content
-const contentStagger = {
-  animate: {
-    transition: {
-      staggerChildren: 0.15, // 150ms between each child
-      delayChildren: 0,
-    },
-  },
-};
-
-const fadeUpStagger = {
-  initial: { opacity: 0, y: 20 },
-  animate: (custom: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      type: "spring",
-      ease: [0.4, 0, 0.2, 1],
-      delay: custom * 0.15,
-    },
-  }),
-  exit: (custom: number) => ({
-    opacity: 0,
-    y: 20,
-    transition: {
-      duration: 0.3,
-      ease: [0.4, 0, 0.2, 1],
-      delay: custom * 0.1,
-    },
-  }),
-};
 
 // Types
 // interface ProjectModalMobileProps {
@@ -282,7 +249,21 @@ export default function ProjectModalMobile({
             </>
           )}
         </div>
-        {/* ... (indicators and panel description unchanged) ... */}
+        {/* ... (Le reste du code des indicateurs est inchangé) ... */}
+        {allVisuals.length > 1 && (
+          <div className="mt-6 flex justify-center">
+            <div className="flex space-x-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-full shadow-sm">
+              {allVisuals.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => swiperRef.current?.slideTo(idx)}
+                  className={`rounded-full transition-all duration-300 ${ currentIndex === idx ? 'w-2.5 h-2.5 bg-orange-500' : 'w-2 h-2 bg-white/60 hover:bg-white/80 hover:scale-110' }`}
+                  aria-label={`Aller à l'image ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       {/* Panel Description */}
       <div 
