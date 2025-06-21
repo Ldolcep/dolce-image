@@ -32,23 +32,13 @@ export default function ProjectModal(props: ProjectModalProps) {
     return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>
   }
 
-  // AnimatePresence wraps the modal for enter/exit animation
+  // AnimatePresence only wraps the modal, not the layout
   return (
     <AnimatePresence mode="wait" initial={false}>
       {props.isOpen && (
-        <motion.div
-          key="modal-root"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.3, type: "spring", ease: [0.4, 0, 0.2, 1] }}
-          style={{ willChange: "opacity, transform", zIndex: 50 }}
-          className="fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50"
-        >
-          {isMobile 
-            ? <ProjectModalMobile {...props} /> 
-            : <ProjectModalDesktop {...props} />}
-        </motion.div>
+        isMobile 
+          ? <ProjectModalMobile {...props} /> 
+          : <ProjectModalDesktop {...props} />
       )}
     </AnimatePresence>
   )

@@ -5,7 +5,7 @@
 import React, { useState } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import ReactMarkdown from "react-markdown"
 import { Project } from "@/types/project"
 
