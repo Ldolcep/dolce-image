@@ -32,13 +32,15 @@ export default function ProjectModal(props: ProjectModalProps) {
     return <div className="fixed inset-0 bg-white z-50" role="dialog" aria-modal="true"></div>
   }
 
-  // AnimatePresence only wraps the modal, not the layout
+  // AnimatePresence wraps the modal with a dynamic key for animation
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="wait">
       {props.isOpen && (
-        isMobile 
-          ? <ProjectModalMobile {...props} /> 
-          : <ProjectModalDesktop {...props} />
+        (props.project ? (
+          isMobile
+            ? <ProjectModalMobile key={props.project.id} {...props} />
+            : <ProjectModalDesktop key={props.project.id} {...props} />
+        ) : null)
       )}
     </AnimatePresence>
   )
