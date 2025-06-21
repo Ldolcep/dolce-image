@@ -68,7 +68,8 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const [direction, setDirection] = React.useState(0)
   const [imagesReady, setImagesReady] = React.useState<Set<number>>(new Set())
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
-  
+  const [isModalVisible, setIsModalVisible] = React.useState(false);
+    
   // Refs
   const modalRef = React.useRef<HTMLDivElement>(null)
   const descriptionRef = React.useRef<HTMLDivElement>(null)
@@ -254,10 +255,10 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            style={{ willChange: "opacity", opacity: 0 }} // extra protection
+            style={{ willChange: "opacity" }}
           >
             {/* Fond */}
-            <div className={`absolute inset-0 -z-10 ${modalHiddenClass}`} style={{ opacity: 0 }}>
+            <div className="absolute inset-0 -z-10">
               <Image 
                 src="/images/gallery-background.jpg" 
                 alt="" 
@@ -273,7 +274,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             <motion.div
               ref={modalRef}
               className={`w-full max-w-none overflow-visible relative ${modalHiddenClass}`}
-              style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity', opacity: 0 }} // extra protection
+              style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity' }}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
