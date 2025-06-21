@@ -252,11 +252,15 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         />
         <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
       </div>
-      {/* Modal content */}
-      <div
+      {/* Modal content with Framer Motion animation */}
+      <motion.div
         ref={modalRef}
         className="w-full max-w-none overflow-visible relative"
-        style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', background: 'white', borderRadius: '0.75rem', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
+        style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', background: 'white', borderRadius: '0.75rem', boxShadow: '0 8px 32px rgba(0,0,0,0.25)', willChange: 'opacity, transform' }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300, duration: 0.35 }}
         onClick={e => e.stopPropagation()}
       >
         {/* Bouton de fermeture flottant, centre aligné au coin supérieur droit du modal */}
@@ -275,6 +279,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         >
           <X size={20} strokeWidth={2} />
         </button>
+        {/* Staggered content animation */}
         <motion.div
           className="grid h-full rounded-lg bg-white overflow-visible modal-grid"
           style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr', willChange: 'transform, opacity' }}
@@ -407,7 +412,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             </div>
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   )
 }
