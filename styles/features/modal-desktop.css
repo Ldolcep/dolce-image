@@ -82,3 +82,9 @@
   opacity: 0;
   pointer-events: none;
 }
+
+/* Prevent modal flash on open */
+.modal-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

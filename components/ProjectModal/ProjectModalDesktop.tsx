@@ -68,6 +68,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const [direction, setDirection] = React.useState(0)
   const [imagesReady, setImagesReady] = React.useState<Set<number>>(new Set())
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
+  const [isModalVisible, setIsModalVisible] = React.useState(false);
 
   // Refs
   const modalRef = React.useRef<HTMLDivElement>(null)
@@ -231,193 +232,218 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
     }),
   };
 
+  // Add a CSS class to hide modal/backdrop before animation
+  const modalHiddenClass = !isOpen ? "modal-hidden" : ""
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsModalVisible(false);
+      // Wait for next tick to allow Framer Motion to apply initial state
+      const timeout = setTimeout(() => setIsModalVisible(true), 10);
+      return () => clearTimeout(timeout);
+    } else {
+      setIsModalVisible(false);
+    }
+  }, [isOpen]);
+
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key="modal-backdrop"
-        className="fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        onClick={onClose}
-        style={{ willChange: "opacity" }}
-      >
-        {/* Fond */}
-        <div className="absolute inset-0 -z-10">
-          <Image 
-            src="/images/gallery-background.jpg" 
-            alt="" 
-            fill 
-            quality={80} 
-            sizes="100vw" 
-            className="object-cover" 
-            priority
-          />
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
-        </div>
-        {/* Modal */}
-        <motion.div
-          ref={modalRef}
-          className="w-full max-w-none overflow-visible relative"
-          style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity' }}
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.4, type: "spring", ease: [0.4, 0, 0.2, 1] }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Bouton de fermeture flottant, centre aligné au coin supérieur droit du modal */}
-          <button
-            onClick={onClose}
-            className="absolute z-30 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300"
-            style={{
-              top: '-20px',
-              right: '-20px',
-              backgroundColor: 'rgb(98, 137, 181)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' }}
-            aria-label="Fermer le modal"
-          >
-            <X size={20} strokeWidth={2} />
-          </button>
+    <>
+      {/* Inline style for modal-hidden class to prevent flash */}
+      <style>{`
+        .modal-hidden {
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+      `}</style>
+      <AnimatePresence mode="wait">
+        {isOpen && (
           <motion.div
-            className="grid h-full rounded-lg bg-white overflow-visible modal-grid"
-            style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr', willChange: 'transform, opacity' }}
-            variants={contentStagger}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+            key="modal-backdrop"
+            className={`fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50${!isModalVisible ? ' modal-hidden' : ''}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            style={{ willChange: "opacity" }}
           >
-            {/* Colonne image */}
+            {/* Fond */}
+            <div className={`absolute inset-0 -z-10 ${modalHiddenClass}`}>
+              <Image 
+                src="/images/gallery-background.jpg" 
+                alt="" 
+                fill 
+                quality={80} 
+                sizes="100vw" 
+                className="object-cover" 
+                priority
+              />
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
+            </div>
+            {/* Modal */}
             <motion.div
-              className="bg-gray-100 h-full flex items-center justify-center relative overflow-hidden"
-              variants={fadeUpStagger}
-              custom={0}
-              style={{ willChange: 'transform, opacity' }}
+              ref={modalRef}
+              className={`w-full max-w-none overflow-visible relative ${modalHiddenClass}`}
+              style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity' }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.4, type: "spring", ease: [0.4, 0, 0.2, 1] }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-full h-full relative overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentImageIndex}
-                    initial={{ opacity: 0, scale: 1.02 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                    layoutId={`project-image-${project.id}-${currentImageIndex}`}
-                    style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, willChange: 'opacity, transform' }}
-                    aria-live="polite"
-                  >
-                    <Image
-                      src={allVisuals[currentImageIndex]}
-                      alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
-                      className="w-full h-full object-cover carousel-image"
-                      style={{ aspectRatio: '4/5' }}
-                      width={600}
-                      height={750}
-                      priority
-                      sizes="600px"
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-              {/* Navigation */}
-              {allVisuals.length > 1 && (
-                <>
-                  <button
-                    onClick={goToPrevious}
-                    className="absolute left-4 top-1/2 z-10 carousel-button-prev btn-nav"
-                    aria-label="Image précédente"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <button
-                    onClick={goToNext}
-                    className="absolute right-4 top-1/2 z-10 carousel-button-next btn-nav"
-                    aria-label="Image suivante"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                </>
-              )}
-              {/* Indicateurs */}
-              {allVisuals.length > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center carousel-indicators">
-                  <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                    {allVisuals.map((_, index) => (
-                      <button
-                        key={`indicator-${index}`}
-                        onClick={() => {
-                          setDirection(index > currentImageIndex ? 1 : -1)
-                          setCurrentImageIndex(index)
-                        }}
-                        className={`transition-all duration-300 rounded-full ${
-                          currentImageIndex === index 
-                            ? 'bg-white w-6 h-2' 
-                            : 'bg-white/60 w-2 h-2 hover:bg-white/80'
-                        }`}
-                        aria-label={`Image ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-            {/* Colonne description */}
-            <motion.div
-              className="flex flex-col h-full min-h-0 relative"
-              variants={fadeUpStagger}
-              custom={1}
-              style={{ willChange: 'transform, opacity' }}
-            >
-              {/* En-tête avec titre */}
-              <div className="flex-shrink-0 p-6 pb-4">
-                <div className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Cocogoose, sans-serif' }}>
-                  {project.title}
-                </div>
-              </div>
-              {/* Séparateur fin noir */}
-              <div className="flex-shrink-0 border-b border-gray-900" style={{ borderWidth: '0px' }}></div>
-              {/* Contenu scrollable */}
-              <div
-                className="flex-1 overflow-y-auto p-6 pt-4 min-h-0 custom-scrollbar"
-                ref={descriptionRef}
-                style={{ 
-                  scrollBehavior: 'smooth',
-                  overscrollBehavior: 'contain'
+              {/* Bouton de fermeture flottant, centre aligné au coin supérieur droit du modal */}
+              <button
+                onClick={onClose}
+                className="absolute z-30 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300"
+                style={{
+                  top: '-20px',
+                  right: '-20px',
+                  backgroundColor: 'rgb(98, 137, 181)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
                 }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgb(78, 117, 161)' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgb(98, 137, 181)' }}
+                aria-label="Fermer le modal"
               >
-                <div className="text-sm text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
-                  {Array.isArray(project.description) ? (
-                    project.description.map((paragraph, i) => (
-                      <div key={i} className="mb-4 last:mb-0">
-                        <ReactMarkdown>
-                          {paragraph}
-                        </ReactMarkdown>
+                <X size={20} strokeWidth={2} />
+              </button>
+              <motion.div
+                className="grid h-full rounded-lg bg-white overflow-visible modal-grid"
+                style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr', willChange: 'transform, opacity' }}
+                variants={contentStagger}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                {/* Colonne image */}
+                <motion.div
+                  className="bg-gray-100 h-full flex items-center justify-center relative overflow-hidden"
+                  variants={fadeUpStagger}
+                  custom={0}
+                  style={{ willChange: 'transform, opacity' }}
+                >
+                  <div className="w-full h-full relative overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentImageIndex}
+                        initial={{ opacity: 0, scale: 1.02 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                        layoutId={`project-image-${project.id}-${currentImageIndex}`}
+                        style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, willChange: 'opacity, transform' }}
+                        aria-live="polite"
+                      >
+                        <Image
+                          src={allVisuals[currentImageIndex]}
+                          alt={`Image ${currentImageIndex + 1} du projet ${project.title}`}
+                          className="w-full h-full object-cover carousel-image"
+                          style={{ aspectRatio: '4/5' }}
+                          width={600}
+                          height={750}
+                          priority
+                          sizes="600px"
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                  {/* Navigation */}
+                  {allVisuals.length > 1 && (
+                    <>
+                      <button
+                        onClick={goToPrevious}
+                        className="absolute left-4 top-1/2 z-10 carousel-button-prev btn-nav"
+                        aria-label="Image précédente"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button
+                        onClick={goToNext}
+                        className="absolute right-4 top-1/2 z-10 carousel-button-next btn-nav"
+                        aria-label="Image suivante"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </>
+                  )}
+                  {/* Indicateurs */}
+                  {allVisuals.length > 1 && (
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center carousel-indicators">
+                      <div className="flex space-x-2 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                        {allVisuals.map((_, index) => (
+                          <button
+                            key={`indicator-${index}`}
+                            onClick={() => {
+                              setDirection(index > currentImageIndex ? 1 : -1)
+                              setCurrentImageIndex(index)
+                            }}
+                            className={`transition-all duration-300 rounded-full ${
+                              currentImageIndex === index 
+                                ? 'bg-white w-6 h-2' 
+                                : 'bg-white/60 w-2 h-2 hover:bg-white/80'
+                            }`}
+                            aria-label={`Image ${index + 1}`}
+                          />
+                        ))}
                       </div>
-                    ))
-                  ) : (
-                    <ReactMarkdown>{project.description}</ReactMarkdown>
+                    </div>
                   )}
-                  {project.link && (
-                    <a
-                      href={project.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline text-sm"
-                    >
-                      Visiter le site du projet
-                    </a>
-                  )}
-                </div>
-              </div>
+                </motion.div>
+                {/* Colonne description */}
+                <motion.div
+                  className="flex flex-col h-full min-h-0 relative"
+                  variants={fadeUpStagger}
+                  custom={1}
+                  style={{ willChange: 'transform, opacity' }}
+                >
+                  {/* En-tête avec titre */}
+                  <div className="flex-shrink-0 p-6 pb-4">
+                    <div className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Cocogoose, sans-serif' }}>
+                      {project.title}
+                    </div>
+                  </div>
+                  {/* Séparateur fin noir */}
+                  <div className="flex-shrink-0 border-b border-gray-900" style={{ borderWidth: '0px' }}></div>
+                  {/* Contenu scrollable */}
+                  <div
+                    className="flex-1 overflow-y-auto p-6 pt-4 min-h-0 custom-scrollbar"
+                    ref={descriptionRef}
+                    style={{ 
+                      scrollBehavior: 'smooth',
+                      overscrollBehavior: 'contain'
+                    }}
+                  >
+                    <div className="text-sm text-gray-700 leading-relaxed prose prose-sm lg:prose-base max-w-none">
+                      {Array.isArray(project.description) ? (
+                        project.description.map((paragraph, i) => (
+                          <div key={i} className="mb-4 last:mb-0">
+                            <ReactMarkdown>
+                              {paragraph}
+                            </ReactMarkdown>
+                          </div>
+                        ))
+                      ) : (
+                        <ReactMarkdown>{project.description}</ReactMarkdown>
+                      )}
+                      {project.link && (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mt-6 text-primary-blue hover:text-primary-orange transition-colors duration-200 underline text-sm"
+                        >
+                          Visiter le site du projet
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
             </motion.div>
           </motion.div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
