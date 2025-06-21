@@ -262,6 +262,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300, duration: 0.35 }}
         onClick={e => e.stopPropagation()}
+        key="modal-desktop-animated"
       >
         {/* Bouton de fermeture flottant, centre aligné au coin supérieur droit du modal */}
         <button
