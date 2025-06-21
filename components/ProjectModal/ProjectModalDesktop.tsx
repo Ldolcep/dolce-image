@@ -68,8 +68,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   const [direction, setDirection] = React.useState(0)
   const [imagesReady, setImagesReady] = React.useState<Set<number>>(new Set())
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
-  const [isModalVisible, setIsModalVisible] = React.useState(false);
-
+  
   // Refs
   const modalRef = React.useRef<HTMLDivElement>(null)
   const descriptionRef = React.useRef<HTMLDivElement>(null)
@@ -233,18 +232,8 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   };
 
   // Add a CSS class to hide modal/backdrop before animation
-  const modalHiddenClass = !isOpen ? "modal-hidden" : ""
-
-  React.useEffect(() => {
-    if (isOpen) {
-      setIsModalVisible(false);
-      // Wait for next tick to allow Framer Motion to apply initial state
-      const timeout = setTimeout(() => setIsModalVisible(true), 10);
-      return () => clearTimeout(timeout);
-    } else {
-      setIsModalVisible(false);
-    }
-  }, [isOpen]);
+  // Always apply modal-hidden class when !isOpen
+  const modalHiddenClass = !isOpen ? "modal-hidden" : "";
 
   return (
     <>
@@ -259,16 +248,16 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         {isOpen && (
           <motion.div
             key="modal-backdrop"
-            className={`fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50${!isModalVisible ? ' modal-hidden' : ''}`}
+            className={`fixed inset-0 flex items-center justify-center p-4 md:p-6 z-50 ${modalHiddenClass}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            style={{ willChange: "opacity" }}
+            style={{ willChange: "opacity", opacity: 0 }} // extra protection
           >
             {/* Fond */}
-            <div className={`absolute inset-0 -z-10 ${modalHiddenClass}`}>
+            <div className={`absolute inset-0 -z-10 ${modalHiddenClass}`} style={{ opacity: 0 }}>
               <Image 
                 src="/images/gallery-background.jpg" 
                 alt="" 
@@ -284,7 +273,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             <motion.div
               ref={modalRef}
               className={`w-full max-w-none overflow-visible relative ${modalHiddenClass}`}
-              style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity' }}
+              style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity', opacity: 0 }} // extra protection
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
