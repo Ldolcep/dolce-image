@@ -232,9 +232,15 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
   };
 
   return (
-    <>
-      {/* Fond */}
-      <div className="absolute inset-0 -z-10">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+      style={{ background: 'rgba(0,0,0,0.8)' }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* Fond (background image and overlay) */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
         <Image 
           src="/images/gallery-background.jpg" 
           alt="" 
@@ -246,15 +252,12 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         />
         <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
       </div>
-      {/* Modal */}
-      <motion.div
+      {/* Modal content */}
+      <div
         ref={modalRef}
         className="w-full max-w-none overflow-visible relative"
-        style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity' }}
-        initial={false}
-        animate={false}
-        exit={false}
-        onClick={(e) => e.stopPropagation()}
+        style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', background: 'white', borderRadius: '0.75rem', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
+        onClick={e => e.stopPropagation()}
       >
         {/* Bouton de fermeture flottant, centre aligné au coin supérieur droit du modal */}
         <button
@@ -404,8 +407,8 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
             </div>
           </motion.div>
         </motion.div>
-      </motion.div>
-    </>
+      </div>
+    </div>
   )
 }
 
