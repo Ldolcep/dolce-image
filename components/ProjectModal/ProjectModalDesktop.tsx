@@ -28,6 +28,39 @@ interface ProjectModalDesktopProps {
   onClose: () => void;
 }
 
+// Animation variants for staggered modal content (DESKTOP ONLY)
+const contentStagger = {
+  animate: {
+    transition: {
+      staggerChildren: 0.15, // 150ms between each child
+      delayChildren: 0,
+    },
+  },
+};
+
+const fadeUpStagger = {
+  initial: { opacity: 0, y: 20 },
+  animate: (custom: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      type: "spring",
+      ease: [0.4, 0, 0.2, 1],
+      delay: custom * 0.15,
+    },
+  }),
+  exit: (custom: number) => ({
+    opacity: 0,
+    y: 20,
+    transition: {
+      duration: 0.3,
+      ease: [0.4, 0, 0.2, 1],
+      delay: custom * 0.1,
+    },
+  }),
+};
+
 // Composant principal sans variables externes
 function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopProps) {
   // État local
@@ -208,6 +241,7 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         onClick={onClose}
+        style={{ willChange: "opacity" }}
       >
         {/* Fond */}
         <div className="absolute inset-0 -z-10">
@@ -222,16 +256,15 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           />
           <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" />
         </div>
-
         {/* Modal */}
         <motion.div
           ref={modalRef}
-          className="w-full max-w-none overflow-visible relative" // Ajout de 'relative' pour positionnement absolu du bouton
-          style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)' }}
+          className="w-full max-w-none overflow-visible relative"
+          style={{ width: 'clamp(300px, 90vw, 1400px)', height: 'clamp(400px, 85vh, 900px)', willChange: 'transform, opacity' }}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, type: "spring", ease: [0.4, 0, 0.2, 1] }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Bouton de fermeture flottant, centre aligné au coin supérieur droit du modal */}
@@ -250,12 +283,21 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
           >
             <X size={20} strokeWidth={2} />
           </button>
-          <div
+          <motion.div
             className="grid h-full rounded-lg bg-white overflow-visible modal-grid"
-            style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr' }}
+            style={{ gridTemplateColumns: 'clamp(300px, 45%, 600px) 1fr', willChange: 'transform, opacity' }}
+            variants={contentStagger}
+            initial="initial"
+            animate="animate"
+            exit="exit"
           >
             {/* Colonne image */}
-            <div className="bg-gray-100 h-full flex items-center justify-center relative overflow-hidden">
+            <motion.div
+              className="bg-gray-100 h-full flex items-center justify-center relative overflow-hidden"
+              variants={fadeUpStagger}
+              custom={0}
+              style={{ willChange: 'transform, opacity' }}
+            >
               <div className="w-full h-full relative overflow-hidden">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -322,9 +364,14 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
             {/* Colonne description */}
-            <div className="flex flex-col h-full min-h-0 relative">
+            <motion.div
+              className="flex flex-col h-full min-h-0 relative"
+              variants={fadeUpStagger}
+              custom={1}
+              style={{ willChange: 'transform, opacity' }}
+            >
               {/* En-tête avec titre */}
               <div className="flex-shrink-0 p-6 pb-4">
                 <div className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Cocogoose, sans-serif' }}>
@@ -366,8 +413,8 @@ function ProjectModalDesktop({ project, isOpen, onClose }: ProjectModalDesktopPr
                   )}
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
